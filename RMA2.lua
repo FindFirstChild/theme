@@ -1,4 +1,9 @@
 -- i got bored so i assigned multiple variables in one-line
+--[[
+credits:
+ideas: cryniz, cam1494
+scripting: kevinYMHGmlg
+]]
 -- services
 local Players=game:GetService'Players'
 local UserInputService=game:GetService'UserInputService'
@@ -566,7 +571,7 @@ DButton.MouseButton1Click:Connect(function()
 			IsDrawing=false
 			HAnimation:Destroy()
 		end)
-		Placeholder.Equipped:Connect(function()
+		Placeholder.Destroying:Connect(function()
 			HAnimation:Destroy(Track:Stop(task.wait(.2)))
 			IsDrawing=false
 		end)
