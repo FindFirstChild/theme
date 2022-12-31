@@ -4,12 +4,13 @@ local Players=game:GetService'Players'
 local UserInputService=game:GetService'UserInputService'
 local TweenService=game:GetService'TweenService'
 local RunService=game:GetService'RunService'
+local Teams=game:GetService'Teams'
 -- local
 local LocalPlayer=Players.LocalPlayer
 local CoreGui=game.CoreGui
 local LPG=LocalPlayer.PlayerGui
 local MG=LPG.MainGui
-local Knight=game:GetService'Teams'.Knight
+local Knight=Teams.Knight
 local KC,UIT=Enum.KeyCode,Enum.UserInputType
 local ReplicatedStorage=game.ReplicatedStorage
 local JewellStand=workspace:FindFirstChild'JewelleryStand'
@@ -213,8 +214,9 @@ GuiDestroy.MouseButton1Click:Connect(function()
 				x:Destroy()
 			end
 		end
+		local t={'BlockM','DupeButton','Counter','ClearS'}
 		for _,x in next,MG:GetChildren()do
-			if x.Name=='BlockM'or x.Name=='DupeButton'or x.Name=='Counter'or x.Name=='ClearS'then
+			if table.find(t,x.Name)then
 				x:Destroy()
 			end
 		end
@@ -250,7 +252,7 @@ task.spawn(function()
 	Set(TeleportMenu){Size=UDim2.new(.8,0,.5,0),Position=UDim2.new(.5,0,.25,0),AnchorPoint=Vector2.new(.5,0)}
 	local PlaceSelectionFrame=TeleportMenu:FindFirstChild'ContentSelectionFrame'
 	if not PlaceSelectionFrame then
-		Notify('IDK LOLZ',2)
+		Notify('Weird, selection frame doesn\'t exist?',2)
 		return
 	end
 	for _,x in next,PlaceSelectionFrame:GetChildren()do
@@ -294,11 +296,9 @@ task.spawn(function()
 		end
 	end
 	Players.PlayerAdded:Connect(function(Player)
-		if Player==LocalPlayer then return end --useless check but ok
 		CreateTB(Player)
 	end)
 	Players.PlayerRemoving:Connect(function(Player)
-		if Player==LocalPlayer then return end --useless check but ok
 		Destroy(PlayerSelectionFrame,Player.Name)
 	end)
 	local function CreateIB(Xame,Id,Position,y)
@@ -342,7 +342,7 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 		local Position,CI,CII
 		local function CharCheck()
 			local height=workspace.FallenPartsDestroyHeight
-			height=if height~=0/0 then height+2 else-50000
+			if height~=0/0 then height=height+2 else height=-50000 end
 			local Character=LocalPlayer.Character
 			local Humanoid=Character:WaitForChild'Humanoid'or Character:FindFirstChildOfClass'Humanoid'
 			local Root=Character:WaitForChild'HumanoidRootPart'or Character:FindFirstChild'HumanoidRootPart'
@@ -351,9 +351,9 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 				Root.CFrame=Position
 				Position=nil
 			end
-			local Destroying,Die;
+			local Destroying,Die
 			Destroying=Character.ChildRemoved:Connect(function(Part)
-				if Part~=Humanoid.RootPart then return end
+				if Part.Name~='HumanoidRootPart'then return end
 				if not IsAutoRespawn.Value then
 					Destroying:Disconnect()
 					return
@@ -477,7 +477,7 @@ DButton.MouseButton1Click:Connect(function()
 					table.insert(SWR,x)
 					continue
 				end
-			    x:Destroy()
+				x:Destroy()
 			end
 		end
 		for _,x in next,Character:GetChildren()do
@@ -596,9 +596,10 @@ local function CheckHandle(a,b)
 	Set(a){Massless=true,CanCollide=false,CanQuery=false,CanTouch=false}
 	a.Parent.Parent=LocalPlayer.Character 
 end
-RSButton.MouseButton1Click:Connect(RequestSword)
+RSButton.MouseButton1Click:Connect(function()RequestSword()if LocalPlayer.Team~=Knight then Notify('You dont have knight role, but okay')end end)
 local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui',IsShowingDupeMenu,
 	function()
+		if LocalPlayer.Team~=Knight then Notify('You dont have knight role, proceed?')end
 		local SideI=CreateButtonOld('DupeButton','Dupe:\noff',UDim2.new(1,-20,.5,-80),Vector2.new(1,0))
 		local Val=Create'BoolValue'{Parent=CoreGui,Name='dupe'}
 		local SideII=CreateButtonOld('ClearS','Clear tools\' stuff',UDim2.new(1,-20,.5,-30),Vector2.new(1,0))
@@ -616,11 +617,11 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 				end
 			end,
 			[2]=function(Tool)
-			    task.spawn(function()
-				    task.wait(.1)
-				    local Handle=Tool:FindFirstChild'Handle'
+				task.spawn(function()
+					task.wait(.1)
+					local Handle=Tool:FindFirstChild'Handle'
 					if Handle then
-				        Destroy(Handle,'SpecialMesh',1)
+						Destroy(Handle,'SpecialMesh',1)
 					end
 				end)
 			end,
@@ -636,13 +637,13 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 						Set(Handle){Massless=true,CanCollide=false,CanQuery=false,CanTouch=false}
 						InputTable[b](Item)
 						continue
-				    end
+					end
 					Item:Destroy()	
 				end
 			end
 		end
 		do
-		    local CI
+			local CI
 			CI=IsShowingDupeMenu:GetPropertyChangedSignal'Value':Connect(function()
 				if not IsShowingDupeMenu.Value then
 					Val.Value=false
@@ -682,14 +683,14 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 				return
 			end
 			SideI.Text='Dupe:\noff'
-			for C,Item in next,game.Lighting:GetChildren()do
+			--[[for C,Item in next,game.Lighting:GetChildren()do
 				if Item:IsA'Tool'and Item.Name=='ClassicSword'then
 					Item.Parent=LocalPlayer.Backpack
 					if C%2==0 then 
 						task.wait()
 					end
 				end
-			end
+			end]]
 		end)
 	end
 )
@@ -729,7 +730,7 @@ local EBButton=CreateDK(BoothMenu,'Extra Banner',UDim2.new(.05,0,.85,0),'Show Id
 				IBanner:FindFirstChildWhichIsA'ClickDetector'.MouseClick:Connect(function()	
 					local ID=Icon.Image
 					if tonumber(ID)>10 then
-					    SetClip(ID)
+						SetClip(ID)
 						Notify('Copied, ID: '..ID..'.',3,'hi')
 						return
 					end
