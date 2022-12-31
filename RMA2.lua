@@ -42,7 +42,10 @@ local function Create(Type) --useful for lazy people
 	end
 end
 local function Destroy(a,b,c)
-	local d=if c then a:FindFirstChildWhichIsA(tostring(b))else a:FindFirstChild(b)
+	local d=a:FindFirstChild(b)
+	if c then 
+		d=a:FindFirstChildWhichIsA(tostring(b))
+	end
 	if d then d:Destroy()return end
 end
 local function CreateBool(Xame,Value)
@@ -263,7 +266,8 @@ task.spawn(function()
 	local UIGridLayout=Create'UIGridLayout'{Parent=PlaceSelectionFrame,CellSize=UDim2.new(0,82,0,82),SortOrder=Enum.SortOrder.Name}
 	local function CreateTB(Player:Player)
 		local Xame=Player.Name
-		local TextButton=Create'TextButton'{Parent=PlayerSelectionFrame,Name=Xame,Size=UDim2.new(1,-10,0,40),BackgroundColor3=Color3.fromRGB(163,162,165),BackgroundTransparency=.9,TextColor3=Color3.new(1,1,1),TextScaled=true,Text='@'..Xame..' ('..(if Player.DisplayName~=''then Player.DisplayName else Xame)..')'}
+		local dn=Player.DisplayName;if dn==''then dn=Xame
+		local TextButton=Create'TextButton'{Parent=PlayerSelectionFrame,Name=Xame,Size=UDim2.new(1,-10,0,40),BackgroundColor3=Color3.fromRGB(163,162,165),BackgroundTransparency=.9,TextColor3=Color3.new(1,1,1),TextScaled=true,Text='@'..Xame..' ('..dn..')'}
 		TextButton.MouseButton1Click:Connect(function()
 			local Character=LocalPlayer.Character
 			local TCharacter=Player.Character
@@ -339,7 +343,7 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 		local Position,CI,CII
 		local function CharCheck()
 			local height=workspace.FallenPartsDestroyHeight
-			height=if height~=0/0 then height+2 else-50000
+            if height~=0/0 then height=height+2 else height=-50000 end
 			local Character=LocalPlayer.Character
 			local Humanoid=Character:WaitForChild'Humanoid'or Character:FindFirstChildOfClass'Humanoid'
 			local Root=Character:WaitForChild'HumanoidRootPart'or Character:FindFirstChild'HumanoidRootPart'
@@ -415,7 +419,7 @@ DButton.MouseButton1Click:Connect(function()
 				v.Text=t
 				v.Name='v'..tostring(n)
 				v.TextXAlignment=Enum.TextXAlignment.Left
-				n+=1
+				n=n+1
 				return v
 			end
 			s('Rotations = R , T , Y')
@@ -470,7 +474,7 @@ DButton.MouseButton1Click:Connect(function()
 				local handle=x:FindFirstChild'Handle'
 				if handle then
 					handle.Massless=true
-					total+=1
+					total=total+1
 					table.insert(SWR,x)
 					continue
 				end
@@ -482,7 +486,7 @@ DButton.MouseButton1Click:Connect(function()
 				local handle=x:FindFirstChild'Handle'
 				if handle then
 					handle.Massless=true
-					total+=1
+					total=total+1
 					table.insert(SWR,x)
 					x.Parent=LocalPlayer.Backpack
 					continue
@@ -493,15 +497,15 @@ DButton.MouseButton1Click:Connect(function()
 		LocalPlayer.Character.ChildAdded:Connect(function(Child)
 			if Child:IsA'Tool'and Child.Name=='ClassicSword'and Child:FindFirstChild'Handle'and not table.find(SWR,Child)then
 				table.insert(SWR,Child)
-				total+=1
+				total=total+1
 				Child.Handle.Massless=true
 			end
 		end)
 		local n=0
 		local InputTable={
-			[KC.R]=function()Orientation*=CFrame.Angles(rot,0,0)end,
-			[KC.T]=function()Orientation*=CFrame.Angles(0,rot,0)end,
-			[KC.Y]=function()Orientation*=CFrame.Angles(0,0,rot)end,
+			[KC.R]=function()Orientation=Orientation*CFrame.Angles(rot,0,0)end,
+			[KC.T]=function()Orientation=Orientation*CFrame.Angles(0,rot,0)end,
+			[KC.Y]=function()Orientation=Orientation*CFrame.Angles(0,0,rot)end,
 			[KC.J]=function()Orientation=CFrame.Angles(math.rad(-90),0,0)end,
 			[KC.H]=function()
 				n=0
@@ -523,7 +527,7 @@ DButton.MouseButton1Click:Connect(function()
 				while IsUndoing and n>0 and IsDrawing do
 					local a=SWR[n]
 					a.Parent=LocalPlayer.Backpack
-					n-=1
+					n=n-1
 					task.wait(Wait)
 				end
 			end
@@ -544,9 +548,9 @@ DButton.MouseButton1Click:Connect(function()
 						return
 					end
 					Debounce=true
-					n+=1 
+					n=n+1
 					local a=SWR[n]	
-					a.Parent=if a.Parent==Character then LocalPlayer.Backpack else a.Parent
+					if a.Parent==Character then a.Parent=LocalPlayer.Backpack end
 					Set(a){Grip=SetCF(CFrame.new(Mouse.Hit.Position)*Orientation),Parent=LocalPlayer.Character}
 					task.wait(Wait)
 					Debounce=false
