@@ -341,8 +341,6 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 	function()
 		local Position,CI,CII
 		local function CharCheck()
-			local height=workspace.FallenPartsDestroyHeight
-			if height~=0/0 then height=height+2 else height=-50000 end
 			local Character=LocalPlayer.Character
 			local Humanoid=Character:WaitForChild'Humanoid'or Character:FindFirstChildOfClass'Humanoid'
 			local Root=Character:WaitForChild'HumanoidRootPart'or Character:FindFirstChild'HumanoidRootPart'
@@ -353,13 +351,13 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 			end
 			local Destroying,Die
 			Destroying=Character.ChildRemoved:Connect(function(Part)
-				if Part.Name~='HumanoidRootPart'then return end
+				if Part~=Root then return end
 				if not IsAutoRespawn.Value then
 					Destroying:Disconnect()
 					return
 				end
-				if Humanoid.RootPart.Position.Y>height then
-					Position=Humanoid.RootPart.CFrame
+				if Part.Position.Y>-50000 then
+					Position=Part.CFrame
 				end
 				ReplicatedStorage.RequestRespawn:FireServer()
 			end)
@@ -368,8 +366,8 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 					Die:Disconnect()
 					return
 				end
-				if Humanoid.RootPart.Position.Y>height then
-					Position=Humanoid.RootPart.CFrame
+				if Root.Position.Y>-50000 then
+					Position=Root.CFrame
 				end
 				ReplicatedStorage.RequestRespawn:FireServer()
 			end)
@@ -433,18 +431,17 @@ DButton.MouseButton1Click:Connect(function()
 			o.Size=d.Size
 		end)
 		local Fuel=Gui.v6
-		local Fuel=Gui.v6
 		local Delay=Create'TextBox'{Parent=Gui,Name='delay',Font=Enum.Font.SourceSansSemibold,TextScaled=true,TextWrapped=true,Text='',AnchorPoint=Vector2.new(1,0),Position=UDim2.new(.95,0,.65,0),Size=UDim2.new(.75,0,.075,0),BackgroundColor3=Color3.new(0,0,0),BackgroundTransparency=.7,TextColor3=Color3.new(1,1,1),PlaceholderText='delay here'}
 		local rot=math.rad(-45)
 		local Rotation=Delay:Clone()
 		Rotation.Parent,Rotation.PlaceholderText,Rotation.Position=Delay.Parent,'rotation here',Delay.Position+UDim2.new(0,0,.075,0)
 		Rotation.FocusLost:Connect(function()
-			Rotation.Text='-45'
 			rot=tonumber(Rotation.Text)or math.rad(-45)
+			Rotation.Text=tostring(rot)
 		end)
 		Delay.FocusLost:Connect(function()
-			Delay.Text='0.1'
-			Wait=tonumber(Delay.Text)or .1
+			Wait=tonumber(Delay.Text)or.25
+			Rotation.Text=tostring(Wait)
 		end)
 		local Arm=Character:FindFirstChild'Right Arm'or Character:FindFirstChild'RightHand'
 		local function SetCF(Position)
@@ -617,13 +614,11 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 				end
 			end,
 			[2]=function(Tool)
-				task.spawn(function()
-					task.wait(.1)
-					local Handle=Tool:FindFirstChild'Handle'
-					if Handle then
-						Destroy(Handle,'SpecialMesh',1)
-					end
-				end)
+				task.wait(.05)
+				local Handle=Tool:FindFirstChild'Handle'
+				if Handle then
+					Destroy(Handle,'SpecialMesh',1)
+				end
 			end,
 			[3]=function(Tool)
 				Tool.Parent=LocalPlayer.Character
@@ -658,15 +653,15 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 			end
 			CheckTool(LocalPlayer.Backpack,3)
 			local CI,CII
-			CI=RunService.RenderStepped:Connect(function()
+			CI=LocalPlayer.Backpack.ChildAdded:Connect(function()
+				CheckTool(LocalPlayer.Backpack,3)
+			end)
+			CII=RunService.RenderStepped:Connect(function()
 				if not Val.Value then
 					CI:Disconnect(CII:Disconnect())
 					return
 				end
 				RequestSword()
-			end)
-			CII=LocalPlayer.Backpack.ChildAdded:Connect(function()
-				CheckTool(LocalPlayer.Backpack,3)
 			end)
 		end)
 		SideII.MouseButton1Click:Connect(function()
