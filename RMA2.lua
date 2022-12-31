@@ -43,9 +43,7 @@ local function Create(Type) --useful for lazy people
 end
 local function Destroy(a,b,c)
 	local d=a:FindFirstChild(b)
-	if c then 
-		d=a:FindFirstChildWhichIsA(tostring(b))
-	end
+	if c then d=a:FindFirstChildWhichIsA(tostring(b))end
 	if d then d:Destroy()return end
 end
 local function CreateBool(Xame,Value)
@@ -266,8 +264,8 @@ task.spawn(function()
 	local UIGridLayout=Create'UIGridLayout'{Parent=PlaceSelectionFrame,CellSize=UDim2.new(0,82,0,82),SortOrder=Enum.SortOrder.Name}
 	local function CreateTB(Player)
 		local Xame=Player.Name
-		local dn=Player.DisplayName;
-		if dn==''then dn=Xame end
+		local dn=Player.DisplayName
+		if Player.DisplayName==''then dn=Xame end
 		local TextButton=Create'TextButton'{Parent=PlayerSelectionFrame,Name=Xame,Size=UDim2.new(1,-10,0,40),BackgroundColor3=Color3.fromRGB(163,162,165),BackgroundTransparency=.9,TextColor3=Color3.new(1,1,1),TextScaled=true,Text='@'..Xame..' ('..dn..')'}
 		TextButton.MouseButton1Click:Connect(function()
 			local Character=LocalPlayer.Character
@@ -344,7 +342,7 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 		local Position,CI,CII
 		local function CharCheck()
 			local height=workspace.FallenPartsDestroyHeight
-            if height~=0/0 then height=height+2 else height=-50000 end
+			height=if height~=0/0 then height+2 else-50000
 			local Character=LocalPlayer.Character
 			local Humanoid=Character:WaitForChild'Humanoid'or Character:FindFirstChildOfClass'Humanoid'
 			local Root=Character:WaitForChild'HumanoidRootPart'or Character:FindFirstChild'HumanoidRootPart'
@@ -549,9 +547,9 @@ DButton.MouseButton1Click:Connect(function()
 						return
 					end
 					Debounce=true
-					n=n+1
+					n=n+1 
 					local a=SWR[n]	
-					if a.Parent==Character then a.Parent=LocalPlayer.Backpack end
+					a.Parent=if a.Parent==Character then LocalPlayer.Backpack else a.Parent
 					Set(a){Grip=SetCF(CFrame.new(Mouse.Hit.Position)*Orientation),Parent=LocalPlayer.Character}
 					task.wait(Wait)
 					Debounce=false
@@ -598,12 +596,7 @@ local function CheckHandle(a,b)
 	Set(a){Massless=true,CanCollide=false,CanQuery=false,CanTouch=false}
 	a.Parent.Parent=LocalPlayer.Character 
 end
-RSButton.MouseButton1Click:Connect(function()
-    RequestSword()
-    if LocalPlayer.Team~=Knight then
-		Notify('You dont own knight, but okay.')
-	end
-end)
+RSButton.MouseButton1Click:Connect(RequestSword)
 local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui',IsShowingDupeMenu,
 	function()
 		local SideI=CreateButtonOld('DupeButton','Dupe:\noff',UDim2.new(1,-20,.5,-80),Vector2.new(1,0))
@@ -619,14 +612,17 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 				for _,z in next,Tool.Handle:GetChildren()do
 					if not z:IsA'Attachment'then
 						z:Destroy()
-						task.wait()
 					end
 				end
 			end,
 			[2]=function(Tool)
-				local Handle=Tool.Handle
-				task.wait(.05)
-				Destroy(Handle,'SpecialMesh',1)
+			    task.spawn(function()
+				    task.wait(.1)
+				    local Handle=Tool:FindFirstChild'Handle'
+					if Handle then
+				        Destroy(Handle,'SpecialMesh',1)
+					end
+				end)
 			end,
 			[3]=function(Tool)
 				Tool.Parent=LocalPlayer.Character
@@ -646,7 +642,7 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 			end
 		end
 		do
-		local CI
+		    local CI
 			CI=IsShowingDupeMenu:GetPropertyChangedSignal'Value':Connect(function()
 				if not IsShowingDupeMenu.Value then
 					Val.Value=false
@@ -661,12 +657,12 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 			end
 			CheckTool(LocalPlayer.Backpack,3)
 			local CI,CII
-			CI=Heartbeat:Connect(function()
+			CI=RunService.RenderStepped:Connect(function()
 				if not Val.Value then
 					CI:Disconnect(CII:Disconnect())
 					return
 				end
-				RequestSword()--a=rqswrd()if a then Signal:Disconnect()Val.Value=false end
+				RequestSword()
 			end)
 			CII=LocalPlayer.Backpack.ChildAdded:Connect(function()
 				CheckTool(LocalPlayer.Backpack,3)
@@ -841,6 +837,7 @@ CKButton.MouseButton1Click:Connect(function()
 	ClickSound()
 	if LocalPlayer.Team==Knight then
 		Notify('you already have knight role, what do you expect.')
+		return
 	end
 	if not JewellStand then
 		Notify('There\'s no JewelleryStand, Knight Panel may not be working',5)
