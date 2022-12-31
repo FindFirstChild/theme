@@ -567,6 +567,10 @@ DButton.MouseButton1Click:Connect(function()
 			HAnimation:Destroy()
 		end)
 		Placeholder.Equipped:Connect(function()
+			HAnimation:Destroy(Track:Stop(task.wait(.2)))
+			IsDrawing=false
+		end)
+		Placeholder.Equipped:Connect(function()
 			Placeholder:Destroy(HAnimation:Destroy(Track:Stop(task.wait(.2))))
 			IsDrawing=false
 		end)
