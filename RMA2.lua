@@ -608,9 +608,8 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 				Destroy(Tool,'LocalScript',1)
 				Destroy(Tool,'Script',1)
 				for _,z in next,Tool.Handle:GetChildren()do
-					if not z:IsA'Attachment'then
-						z:Destroy()
-					end
+					z:Destroy()
+					task.wait(.05)
 				end
 			end,
 			[2]=function(Tool)
