@@ -1,6 +1,7 @@
 -- i got bored so i assigned multiple variables in one-line
 if _G.RMA2ENABLED then
 	error'RMA2 is already running!'
+	return
 end
 _G.RMA2ENABLED=true
 -- services
@@ -21,6 +22,8 @@ local ReplicatedStorage=game.ReplicatedStorage
 local JewellStand=workspace:FindFirstChild'JewelleryStand'
 local Heartbeat=RunService.Heartbeat
 local AllBools,Frames={},{}
+--functions
+pcall(function()MG.VersionTag.Text='v.1.436 | LOCAL MODIFIED.'end)
 local SetClip=toclipboard or setclipboard 
 local IS=RunService:IsStudio()	
 local function Set(Xnstance)
@@ -50,9 +53,11 @@ end
 local function Destroy(a,b,c)
 	local d=a
 	if not b then 
-		if typeof(d)=='RBXScriptConnection'then
-			d:Disconnect()
-		elseif d then 
+		if d then
+			if typeof(d)=='RBXScriptConnection'then
+				d:Disconnect()
+				return
+			end
 			d:Destroy()
 		end
 		return 
@@ -91,20 +96,22 @@ local function Link(button,frame)
 	end)
 end
 local function Notify(Message,Duration,Warn)
-	if not Warn then warn(Message)end
-	if not Duration then Duration=5 end
-	local NFrame=Create'Frame'{Parent=MG,BackgroundColor3=Color3.fromRGB(34,34,34),Name='NFrame',Position=UDim2.new(.2,0,.05,0),Size=UDim2.new(.6,0,.06,0),Style=Enum.FrameStyle.Custom}
-	local Notif=Create'TextLabel'{Parent=NFrame,AutomaticSize=Enum.AutomaticSize.None,BackgroundColor3=Color3.new(1,1,1),BackgroundTransparency=1,Name='NotificationText',Position=UDim2.new(.05,0,.175,0),Size=UDim2.new(.9,0,.65,0),Font=Enum.Font.SourceSansSemibold,Text=Message,TextColor3=Color3.new(1,1,1),TextScaled=true,TextSize=14}
-	local UISC=Create'UISizeConstraint'{Parent=Notif.Parent}
-	local UIC=Create'UICorner'{Parent=Notif.Parent}
-	local NSound=MG['Main Gui Core']:FindFirstChild'NotificationSound'
-	if NSound then
-		NSound:Play()
-		NFrame:Destroy(task.wait(Duration-NSound.TimePosition))
-		return
-	end
-	warn'Notif Missing, creating a new one..'
-	local NewNSound=Create'Sound'{SoundId='rbxassetid://4590662766',Volume=.5,Parent=MG['Main Gui Core']}
+	task.spawn(function()
+		if not Warn then warn(Message)end
+		if not Duration then Duration=5 end
+		local NFrame=Create'Frame'{Parent=MG,BackgroundColor3=Color3.fromRGB(34,34,34),Name='NFrame',Position=UDim2.new(.2,0,.05,0),Size=UDim2.new(.6,0,.06,0),Style=Enum.FrameStyle.Custom}
+		local Notif=Create'TextLabel'{Parent=NFrame,AutomaticSize=Enum.AutomaticSize.None,BackgroundColor3=Color3.new(1,1,1),BackgroundTransparency=1,Name='NotificationText',Position=UDim2.new(.05,0,.175,0),Size=UDim2.new(.9,0,.65,0),Font=Enum.Font.SourceSansSemibold,Text=Message,TextColor3=Color3.new(1,1,1),TextScaled=true,TextSize=14}
+		local UISC=Create'UISizeConstraint'{Parent=Notif.Parent}
+		local UIC=Create'UICorner'{Parent=Notif.Parent}
+		local NSound=MG['Main Gui Core']:FindFirstChild'NotificationSound'
+		if NSound then
+			NSound:Play()
+			NFrame:Destroy(task.wait(Duration-NSound.TimePosition))
+			return
+		end
+		warn'Notif Missing, creating a new one..'
+		local NewNSound=Create'Sound'{SoundId='rbxassetid://4590662766',Volume=.5,Parent=MG['Main Gui Core']}
+	end)
 end
 local function CreateIcon(Xame,Xmage,Xosition,XnchorPoint)
 	local Label=Create'ImageButton'{Parent=MG,Name=Xame,Size=UDim2.new(0,40,0,40),Position=Xosition,BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,Image=Xmage,AnchorPoint=XnchorPoint or Vector2.new(0,0)}
@@ -370,32 +377,32 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 			local Character=LocalPlayer.Character
 			local Humanoid=Character:WaitForChild'Humanoid'or Character:FindFirstChildOfClass'Humanoid'
 			local Root=Character:WaitForChild'HumanoidRootPart'or Character:FindFirstChild'HumanoidRootPart'
-			if not Root then return end			
+			if not Humanoid or not Root then return end			
 			if Position~=nil then
 				Root.CFrame=Position
 				Position=nil
 			end
-			local Destroying,Die
-			Destroying=Character.ChildRemoved:Connect(function(Part)
-				if Part~=Root then return end
+			local Destroying,Die,Parent
+			local function yeahwhatever(Connection)
 				if not IsAutoRespawn.Value then
-					Destroying:Disconnect()
+					Destroy(Connection)
 					return
 				end
-				if Part.Position.Y>-50000 then
-					Position=Part.CFrame
-				end
-				ReplicatedStorage.RequestRespawn:FireServer()
-			end)
-			Die=Humanoid.Died:Connect(function()
-				if not IsAutoRespawn.Value then
-					Die:Disconnect()
-					return
-				end
-				if Root.Position.Y>-50000 then
+				if(Root and Root.Position.Y>-50000)then
 					Position=Root.CFrame
 				end
 				ReplicatedStorage.RequestRespawn:FireServer()
+			end
+			Destroying=Character.ChildRemoved:Connect(function(Part)
+				if Part~=Root then return end
+				yeahwhatever(Destroying)
+			end)
+			Parent=Character:GetPropertyChangedSignal'Parent':Connect(function()
+				if Character.Parent==LocalPlayer then return end
+				yeahwhatever(Parent)
+			end)
+			Die=Humanoid.Died:Connect(function()
+				yeahwhatever(Die)
 			end)
 		end
 		CharCheck()
@@ -422,7 +429,7 @@ DButton.MouseButton1Click:Connect(function()
 		local LockedWhileResetting=false --necessary
 		local Character=LocalPlayer.Character
 		local Gui=Create'Frame'{Parent=MG,BackgroundTransparency=.5,BackgroundColor3=Color3.fromRGB(34,34,34),Name='DrawGui',Size=UDim2.new(.25,0,.3,0),Position=UDim2.new(0,0,1,0),AnchorPoint=Vector2.new(0,1)}
-		local Wait=.1
+		local Wait=.065
 		task.spawn(function()
 			local u=Create'UICorner'{Parent=Gui;CornerRadius=UDim.new(0,16)}
 			local g=MG
@@ -466,7 +473,7 @@ DButton.MouseButton1Click:Connect(function()
 			Rotation.Text=tostring(rot)
 		end)
 		Delay.FocusLost:Connect(function()
-			Wait=tonumber(Delay.Text)or.1
+			Wait=tonumber(Delay.Text)or.065
 			Delay.Text=tostring(Wait)
 		end)
 		local Arm=Character:FindFirstChild'Right Arm'or Character:FindFirstChild'RightHand'
@@ -588,21 +595,25 @@ DButton.MouseButton1Click:Connect(function()
 				IsUndoing=false
 			end
 		end)
-		Character.Humanoid.Died:Connect(function()
+		local function t()
 			IsDrawing=false
 			HAnimation:Destroy()
+		end
+		Character.ChildRemoved:Connect(function(Part)
+			if Part~=Placeholder then return end
+			t()
 		end)
-		Placeholder.Destroying:Connect(function()
-			HAnimation:Destroy(Track:Stop(task.wait(.2)))
-			IsDrawing=false
-		end)
+		Character.Humanoid.Died:Connect(t)
 		Placeholder.Equipped:Connect(function()
-			Placeholder:Destroy(HAnimation:Destroy(Track:Stop(task.wait(.2))))
-			IsDrawing=false
+			HAnimation:Destroy(Track:Stop(task.wait()))
+			t()
 		end)
 		CIV=RunService.RenderStepped:Connect(function()
 			if not IsDrawing then
-				Value:Destroy(Gui:Destroy(CII:Disconnect(CIII:Disconnect((CIV:Disconnect(Pointer:Destroy()))))))
+				Destroy(Value)
+				Destroy(Gui)
+				Destroy(Pointer)
+				CIV:Disconnect(CIII:Disconnect(CII:Disconnect()))
 				return
 			end
 			Fuel.Text='Swords: '..tostring(n)..'/'..tostring(total)
@@ -785,7 +796,7 @@ local EBButton=CreateDK(BoothMenu,'Extra Banner',UDim2.new(.05,0,.85,0),'Show Id
 	end
 )
 EBButton.Text.Size=UDim2.new(.75,0,1,0)
-local DMButton=CreateDK(Frame,'Music',UDim2.new(.05,0,.35,0),'music',IsMusicEnabled,
+local DMButton=CreateDK(Frame,'Music',UDim2.new(.05,0,.15,0),'music',IsMusicEnabled,
 	function()
 		do do end do do end end do end do end end
 		--GOD I DONT KNOW HOW TO MAKE TRANSITION PLEASE IGNORE BECAUSE IT'S SPAGHETTI AS HELL
