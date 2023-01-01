@@ -1,15 +1,15 @@
 -- i got bored so i assigned multiple variables in one-line
---[[
-credits:
-ideas: cryniz, cam1494
-scripting: kevinYMHGmlg
-]]
+if _G.RMA2ENABLED then
+	error'RMA2 is already running!'
+end
+_G.RMA2ENABLED=true
 -- services
 local Players=game:GetService'Players'
 local UserInputService=game:GetService'UserInputService'
 local TweenService=game:GetService'TweenService'
 local RunService=game:GetService'RunService'
 local Teams=game:GetService'Teams'
+local ContentProvider=game:GetService'ContentProvider'
 -- local
 local LocalPlayer=Players.LocalPlayer
 local CoreGui=game.CoreGui
@@ -22,7 +22,7 @@ local JewellStand=workspace:FindFirstChild'JewelleryStand'
 local Heartbeat=RunService.Heartbeat
 local AllBools,Frames={},{}
 local SetClip=toclipboard or setclipboard 
-local IS=RunService:IsStudio()
+local IS=RunService:IsStudio()	
 local function Set(Xnstance)
 	return function(Parameters)
 		for Parameter,Value in next,Parameters do
@@ -34,7 +34,7 @@ local function Set(Xnstance)
 		end
 	end
 end
-local function Create(Type) --useful for lazy people
+local function Create(Type) 	 	 --useful for lazy people
 	local Xnstance=Instance.new(Type)
 	return function(Parameters)
 		for Parameter,Value in next,Parameters do
@@ -48,7 +48,16 @@ local function Create(Type) --useful for lazy people
 	end
 end
 local function Destroy(a,b,c)
-	local d=a:FindFirstChild(b)
+	local d=a
+	if not b then 
+		if typeof(d)=='RBXScriptConnection'then
+			d:Disconnect()
+		elseif d then 
+			d:Destroy()
+		end
+		return 
+	end
+	d=d:FindFirstChild(b)
 	if c then d=a:FindFirstChildWhichIsA(tostring(b))end
 	if d then d:Destroy()return end
 end
@@ -97,8 +106,8 @@ local function Notify(Message,Duration,Warn)
 	warn'Notif Missing, creating a new one..'
 	local NewNSound=Create'Sound'{SoundId='rbxassetid://4590662766',Volume=.5,Parent=MG['Main Gui Core']}
 end
-local function CreateIcon(Xame,Xmage,Xosition)
-	local Label=Create'ImageButton'{Parent=MG,Name=Xame,Size=UDim2.new(0,40,0,40),Position=Xosition,BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,Image=Xmage}
+local function CreateIcon(Xame,Xmage,Xosition,XnchorPoint)
+	local Label=Create'ImageButton'{Parent=MG,Name=Xame,Size=UDim2.new(0,40,0,40),Position=Xosition,BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,Image=Xmage,AnchorPoint=XnchorPoint or Vector2.new(0,0)}
 	local UICorner=Create'UICorner'{CornerRadius=UDim.new(0,8),Parent=Label}
 	return Label
 end
@@ -167,8 +176,12 @@ local function a(p)
 	JewellStand.CanCollide,HumanoidRootPart.CFrame=true,OldCFrame
 	return true
 end
-local IsAutoClaim,IsAntiProx,IsShowingDupeMenu,IsShowingDesc=CreateBool('IACK'),CreateBool('IAP'),CreateBool('ISDM'),CreateBool('ISD')
-local IsAutoRespawn,IsAntiBarrier=CreateBool('IAR'),CreateBool('IAB')
+
+--bools 
+local IsAutoClaim,IsAntiProx,IsShowingDupeMenu,IsShowingDesc=CreateBool'IACK',CreateBool'IAP',CreateBool'ISDM',CreateBool'ISD'
+local IsAutoRespawn,IsAntiBarrier,IsMusicEnabled=CreateBool'IAR',CreateBool'IAB',CreateBool'IME'
+
+--guis
 local Main=CreateIcon('ExploitButton','rbxassetid://10462982957',UDim2.new(0,20,.5,-80))
 local Frame=CreateFrame('Custom','hi')
 local Credits=Create'TextLabel'{Parent=Frame,Text='credits:\nideas:\ncryniz#5446\ncam1494#7363\nscript:\nkevinYMHGmlg#1822',Size=UDim2.new(.6,0,.9,0),AnchorPoint=Vector2.new(0,.5),Position=UDim2.new(1.05,0,.5,0),Name='Credits',BackgroundTransparency=1,Font=Enum.Font.SourceSansBold,TextTransparency=.9,TextColor3=Color3.new(1,1,1),TextScaled=true,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Center,TextSize=14}
@@ -192,8 +205,10 @@ local LocalReturn=CreateButton('R',LocalMenu,'Return',UDim2.new(.05,0,.55,0))
 local TeleportMenu=MG.ContentMenuFrame:Clone()
 Set(TeleportMenu){Parent=MG,Name='TeleportationFrame'}
 table.insert(Frames,TeleportMenu)
-TeleportMenu.Heading.Text='should i consider removing velocity=0 or keep it?'
-TeleportMenu.Subheading.Text='hm.cf=cf.n(pos)*cf.ang(0,ori,0)'
+TeleportMenu.Heading.Text='teleportations'
+TeleportMenu.Subheading.Text='HumanoidRootPart.CFrame=CFrame.new(pos)*CFrame.Angles(0,ori,0)'
+
+--linkers
 Link(TeleportMenu.ReturnButton,WorldMenu)
 Link(LocalReturn,Frame)
 Link(Main,Frame)
@@ -201,11 +216,15 @@ Link(Worlds,WorldMenu)
 Link(Knights,KnightMenu)
 Link(Locals,LocalMenu)
 Link(Booths,BoothMenu)
+
+
 GuiDestroy.MouseButton1Click:Connect(function()
 	ClickSound()
 	local CountDown=5
 	GuiDestroy.Text='are you sure? ('..tostring(CountDown)..')'
-	GuiDestroy.MouseButton1Click:Connect(function()
+	local CI
+	CI=GuiDestroy.MouseButton1Click:Connect(function()
+		_G.RMA2ENABLED=false
 		for _,x in next,AllBools do
 			task.spawn(function()
 				x.Value=false
@@ -232,6 +251,7 @@ GuiDestroy.MouseButton1Click:Connect(function()
 			task.wait(1)
 		end
 		GuiDestroy.Text='Disconnect Gui'
+		CI:Disconnect()
 	end)
 end)
 local APButton=CreateDK(LocalMenu,'AP',UDim2.new(.05,0,.65,0),'Anti Proximity: ',IsAntiProx,
@@ -308,6 +328,7 @@ task.spawn(function()
 	end)
 	local function CreateIB(Xame,Id,Position,y)
 		local ImageButton=Create'ImageButton'{Parent=PlaceSelectionFrame,Name=Xame,BorderSizePixel=0,Image='rbxassetid://'..Id}
+		ContentProvider:PreloadAsync({ImageButton})
 		ImageButton.MouseButton1Click:Connect(function()
 			local Character=LocalPlayer.Character
 			if not Character then 
@@ -401,7 +422,7 @@ DButton.MouseButton1Click:Connect(function()
 		local LockedWhileResetting=false --necessary
 		local Character=LocalPlayer.Character
 		local Gui=Create'Frame'{Parent=MG,BackgroundTransparency=.5,BackgroundColor3=Color3.fromRGB(34,34,34),Name='DrawGui',Size=UDim2.new(.25,0,.3,0),Position=UDim2.new(0,0,1,0),AnchorPoint=Vector2.new(0,1)}
-		local Wait=.03
+		local Wait=.1
 		task.spawn(function()
 			local u=Create'UICorner'{Parent=Gui;CornerRadius=UDim.new(0,16)}
 			local g=MG
@@ -445,8 +466,8 @@ DButton.MouseButton1Click:Connect(function()
 			Rotation.Text=tostring(rot)
 		end)
 		Delay.FocusLost:Connect(function()
-			Wait=tonumber(Delay.Text)or.25
-			Rotation.Text=tostring(Wait)
+			Wait=tonumber(Delay.Text)or.1
+			Delay.Text=tostring(Wait)
 		end)
 		local Arm=Character:FindFirstChild'Right Arm'or Character:FindFirstChild'RightHand'
 		local function SetCF(Position)
@@ -454,7 +475,7 @@ DButton.MouseButton1Click:Connect(function()
 		end
 		local Humanoid=Character:FindFirstChildWhichIsA"Humanoid"
 		local Animator=Humanoid:FindFirstChild'Animator'
-		local HAnimation=Create'Animation'{AnimationId='rbxassetid://182393478'} --Holding, not "H".
+		local HAnimation=Create'Animation'{AnimationId='rbxassetid://182393478'} --Holding, not "that" animation.
 		local Track=Animator:LoadAnimation(HAnimation)
 		Track:Play(0)
 		Track.Priority=Enum.AnimationPriority.Action
@@ -535,7 +556,7 @@ DButton.MouseButton1Click:Connect(function()
 		}
 		CII=UserInputService.InputBegan:Connect(function(input,input2)
 			if input2 then return end
-			if input.UserInputType==UIT.MouseButton1 then  
+			if input.UserInputType==UIT.MouseButton1 then	
 				if LockedWhileResetting then
 					IsHolding=false
 				end
@@ -605,28 +626,38 @@ end
 RSButton.MouseButton1Click:Connect(function()RequestSword()if LocalPlayer.Team~=Knight then Notify('You dont have knight role, but okay')end end)
 local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui',IsShowingDupeMenu,
 	function()
-		if LocalPlayer.Team~=Knight then Notify('You dont have knight role, proceed?')end
+		if LocalPlayer.Team~=Knight then Notify('g5g5gr22r')end
 		local SideI=CreateButtonOld('DupeButton','Dupe:\noff',UDim2.new(1,-20,.5,-80),Vector2.new(1,0))
 		local Val=Create'BoolValue'{Parent=CoreGui,Name='dupe'}
-		local SideII=CreateButtonOld('ClearS','Clear tools\' stuff',UDim2.new(1,-20,.5,-30),Vector2.new(1,0))
+		local SideII=CreateIcon('ClearS','rbxassetid://11993031978',UDim2.new(1,-20,.5,-30),Vector2.new(1,0))
 		local SideIII=CreateButtonOld('BlockM','Clear meshes',UDim2.new(1,-20,.5,20),Vector2.new(1,0))
 		local SideIV=Create'TextLabel'{Parent=MG,Name='Counter',Text='Items:\n?',Size=UDim2.new(0,40,0,40),Position=UDim2.new(1,-20,.5,70),BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,Font=Enum.Font.SourceSansSemibold,TextScaled=true,AnchorPoint=Vector2.new(1,0)}
 		local UICorner=Create'UICorner'{Parent=SideIV,CornerRadius=UDim.new(0,8)}
 		local InputTable={
 			[1]=function(Tool)
-				Destroy(Tool,'LocalScript',1)
-				Destroy(Tool,'Script',1)
-				for _,z in next,Tool.Handle:GetChildren()do
-					z:Destroy()
+				task.spawn(function()	
+					Tool.Parent=LocalPlayer.Character
 					task.wait(.05)
-				end
+					Destroy(Tool,'LocalScript',1)
+					Destroy(Tool,'Script',1)
+					for _,z in next,Tool.Handle:GetChildren()do
+						if not z:IsA'Attachment'then
+							z:Destroy()
+						end
+					end
+					Tool.Parent=LocalPlayer.Backpack
+				end)
 			end,
 			[2]=function(Tool)
-				task.wait(.05)
-				local Handle=Tool:FindFirstChild'Handle'
-				if Handle then
-					Destroy(Handle,'SpecialMesh',1)
-				end
+				task.spawn(function()					
+					local Handle=Tool:FindFirstChild'Handle'
+					if Handle then
+						Tool.Parent=LocalPlayer.Character
+						task.wait(.05)
+						Destroy(Handle,'SpecialMesh',1)
+						Tool.Parent=LocalPlayer.Backpack
+					end
+				end)
 			end,
 			[3]=function(Tool)
 				Tool.Parent=LocalPlayer.Character
@@ -686,14 +717,6 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 				return
 			end
 			SideI.Text='Dupe:\noff'
-			--[[for C,Item in next,game.Lighting:GetChildren()do
-				if Item:IsA'Tool'and Item.Name=='ClassicSword'then
-					Item.Parent=LocalPlayer.Backpack
-					if C%2==0 then 
-						task.wait()
-					end
-				end
-			end]]
 		end)
 	end
 )
@@ -762,6 +785,84 @@ local EBButton=CreateDK(BoothMenu,'Extra Banner',UDim2.new(.05,0,.85,0),'Show Id
 	end
 )
 EBButton.Text.Size=UDim2.new(.75,0,1,0)
+local DMButton=CreateDK(Frame,'Music',UDim2.new(.05,0,.35,0),'music',IsMusicEnabled,
+	function()
+		do do end do do end end do end do end end
+		--GOD I DONT KNOW HOW TO MAKE TRANSITION PLEASE IGNORE BECAUSE IT'S SPAGHETTI AS HELL
+		task.wait(1)
+		local Tag=MG.VersionTag
+		local the_ultimate_disconnector=true
+		local Folder=Create'Folder'{Name='OSTs',Parent=workspace}
+		local TweenValue=Create'NumberValue'{Parent=Folder};
+		local function text(Name)
+			local Trans=tostring(1-TweenValue.Value)
+			Tag.Text='v.1.436 | LOCAL MODIFIED. | <i><b><font color="#66e3e5"><stroke color="#66965d" joins="miter" thickness="1" transparency="'..Trans..'"><u>うみとまもののこどもたち</u>  - <font transparency="'..Trans..'">'..Name..'</font></stroke></font>  ^^</b></i>'
+		end
+		Set(Tag){TextSize=20,TextXAlignment=Enum.TextXAlignment.Left,Size=UDim2.new(0,360,0,40),Position=UDim2.new(0,40,1,-50),TextScaled=false,TextWrapped=false,RichText=true}
+		local CCXXXII
+		local CXXXll=TweenService:Create(TweenValue,TweenInfo.new(1),{Value=1});CXXXll:Play()
+		CXXXll.Completed:Connect(function()CCXXXII:Disconnect()end)
+		CCXXXII=TweenValue:GetPropertyChangedSignal'Value':Connect(function()
+			Tag.Text='v.1.436 | LOCAL MODIFIED. | <i><b><font color="#66e3e5"><stroke color="#66965d" joins="miter" thickness="1" transparency="'..tostring(1-TweenValue.Value)..'"><u>うみとまもののこどもたち</u>  - <font transparency="1">'..'.edley is great'..'</font></stroke></font>  ^^</b></i>'
+		end)
+		CXXXll.Completed:Wait()
+		TweenValue.Value=0
+		local music={
+			--credits to K-san, うみとまもののこどもたち (The Children Of The Sea And The Devil)
+			[1]={['タイトル']=11971802088}, --title
+			[2]={['あるいていこう']=11971804906}, --let's walk!
+			[3]={['はれのひ']=11971810581},--sunny day
+			[4]={['ほんをよむ']=11971808229}, --reading a book
+			[5]={['ちったはなびら']=11971807402}, --flower petals
+			[6]={['かいていどうくつ']=11971806642}, --begin
+		}
+		local ignore=#music
+		for i=1,ignore do
+			for Counter,Id in next,music[i]do
+				local OST=Create'Sound'{Volume=0,SoundId='rbxassetid://'..tostring(Id),Parent=Folder,Name=('うみとまののこどもたち - '..Counter)}
+				music[i][Counter]=OST
+				OST.Loaded:Wait()
+			end
+		end
+		local function playmusic()
+			if not the_ultimate_disconnector then return end
+			for i=1,ignore do
+				for Name,Theme in next,music[i]do
+					Theme:Play()
+					local CI,CII,CIII
+					do
+						local Ret=TweenService:Create(TweenValue,TweenInfo.new(3),{Value=1});Ret:Play()
+						Ret.Completed:Connect(function()CII:Disconnect()end)
+						CII=TweenValue:GetPropertyChangedSignal'Value':Connect(function()
+							Theme.Volume=TweenValue.Value
+							text(Name)
+						end)
+					end
+					CI=RunService.RenderStepped:Connect(function()
+						if not the_ultimate_disconnector then Destroy(CI)Destroy(CII)Destroy(CIII)return end
+						if Theme.TimePosition>=Theme.TimeLength-3 then
+							local Ret=TweenService:Create(TweenValue,TweenInfo.new(3),{Value=0});Ret:Play()
+							Ret.Completed:Connect(function()CIII:Disconnect()end)
+							CIII=TweenValue:GetPropertyChangedSignal'Value':Connect(function()
+								Theme.Volume=TweenValue.Value
+								text(Name)
+							end)
+							CI:Disconnect()
+						end
+					end)
+					Theme.Ended:Wait()
+				end
+			end
+			playmusic()
+		end
+		task.spawn(function()playmusic()end)
+		IsMusicEnabled:GetPropertyChangedSignal'Value':Connect(function()
+			the_ultimate_disconnector=false
+			Destroy(Folder)		
+			Tag.Text='v.1.436 | LOCAL MODIFIED.'
+		end)
+	end
+)
 local ABButton=CreateDK(BoothMenu,'Anti Barrier',UDim2.new(.05,0,.65,0),'Anti Barrier: ',IsAntiBarrier,
 	function()
 		local function set(a,b)
@@ -770,7 +871,7 @@ local ABButton=CreateDK(BoothMenu,'Anti Barrier',UDim2.new(.05,0,.65,0),'Anti Ba
 					Set(a){CanTouch=true,CastShadow=true,BrickColor=BrickColor.new(165,0,3)}
 					return
 				end 
-				Set(a){CanTouch=false,CanQuery=false,CastShadow=false,Transparency=.8,BrickColor=BrickColor.new(200,200,200)}
+				Set(a){CanTouch=false,CanQuery=false,CastShadow=false,Transparency=.95,BrickColor=BrickColor.new(200,200,200)}
 			end
 		end
 		for _,x in next,workspace:GetChildren()do
@@ -854,92 +955,5 @@ CKButton.MouseButton1Click:Connect(function()
 			return
 		end
 		a(Prox)
-	end
-end)
-pcall(function()
-	do do end do do end end do end do end end
-	--GOD I DONT KNOW HOW TO MAKE TRANSITION PLEASE IGNORE BECACUSE IT'S SPAGHETTI AS HELL
-	task.wait(1)
-	local Tag=MG.VersionTag
-	local function text(Name,Transparency)
-		Tag.Text='<s>v.1.436</s><i><b><font color="#66e3e5"><stroke color="#66965d" joins="miter" thickness="1" transparency="'..(Transparency or'0')..'"><u>うみとまもののこどもたち</u>  - <font transparency="'..(Transparency or'0')..'">'..Name..'</font></stroke></font>  ^^</b></i>'
-	end
-	Set(Tag){TextSize=20,TextXAlignment=Enum.TextXAlignment.Left,Size=UDim2.new(0,360,0,40),Position=UDim2.new(0,40,1,-50),TextScaled=false,TextWrapped=false,RichText=true}
-	if not workspace:FindFirstChild'OSTs'then 
-		local the_ultimate_disconnector=true--if 69/69==1 then if'hi'then true else'bruh'else function()print'deez'end or Instance.new'Part'
-		local Folder=Create'Folder'{Name='OSTs',Parent=workspace}
-		local music={
-			--credits to K-san, うみとまもののこどもたち (The Children Of The Sea And The Devil)
-			[1]={['タイトル']=11971802088}, --title
-			[2]={['あるいていこう']=11971804906}, --let's walk!
-			[3]={['はれのひ']=11971810581},--sunny day
-			[4]={['ほんをよむ']=11971808229}, --reading a book
-			[5]={['ちったはなびら']=11971807402}, --flower petals
-			[6]={['かいていどうくつ']=11971806642}, --begin
-		}
-		--[[if IS then
-			local themes=isfolder('themes')
-			if not themes then
-				themes=makefolder('themes')
-				return
-			end
-			local link='https://github.com/kevinYMHGmlg/theme/blob/main/TCATDOTS%20-%20%E3%8'
-			music={
-				--credits to K-san, うみとまもののこどもたち (The Children Of The Sea And The Devil)
-				[1]={['タイトル']=link..'1%82%E3%82%8B%E3%81%84%E3%81%A6%E3%81%84%E3%81%93%E3%81%86.mp3?raw=true'}, --title
-				[2]={['あるいていこう']=link..'1%8B%E3%81%84%E3%81%A6%E3%81%84%E3%81%A9%E3%81%86%E3%81%8F%E3%81%A4.mp3?raw=true'}, --let's walk!
-				[3]={['はれのひ']=link..'1%A1%E3%81%A3%E3%81%9F%E3%81%AF%E3%81%AA%E3%81%B3%E3%82%89.mp3?raw=true'},--sunny day
-				[4]={['ほんをよむ']=link..'1%AF%E3%82%8C%E3%81%AE%E3%81%B2.mp3?raw=true'}, --reading a book
-				[5]={['ちったはなびら']=link..'1%BB%E3%82%93%E3%82%92%E3%82%88%E3%82%80.mp3?raw=true'}, --flower petals
-				[6]={['かいていどうくつ']=link..'2%BF%E3%82%A4%E3%83%88%E3%83%AB.mp3?raw=true'}, --begin
-			}
-		end]]
-		local ignore=#music
-		for i=1,ignore do
-			for Counter,Id in next,music[i]do
-				local OST=Create'Sound'{Volume=0,SoundId='rbxassetid://'..tostring(Id),Parent=Folder,Name=('うみとまもののこどもたち - '..Counter)}
-				music[i][Counter]=OST
-				OST.Loaded:Wait()
-				print('Loaded '..OST.Name)
-			end
-		end
-		Main.Destroying:Connect(function(THING)
-			the_ultimate_disconnector=false
-			Folder:Destroy()			
-			Tag.Text='v.1.436'
-		end)
-		local function t(a)
-			if a then a:Disconnect()end
-		end
-		local function playmusic()
-			if not the_ultimate_disconnector then return end
-			for i=1,ignore do
-				for Name,Theme in next,music[i]do
-					Theme:Play()
-					local CI,CII,CIII
-					do
-						local Ret=TweenService:Create(Theme,TweenInfo.new(3),{Volume=1});Ret:Play()
-						Ret.Completed:Connect(function()CII:Disconnect()end)
-						CII=Theme:GetPropertyChangedSignal'Volume':Connect(function()
-							text(Name,tostring(1-Theme.Volume))
-						end)
-					end
-					CI=RunService.RenderStepped:Connect(function()
-						if not the_ultimate_disconnector then t(CI)t(CII)t(CIII)return end
-						if Theme.TimePosition>=Theme.TimeLength-3 then
-							local Ret=TweenService:Create(Theme,TweenInfo.new(3),{Volume=0});Ret:Play()
-							Ret.Completed:Connect(function()CIII:Disconnect()end)
-							CIII=Theme:GetPropertyChangedSignal'Volume':Connect(function()
-								text(Name,tostring(1-Theme.Volume))
-							end)
-							CI:Disconnect()
-						end
-					end)
-					Theme.Ended:Wait()
-				end
-			end
-			playmusic()
-		end
-		playmusic()
 	end
 end)
