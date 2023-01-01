@@ -23,7 +23,6 @@ local JewellStand=workspace:FindFirstChild'JewelleryStand'
 local Heartbeat=RunService.Heartbeat
 local AllBools,Frames={},{}
 --functions
-pcall(function()MG.VersionTag.Text='v.1.436 | LOCAL MODIFIED.'end)
 local SetClip=toclipboard or setclipboard 
 local IS=RunService:IsStudio()	
 local function Set(Xnstance)
@@ -37,6 +36,9 @@ local function Set(Xnstance)
 		end
 	end
 end
+pcall(function()
+	Set(MG.VersionTag){TextSize=20,TextXAlignment=Enum.TextXAlignment.Left,Size=UDim2.new(0,360,0,40),Position=UDim2.new(0,40,1,-50),Text='v.1.436 | LOCAL MODIFIED.',TextScaled=false,TextWrapped=false,RichText=true}
+end)
 local function Create(Type) 	 	 --useful for lazy people
 	local Xnstance=Instance.new(Type)
 	return function(Parameters)
@@ -292,7 +294,7 @@ task.spawn(function()
 	end
 	Set(PlaceSelectionFrame){Size=UDim2.new(.44,0,.5,0),Name='PlaceSelectionFrame'}
 	local PlayerSelectionFrame=PlaceSelectionFrame:Clone()
-	Set(PlayerSelectionFrame){Position=UDim2.new(.95,0,.3,0),AnchorPoint=Vector2.new(1,0),Name='PlayerSelectionFrame'}
+	Set(PlayerSelectionFrame){Position=UDim2.new(.95,0,.3,0),AnchorPoint=Vector2.new(1,0),Name='PlayerSelectionFrame',CanvasSize=UDim2.new(0,0,0,2400)}
 	PlayerSelectionFrame.Parent=PlaceSelectionFrame.Parent
 	local UIListLayout=Create'UIListLayout'{Parent=PlayerSelectionFrame,Padding=UDim.new(0,8),HorizontalAlignment=Enum.HorizontalAlignment.Left,SortOrder=Enum.SortOrder.Name,VerticalAlignment=Enum.VerticalAlignment.Top,FillDirection=Enum.FillDirection.Vertical}
 	local UIGridLayout=Create'UIGridLayout'{Parent=PlaceSelectionFrame,CellSize=UDim2.new(0,82,0,82),SortOrder=Enum.SortOrder.Name}
@@ -300,7 +302,7 @@ task.spawn(function()
 		local Xame=Player.Name
 		local dn=Player.DisplayName
 		if Player.DisplayName==''then dn=Xame end
-		local TextButton=Create'TextButton'{Parent=PlayerSelectionFrame,Name=Xame,Size=UDim2.new(1,-10,0,40),BackgroundColor3=Color3.fromRGB(163,162,165),BackgroundTransparency=.9,TextColor3=Color3.new(1,1,1),TextScaled=true,Text='@'..Xame..' ('..dn..')'}
+		local TextButton=Create'TextButton'{Parent=PlayerSelectionFrame,Name=Xame,Size=UDim2.new(1,-10,0,40),BackgroundColor3=Color3.fromRGB(163,162,165),BackgroundTransparency=.9,TextColor3=Color3.new(1,1,1),TextScaled=true,Text=dn..' (@'..Xame..')'}
 		TextButton.MouseButton1Click:Connect(function()
 			local Character=LocalPlayer.Character
 			local TCharacter=Player.Character
