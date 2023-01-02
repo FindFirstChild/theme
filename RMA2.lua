@@ -4,6 +4,8 @@ if _G.RMA2ENABLED then
 	return
 end
 _G.RMA2ENABLED=true
+
+local NaN=0/0
 -- services
 local Players=game:GetService'Players'
 local UserInputService=game:GetService'UserInputService'
@@ -384,12 +386,13 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 				Root.CFrame=Position
 				Position=nil
 			end
-			local Destroying,Die,Parent
+			local Destroying,Die
 			local function yeahwhatever(Connection)
 				if not IsAutoRespawn.Value then
 					Destroy(Connection)
 					return
 				end
+				local Height=workspace.FallenPartsDestroyHeight
 				if(Root and Root.Position.Y>-50000)then
 					Position=Root.CFrame
 				end
@@ -398,10 +401,6 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 			Destroying=Character.ChildRemoved:Connect(function(Part)
 				if Part~=Root then return end
 				yeahwhatever(Destroying)
-			end)
-			Parent=Character:GetPropertyChangedSignal'Parent':Connect(function()
-				if Character.Parent==LocalPlayer then return end
-				yeahwhatever(Parent)
 			end)
 			Die=Humanoid.Died:Connect(function()
 				yeahwhatever(Die)
@@ -636,59 +635,65 @@ local function CheckHandle(a,b)
 	Set(a){Massless=true,CanCollide=false,CanQuery=false,CanTouch=false}
 	a.Parent.Parent=LocalPlayer.Character 
 end
+local InputTable={
+	[1]=function(Tool)
+		task.spawn(function()	
+			local Old=Tool.Parent
+			Tool.Parent=LocalPlayer.Character
+			task.wait(.05)
+			Destroy(Tool,'LocalScript',1)
+			Destroy(Tool,'Script',1)
+			for _,z in next,Tool.Handle:GetChildren()do
+				if not z:IsA'Attachment'then
+					z:Destroy()
+				end
+			end
+			Tool.Parent=Old
+		end)
+	end,
+	[2]=function(Tool)
+		task.spawn(function()					
+			local Handle=Tool:FindFirstChild'Handle'
+			if Handle then
+				local Mesh=Handle:FindFirstChildWhichIsA'SpecialMesh'
+				local Old=Tool.Parent
+				if Mesh then
+					Tool.Parent=LocalPlayer.Character
+					task.wait(.05)
+					Mesh:Destroy()
+				end
+				Tool.Parent=Old
+			end
+		end)
+	end,
+	[3]=function(Tool)
+		Tool.Parent=LocalPlayer.Character
+	end,
+}
+local function CheckTool(a,b)
+	for _,Item in next,a:GetChildren()do 
+		if Item:IsA'Tool'and Item.Name=='ClassicSword'then 
+			local Handle=Item:FindFirstChild'Handle'or Item:WaitForChild('Handle',4)
+			if Handle then 
+				Set(Handle){Massless=true,CanCollide=false,CanQuery=false,CanTouch=false}
+				InputTable[b](Item)
+				continue
+			end
+			Item:Destroy()	
+		end
+	end
+end
 RSButton.MouseButton1Click:Connect(function()RequestSword()if LocalPlayer.Team~=Knight then Notify('You dont have knight role, but okay')end end)
 local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui',IsShowingDupeMenu,
 	function()
-		if LocalPlayer.Team~=Knight then Notify('g5g5gr22r')end
+		--should rework this function later
+		if LocalPlayer.Team~=Knight then Notify('you\'re not knight')end
 		local SideI=CreateButtonOld('DupeButton','Dupe:\noff',UDim2.new(1,-20,.5,-80),Vector2.new(1,0))
 		local Val=Create'BoolValue'{Parent=CoreGui,Name='dupe'}
 		local SideII=CreateIcon('ClearS','rbxassetid://11993031978',UDim2.new(1,-20,.5,-30),Vector2.new(1,0))
 		local SideIII=CreateButtonOld('BlockM','Clear meshes',UDim2.new(1,-20,.5,20),Vector2.new(1,0))
 		local SideIV=Create'TextLabel'{Parent=MG,Name='Counter',Text='Items:\n?',Size=UDim2.new(0,40,0,40),Position=UDim2.new(1,-20,.5,70),BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,Font=Enum.Font.SourceSansSemibold,TextScaled=true,AnchorPoint=Vector2.new(1,0)}
 		local UICorner=Create'UICorner'{Parent=SideIV,CornerRadius=UDim.new(0,8)}
-		local InputTable={
-			[1]=function(Tool)
-				task.spawn(function()	
-					Tool.Parent=LocalPlayer.Character
-					task.wait(.05)
-					Destroy(Tool,'LocalScript',1)
-					Destroy(Tool,'Script',1)
-					for _,z in next,Tool.Handle:GetChildren()do
-						if not z:IsA'Attachment'then
-							z:Destroy()
-						end
-					end
-					Tool.Parent=LocalPlayer.Backpack
-				end)
-			end,
-			[2]=function(Tool)
-				task.spawn(function()					
-					local Handle=Tool:FindFirstChild'Handle'
-					if Handle then
-						Tool.Parent=LocalPlayer.Character
-						task.wait(.05)
-						Destroy(Handle,'SpecialMesh',1)
-						Tool.Parent=LocalPlayer.Backpack
-					end
-				end)
-			end,
-			[3]=function(Tool)
-				Tool.Parent=LocalPlayer.Character
-			end,
-		}
-		local function CheckTool(a,b)
-			for _,Item in next,a:GetChildren()do 
-				if Item:IsA'Tool'and Item.Name=='ClassicSword'then 
-					local Handle=Item:FindFirstChild'Handle'or Item:WaitForChild('Handle',4)
-					if Handle then 
-						Set(Handle){Massless=true,CanCollide=false,CanQuery=false,CanTouch=false}
-						InputTable[b](Item)
-						continue
-					end
-					Item:Destroy()	
-				end
-			end
-		end
 		do
 			local CI
 			CI=IsShowingDupeMenu:GetPropertyChangedSignal'Value':Connect(function()
@@ -723,6 +728,31 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 		SideIII.MouseButton1Click:Connect(function()
 			CheckTool(LocalPlayer.Backpack,2)
 			CheckTool(LocalPlayer.Character,2)
+		end)
+		local Total=Create'IntValue'{Parent=SideIV,Name='Amount'}
+		local function CheckH(Item,Mode)
+			if Item:IsA'Tool'and Item.Name=='ClassicSword'then
+				if Mode then
+					Total.Value=Total.Value-1
+					return
+				end
+				Total.Value=Total.Value+1
+			end
+		end
+		Total:GetPropertyChangedSignal'Value':Connect(function()
+			SideIV.Text='Items: '..tostring(Total.Value)
+		end)
+		LocalPlayer.Backpack.ChildAdded:Connect(function(Item)
+			CheckH(Item)
+		end)
+		LocalPlayer.Backpack.ChildRemoved:Connect(function(Item)
+			CheckH(Item,1)
+		end)
+		LocalPlayer.Character.ChildAdded:Connect(function(Item)
+			CheckH(Item)
+		end)
+		LocalPlayer.Character.ChildRemoved:Connect(function(Item)
+			CheckH(Item,1)
 		end)
 		Val:GetPropertyChangedSignal'Value':Connect(function()
 			if Val.Value then
@@ -868,12 +898,12 @@ local DMButton=CreateDK(Frame,'Music',UDim2.new(.05,0,.15,0),'music',IsMusicEnab
 			end
 			playmusic()
 		end
-		task.spawn(function()playmusic()end)
 		IsMusicEnabled:GetPropertyChangedSignal'Value':Connect(function()
 			the_ultimate_disconnector=false
 			Destroy(Folder)		
 			Tag.Text='v.1.436 | LOCAL MODIFIED.'
 		end)
+		playmusic()
 	end
 )
 local ABButton=CreateDK(BoothMenu,'Anti Barrier',UDim2.new(.05,0,.65,0),'Anti Barrier: ',IsAntiBarrier,
