@@ -294,12 +294,13 @@ task.spawn(function()
 	for _,x in next,PlaceSelectionFrame:GetChildren()do
 		x:Destroy()
 	end
-	Set(PlaceSelectionFrame){Size=UDim2.new(.44,0,.5,0),Name='PlaceSelectionFrame'}
+	Set(PlaceSelectionFrame){Size=UDim2.new(.22,0,.5,0),Name='PlaceSelectionFrame'}
 	local PlayerSelectionFrame=PlaceSelectionFrame:Clone()
-	Set(PlayerSelectionFrame){Position=UDim2.new(.95,0,.3,0),AnchorPoint=Vector2.new(1,0),Name='PlayerSelectionFrame',CanvasSize=UDim2.new(0,0,0,2400)}
+	Set(PlayerSelectionFrame){Position=UDim2.new(.95,0,.4,0),Size=UDim2.new(.67,0,.4,0),AnchorPoint=Vector2.new(1,0),Name='PlayerSelectionFrame',CanvasSize=UDim2.new(0,0,0,2400)}
 	PlayerSelectionFrame.Parent=PlaceSelectionFrame.Parent
 	local UIListLayout=Create'UIListLayout'{Parent=PlayerSelectionFrame,Padding=UDim.new(0,8),HorizontalAlignment=Enum.HorizontalAlignment.Left,SortOrder=Enum.SortOrder.Name,VerticalAlignment=Enum.VerticalAlignment.Top,FillDirection=Enum.FillDirection.Vertical}
 	local UIGridLayout=Create'UIGridLayout'{Parent=PlaceSelectionFrame,CellSize=UDim2.new(0,82,0,82),SortOrder=Enum.SortOrder.Name}
+	local Searcher=Create'TextBox'{Parent=TeleportMenu,BackgroundColor3=Color3.fromRGB(61,61,61),AnchorPoint=Vector2.new(1,0),Position=UDim2.new(.95,0,.3,0),Size=UDim2.new(.67,0,.075,0),Font=Enum.Font.SourceSansBold,TextColor3=Color3.new(1,1,1),PlaceholderText='Find player by Name/DisplayName',TextScaled=true,TextWrapped=true,Name='FindSeacher',Text=''}
 	local function CreateTB(Player)
 		local Xame=Player.Name
 		local dn=Player.DisplayName
@@ -352,7 +353,7 @@ task.spawn(function()
 				return
 			end
 			task.spawn(function()
-				for i=1,15 do
+				for i=1,7 do
 					HumanoidRootPart.Velocity=Vector3.new(0,0,0)
 					task.wait()
 				end
@@ -393,7 +394,8 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 					return
 				end
 				local Height=workspace.FallenPartsDestroyHeight
-				if(Root and Root.Position.Y>-50000)then
+				if Height==NaN then Height=-5000 end
+				if(Root and Root.Position.Y>Height)then
 					Position=Root.CFrame
 				end
 				ReplicatedStorage.RequestRespawn:FireServer()
@@ -430,7 +432,7 @@ DButton.MouseButton1Click:Connect(function()
 		local LockedWhileResetting=false --necessary
 		local Character=LocalPlayer.Character
 		local Gui=Create'Frame'{Parent=MG,BackgroundTransparency=.5,BackgroundColor3=Color3.fromRGB(34,34,34),Name='DrawGui',Size=UDim2.new(.25,0,.3,0),Position=UDim2.new(0,0,1,0),AnchorPoint=Vector2.new(0,1)}
-		local Wait=.065
+		local Wait=.055
 		task.spawn(function()
 			local u=Create'UICorner'{Parent=Gui;CornerRadius=UDim.new(0,16)}
 			local g=MG
@@ -606,7 +608,7 @@ DButton.MouseButton1Click:Connect(function()
 		end)
 		Character.Humanoid.Died:Connect(t)
 		Placeholder.Equipped:Connect(function()
-			HAnimation:Destroy(Track:Stop(task.wait()))
+			HAnimation:Destroy(Track:Stop(task.wait(.25)))
 			t()
 		end)
 		CIV=RunService.RenderStepped:Connect(function()
@@ -650,6 +652,7 @@ local InputTable={
 			end
 			Tool.Parent=Old
 		end)
+		task.wait()
 	end,
 	[2]=function(Tool)
 		task.spawn(function()					
@@ -665,6 +668,7 @@ local InputTable={
 				Tool.Parent=Old
 			end
 		end)
+		task.wait()
 	end,
 	[3]=function(Tool)
 		Tool.Parent=LocalPlayer.Character
@@ -690,10 +694,9 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 		if LocalPlayer.Team~=Knight then Notify('you\'re not knight')end
 		local SideI=CreateButtonOld('DupeButton','Dupe:\noff',UDim2.new(1,-20,.5,-80),Vector2.new(1,0))
 		local Val=Create'BoolValue'{Parent=CoreGui,Name='dupe'}
-		local SideII=CreateIcon('ClearS','rbxassetid://11993031978',UDim2.new(1,-20,.5,-30),Vector2.new(1,0))
-		local SideIII=CreateButtonOld('BlockM','Clear meshes',UDim2.new(1,-20,.5,20),Vector2.new(1,0))
-		local SideIV=Create'TextLabel'{Parent=MG,Name='Counter',Text='Items:\n?',Size=UDim2.new(0,40,0,40),Position=UDim2.new(1,-20,.5,70),BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,Font=Enum.Font.SourceSansSemibold,TextScaled=true,AnchorPoint=Vector2.new(1,0)}
-		local UICorner=Create'UICorner'{Parent=SideIV,CornerRadius=UDim.new(0,8)}
+		local SideII=CreateIcon('ClearS','rbxassetid://12006807223',UDim2.new(1,-20,.5,-30),Vector2.new(1,0))
+		local SideIII=CreateIcon('BlockM','rbxassetid://11993031978',UDim2.new(1,-20,.5,20),Vector2.new(1,0))
+		local SideIV=CreateButtonOld('Counter','clickmetocountsword',UDim2.new(1,-20,.5,70),Vector2.new(1,0))
 		do
 			local CI
 			CI=IsShowingDupeMenu:GetPropertyChangedSignal'Value':Connect(function()
@@ -742,17 +745,13 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 		Total:GetPropertyChangedSignal'Value':Connect(function()
 			SideIV.Text='Items: '..tostring(Total.Value)
 		end)
-		LocalPlayer.Backpack.ChildAdded:Connect(function(Item)
-			CheckH(Item)
-		end)
-		LocalPlayer.Backpack.ChildRemoved:Connect(function(Item)
-			CheckH(Item,1)
-		end)
-		LocalPlayer.Character.ChildAdded:Connect(function(Item)
-			CheckH(Item)
-		end)
-		LocalPlayer.Character.ChildRemoved:Connect(function(Item)
-			CheckH(Item,1)
+		SideIV.MouseButton1Click:Connect(function()
+			for _,x in next,LocalPlayer.Character:GetChildren()do
+				CheckH(x)
+			end
+			for _,x in next,LocalPlayer.Backpack:GetChildren()do
+				CheckH(x)
+			end
 		end)
 		Val:GetPropertyChangedSignal'Value':Connect(function()
 			if Val.Value then
@@ -781,7 +780,7 @@ local EBButton=CreateDK(BoothMenu,'Extra Banner',UDim2.new(.05,0,.85,0),'Show Id
 					Notify('a description is missing',1)
 				end
 				local IBanner=Banner:Clone()
-				Set(IBanner){Parent=Banner.Parent,Size=Vector3.new(3.8,2.8,.4),CFrame=Banner.CFrame:ToWorldSpace(CFrame.new(6.2,0,0,1,0,0,0,1,0,0,0,1)),Name='ExtraBanner'}
+				Set(IBanner){Parent=Banner.Parent,CanCollide=false,Size=Vector3.new(3.8,2.8,.4),CFrame=Banner.CFrame:ToWorldSpace(CFrame.new(6.2,0,0,1,0,0,0,1,0,0,0,1)),Name='ExtraBanner'}
 				local Img=IBanner.SurfaceGui.Frame.Description
 				for _,v in next,Img.Parent:GetChildren()do
 					if v~=Img then
@@ -790,29 +789,28 @@ local EBButton=CreateDK(BoothMenu,'Extra Banner',UDim2.new(.05,0,.85,0),'Show Id
 				end
 				local TBanner=IBanner:Clone()
 				Set(TBanner){Parent=Banner.Parent,Size=Vector3.new(3.8,1.05,.4),CFrame=Banner.CFrame:ToWorldSpace(CFrame.new(6.2,-1.925,0,1,0,0,0,1,0,0,0,1))}
-				local Text=TBanner.SurfaceGui.Frame.Description
-				Set(Text){Text='Copy text',Size=UDim2.new(1,0,1,0),Position=UDim2.new(0,0,0,0)}
+				TBanner.SurfaceGui.Frame.Description:Destroy()
+				local Text=Create'TextBox'{Parent=TBanner.SurfaceGui.Frame,BackgroundTransparency=1,Size=UDim2.new(1,0,1,0),Font=Enum.Font.SourceSansBold,TextColor3=Color3.new(1,1,1),PlaceholderText='text should appear here (Ctrl+A copy)',TextScaled=true,TextWrapped=true,Name='Extra',Text=Description.Text,TextEditable=false,ClearTextOnFocus=false}
 				Set(Img){RichText=true,Text='roblox.com/library/'..string.match(Icon.Image,'%d+$'),AnchorPoint=Vector2.new(0,.5),Position=UDim2.new(0,0,.5,0),Size=UDim2.new(1,0,.5,0)}
 				Icon:GetPropertyChangedSignal'Image':Connect(function()
 					Img.Text='roblox.com/library/'..string.match(Icon.Image,'%d+$')
 				end)
+				Description:GetPropertyChangedSignal'Text':Connect(function()
+					local T=Description.Text
+					if T~='Click here to rent this booth'then
+						Text.Text=T
+						return
+					end
+					Text.Text='text should appear here, or it is not important (Ctrl+A copy)'
+				end)
 				IBanner:FindFirstChildWhichIsA'ClickDetector'.MouseClick:Connect(function()	
-					local ID=Icon.Image
-					if tonumber(ID)>10 then
+					local ID=string.gsub(Icon.Image,'rbxassetid://','')
+					if tonumber(ID)and tonumber(ID)>10 then
 						SetClip(ID)
 						Notify('Copied, ID: '..ID..'.',3,'hi')
 						return
 					end
 					Notify('This booth has no image.')
-				end)
-				TBanner:FindFirstChildWhichIsA'ClickDetector'.MouseClick:Connect(function()	
-					local T=Description.Text
-					if T~='Click here to rent this booth'then
-						SetClip(T)
-						Notify('Copied.',1,'hi')
-						return
-					end
-					Notify('bruh.')
 				end)
 				table.insert(ExtraBanners,IBanner)
 				table.insert(ExtraBanners,TBanner)
