@@ -15,7 +15,7 @@ local Teams=game:GetService'Teams'
 local ContentProvider=game:GetService'ContentProvider'
 -- local
 local LocalPlayer=Players.LocalPlayer
-local CoreGui=game.CoreGui
+local CoreGui=LocalPlayer.PlayerGui --game.CoreGui
 local LPG=LocalPlayer.PlayerGui
 local MG=LPG.MainGui
 local Knight=Teams.Knight
@@ -291,6 +291,7 @@ task.spawn(function()
 		Notify('Weird, selection frame doesn\'t exist?',2)
 		return
 	end
+	local TableOfPlayers={}
 	for _,x in next,PlaceSelectionFrame:GetChildren()do
 		x:Destroy()
 	end
@@ -301,10 +302,22 @@ task.spawn(function()
 	local UIListLayout=Create'UIListLayout'{Parent=PlayerSelectionFrame,Padding=UDim.new(0,8),HorizontalAlignment=Enum.HorizontalAlignment.Left,SortOrder=Enum.SortOrder.Name,VerticalAlignment=Enum.VerticalAlignment.Top,FillDirection=Enum.FillDirection.Vertical}
 	local UIGridLayout=Create'UIGridLayout'{Parent=PlaceSelectionFrame,CellSize=UDim2.new(0,82,0,82),SortOrder=Enum.SortOrder.Name}
 	local Searcher=Create'TextBox'{Parent=TeleportMenu,BackgroundColor3=Color3.fromRGB(61,61,61),AnchorPoint=Vector2.new(1,0),Position=UDim2.new(.95,0,.3,0),Size=UDim2.new(.67,0,.075,0),Font=Enum.Font.SourceSansBold,TextColor3=Color3.new(1,1,1),PlaceholderText='Find player by Name/DisplayName',TextScaled=true,TextWrapped=true,Name='FindSeacher',Text=''}
+	Searcher:GetPropertyChangedSignal'Text':Connect(function()
+		local Text=Searcher.Text
+		for _,x in next,TableOfPlayers do
+			if x==UIListLayout then continue end
+			if string.match(x.Name:lower(),Text:lower())then
+				x.Visible=true
+				continue
+			end
+			x.Visible=false
+		end
+	end)
 	local function CreateTB(Player)
 		local Xame=Player.Name
 		local dn=Player.DisplayName
 		if Player.DisplayName==''then dn=Xame end
+		table.insert(TableOfPlayers,dn)
 		local TextButton=Create'TextButton'{Parent=PlayerSelectionFrame,Name=Xame,Size=UDim2.new(1,-10,0,40),BackgroundColor3=Color3.fromRGB(163,162,165),BackgroundTransparency=.9,TextColor3=Color3.new(1,1,1),TextScaled=true,Text=dn..' (@'..Xame..')'}
 		TextButton.MouseButton1Click:Connect(function()
 			local Character=LocalPlayer.Character
@@ -337,6 +350,9 @@ task.spawn(function()
 	end)
 	Players.PlayerRemoving:Connect(function(Player)
 		Destroy(PlayerSelectionFrame,Player.Name)
+		local A=table.find(TableOfPlayers,Player.Name)
+		if not A then A=table.find(TableOfPlayers,Player.DisplayName)end
+		table.remove(TableOfPlayers,A)
 	end)
 	local function CreateIB(Xame,Id,Position,y)
 		local ImageButton=Create'ImageButton'{Parent=PlaceSelectionFrame,Name=Xame,BorderSizePixel=0,Image='rbxassetid://'..Id}
@@ -379,7 +395,7 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 	function()
 		local Position,CI,CII
 		local function CharCheck()
-			local Character=LocalPlayer.Character
+			local Character=LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 			local Humanoid=Character:WaitForChild'Humanoid'or Character:FindFirstChildOfClass'Humanoid'
 			local Root=Character:WaitForChild'HumanoidRootPart'or Character:FindFirstChild'HumanoidRootPart'
 			if not Humanoid or not Root then return end			
@@ -401,7 +417,7 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 				ReplicatedStorage.RequestRespawn:FireServer()
 			end
 			Destroying=Character.ChildRemoved:Connect(function(Part)
-				if Part~=Root then return end
+				if Part~=Root and Part~=Humanoid then return end
 				yeahwhatever(Destroying)
 			end)
 			Die=Humanoid.Died:Connect(function()
@@ -608,7 +624,7 @@ DButton.MouseButton1Click:Connect(function()
 		end)
 		Character.Humanoid.Died:Connect(t)
 		Placeholder.Equipped:Connect(function()
-			HAnimation:Destroy(Track:Stop(task.wait(.25)))
+			Placeholder:Destroy(HAnimation:Destroy(Track:Stop(task.wait(.25))))
 			t()
 		end)
 		CIV=RunService.RenderStepped:Connect(function()
