@@ -1,4 +1,7 @@
 -- i got bored so i assigned multiple variables in one-line
+--[[credits:
+kevinYMHGmlg#1822
+]]
 if _G.RMA2ENABLED then
 	error'RMA2 is already running!'
 	return
