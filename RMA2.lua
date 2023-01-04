@@ -4,8 +4,6 @@ if _G.RMA2ENABLED then
 	return
 end
 _G.RMA2ENABLED=true
-
-local NaN=0/0
 -- services
 local Players=game:GetService'Players'
 local UserInputService=game:GetService'UserInputService'
@@ -15,7 +13,7 @@ local Teams=game:GetService'Teams'
 local ContentProvider=game:GetService'ContentProvider'
 -- local
 local LocalPlayer=Players.LocalPlayer
-local CoreGui=LocalPlayer.PlayerGui --game.CoreGui
+local CoreGui=game.CoreGui
 local LPG=LocalPlayer.PlayerGui
 local MG=LPG.MainGui
 local Knight=Teams.Knight
@@ -55,20 +53,8 @@ local function Create(Type) 	 	 --useful for lazy people
 	end
 end
 local function Destroy(a,b,c)
-	local d=a
-	if not b then 
-		if d then
-			if typeof(d)=='RBXScriptConnection'then
-				d:Disconnect()
-				return
-			end
-			d:Destroy()
-		end
-		return 
-	end
-	d=d:FindFirstChild(b)
-	if c then d=a:FindFirstChildWhichIsA(tostring(b))end
-	if d then d:Destroy()return end
+	local d=a if not b then if d then if typeof(d)=='RBXScriptConnection'then d:Disconnect()return end d:Destroy()end return end d=d:FindFirstChild(b)if c then d=a:FindFirstChildWhichIsA(b)end if d then
+d:Destroy()return end
 end
 local function CreateBool(Xame,Value)
 	local Bool=Create'BoolValue'{Parent=workspace,Name=Xame}
@@ -187,11 +173,9 @@ local function a(p)
 	JewellStand.CanCollide,HumanoidRootPart.CFrame=true,OldCFrame
 	return true
 end
-
 --bools 
 local IsAutoClaim,IsAntiProx,IsShowingDupeMenu,IsShowingDesc=CreateBool'IACK',CreateBool'IAP',CreateBool'ISDM',CreateBool'ISD'
 local IsAutoRespawn,IsAntiBarrier,IsMusicEnabled=CreateBool'IAR',CreateBool'IAB',CreateBool'IME'
-
 --guis
 local Main=CreateIcon('ExploitButton','rbxassetid://10462982957',UDim2.new(0,20,.5,-80))
 local Frame=CreateFrame('Custom','hi')
@@ -218,7 +202,6 @@ Set(TeleportMenu){Parent=MG,Name='TeleportationFrame'}
 table.insert(Frames,TeleportMenu)
 TeleportMenu.Heading.Text='teleportations'
 TeleportMenu.Subheading.Text='HumanoidRootPart.CFrame=CFrame.new(pos)*CFrame.Angles(0,ori,0)'
-
 --linkers
 Link(TeleportMenu.ReturnButton,WorldMenu)
 Link(LocalReturn,Frame)
@@ -227,8 +210,7 @@ Link(Worlds,WorldMenu)
 Link(Knights,KnightMenu)
 Link(Locals,LocalMenu)
 Link(Booths,BoothMenu)
-
-
+--buttons function
 GuiDestroy.MouseButton1Click:Connect(function()
 	ClickSound()
 	local CountDown=5
@@ -302,22 +284,32 @@ task.spawn(function()
 	local UIListLayout=Create'UIListLayout'{Parent=PlayerSelectionFrame,Padding=UDim.new(0,8),HorizontalAlignment=Enum.HorizontalAlignment.Left,SortOrder=Enum.SortOrder.Name,VerticalAlignment=Enum.VerticalAlignment.Top,FillDirection=Enum.FillDirection.Vertical}
 	local UIGridLayout=Create'UIGridLayout'{Parent=PlaceSelectionFrame,CellSize=UDim2.new(0,82,0,82),SortOrder=Enum.SortOrder.Name}
 	local Searcher=Create'TextBox'{Parent=TeleportMenu,BackgroundColor3=Color3.fromRGB(61,61,61),AnchorPoint=Vector2.new(1,0),Position=UDim2.new(.95,0,.3,0),Size=UDim2.new(.67,0,.075,0),Font=Enum.Font.SourceSansBold,TextColor3=Color3.new(1,1,1),PlaceholderText='Find player by Name/DisplayName',TextScaled=true,TextWrapped=true,Name='FindSeacher',Text=''}
+	local Count=0
 	Searcher:GetPropertyChangedSignal'Text':Connect(function()
-		local Text=Searcher.Text
-		for _,x in next,TableOfPlayers do
-			if x==UIListLayout then continue end
-			if string.match(x.Name:lower(),Text:lower())then
-				x.Visible=true
-				continue
+		local text=Searcher.Text:lower()
+		if text==''then
+			for _,x in next,TableOfPlayers do
+				local Frame=PlayerSelectionFrame[x]
+				Frame.Visible=true
 			end
-			x.Visible=false
+			return
+		end
+		for _,x in next,TableOfPlayers do
+			local Frame=PlayerSelectionFrame[x]
+			for i=1,#text do
+				if x:lower():find(text:lower(),i,true)then
+					Frame.Visible=true
+					break
+				end
+				Frame.Visible=false
+			end
 		end
 	end)
 	local function CreateTB(Player)
 		local Xame=Player.Name
 		local dn=Player.DisplayName
-		if Player.DisplayName==''then dn=Xame end
-		table.insert(TableOfPlayers,dn)
+		table.insert(TableOfPlayers,Xame)
+		if dn==''then dn=Xame end
 		local TextButton=Create'TextButton'{Parent=PlayerSelectionFrame,Name=Xame,Size=UDim2.new(1,-10,0,40),BackgroundColor3=Color3.fromRGB(163,162,165),BackgroundTransparency=.9,TextColor3=Color3.new(1,1,1),TextScaled=true,Text=dn..' (@'..Xame..')'}
 		TextButton.MouseButton1Click:Connect(function()
 			local Character=LocalPlayer.Character
@@ -349,9 +341,10 @@ task.spawn(function()
 		CreateTB(Player)
 	end)
 	Players.PlayerRemoving:Connect(function(Player)
-		Destroy(PlayerSelectionFrame,Player.Name)
-		local A=table.find(TableOfPlayers,Player.Name)
-		if not A then A=table.find(TableOfPlayers,Player.DisplayName)end
+		local Name=Player.Name
+		Destroy(PlayerSelectionFrame,Name)
+		local A=table.find(TableOfPlayers,Name)
+		if not A then return end
 		table.remove(TableOfPlayers,A)
 	end)
 	local function CreateIB(Xame,Id,Position,y)
@@ -398,7 +391,7 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 			local Character=LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 			local Humanoid=Character:WaitForChild'Humanoid'or Character:FindFirstChildOfClass'Humanoid'
 			local Root=Character:WaitForChild'HumanoidRootPart'or Character:FindFirstChild'HumanoidRootPart'
-			if not Humanoid or not Root then return end			
+			if not Humanoid or not Root then print('return')return end			
 			if Position~=nil then
 				Root.CFrame=Position
 				Position=nil
@@ -410,8 +403,8 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 					return
 				end
 				local Height=workspace.FallenPartsDestroyHeight
-				if Height==NaN then Height=-5000 end
-				if(Root and Root.Position.Y>Height)then
+				if Height~=Height then Height=-500 end
+				if Root and Root.Position.Y>Height then
 					Position=Root.CFrame
 				end
 				ReplicatedStorage.RequestRespawn:FireServer()
