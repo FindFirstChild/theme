@@ -1,6 +1,14 @@
 -- i got bored so i assigned multiple variables in one-line
---[[credits:
-kevinYMHGmlg#1822
+--[[
+credits:
+	ideas:
+		absence#5446
+		cam1494#7363
+		
+	scripting:
+		kevinYMHGmlg#1822 (me)
+		
+
 ]]
 if _G.RMA2ENABLED then
 	error'RMA2 is already running!'
@@ -14,8 +22,11 @@ local TweenService=game:GetService'TweenService'
 local RunService=game:GetService'RunService'
 local Teams=game:GetService'Teams'
 local ContentProvider=game:GetService'ContentProvider'
+local CollectionService=game:GetService'CollectionService'
 -- local
 local LocalPlayer=Players.LocalPlayer
+local CurrentCamera=workspace.CurrentCamera
+local LMouse=LocalPlayer:GetMouse()
 local CoreGui=game.CoreGui
 local LPG=LocalPlayer.PlayerGui
 local MG=LPG.MainGui
@@ -288,30 +299,34 @@ task.spawn(function()
 	local UIGridLayout=Create'UIGridLayout'{Parent=PlaceSelectionFrame,CellSize=UDim2.new(0,82,0,82),SortOrder=Enum.SortOrder.Name}
 	local Searcher=Create'TextBox'{Parent=TeleportMenu,BackgroundColor3=Color3.fromRGB(61,61,61),AnchorPoint=Vector2.new(1,0),Position=UDim2.new(.95,0,.3,0),Size=UDim2.new(.67,0,.075,0),Font=Enum.Font.SourceSansBold,TextColor3=Color3.new(1,1,1),PlaceholderText='Find player by Name/DisplayName',TextScaled=true,TextWrapped=true,Name='FindSeacher',Text=''}
 	local Count=0
+	local function condition(frame,length,x)
+		for i=1,#length do
+			if x:lower():find(length,i,true)then
+				frame.Visible=true
+				break
+			end
+			frame.Visible=false
+		end
+	end
 	Searcher:GetPropertyChangedSignal'Text':Connect(function()
 		local text=Searcher.Text:lower()
 		if text==''then
-			for _,x in next,TableOfPlayers do
-				local Frame=PlayerSelectionFrame[x]
-				Frame.Visible=true
+			for n,_ in next,TableOfPlayers do
+				local UFrame=PlayerSelectionFrame[n]
+				UFrame.Visible=true
 			end
 			return
 		end
-		for _,x in next,TableOfPlayers do
-			local Frame=PlayerSelectionFrame[x]
-			for i=1,#text do
-				if x:lower():find(text:lower(),i,true)then
-					Frame.Visible=true
-					break
-				end
-				Frame.Visible=false
-			end
+		for n,d in next,TableOfPlayers do
+			local UFrame=PlayerSelectionFrame[n]
+			condition(Frame,#text,n)
+			condition(Frame,#text,d)
 		end
 	end)
 	local function CreateTB(Player)
 		local Xame=Player.Name
 		local dn=Player.DisplayName
-		table.insert(TableOfPlayers,Xame)
+		TableOfPlayers[Xame]=dn
 		if dn==''then dn=Xame end
 		local TextButton=Create'TextButton'{Parent=PlayerSelectionFrame,Name=Xame,Size=UDim2.new(1,-10,0,40),BackgroundColor3=Color3.fromRGB(163,162,165),BackgroundTransparency=.9,TextColor3=Color3.new(1,1,1),TextScaled=true,Text=dn..' (@'..Xame..')'}
 		TextButton.MouseButton1Click:Connect(function()
@@ -348,7 +363,7 @@ task.spawn(function()
 		Destroy(PlayerSelectionFrame,Name)
 		local A=table.find(TableOfPlayers,Name)
 		if not A then return end
-		table.remove(TableOfPlayers,A)
+		TableOfPlayers[A]=nil
 	end)
 	local function CreateIB(Xame,Id,Position,y)
 		local ImageButton=Create'ImageButton'{Parent=PlaceSelectionFrame,Name=Xame,BorderSizePixel=0,Image='rbxassetid://'..Id}
@@ -431,17 +446,19 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 local CKButton=CreateButton('CK',KnightMenu,'Claim Knight',UDim2.new(.05,0,.35,0))
 local RSButton=CreateButton('RS',KnightMenu,'Request Sword',UDim2.new(.05,0,.45,0))
 local TPButton=CreateButton('TP',WorldMenu,'Teleportations',UDim2.new(.05,0,.75,0))
-local DButton=CreateButton('D',WorldMenu,'DrawGui.lua',UDim2.new(.05,0,.65,0))
+local DButton=CreateButton('D',LocalMenu,'DrawGui.lua',UDim2.new(.05,0,.45,0))
 Link(TPButton,TeleportMenu)
 DButton.MouseButton1Click:Connect(function()
 	task.spawn(function()
+		local function TooComplex(x,y,p)
+			local Unit=CurrentCamera:ScreenPointToRay(x,y)
+			return workspace:Raycast(Unit.Origin,Unit.Direction*5000,p)
+		end
 		Destroy(CoreGui,'IsDrawing')
 		if CoreGui:FindFirstChild'IsDrawing'then CoreGui.IsDrawing:Destroy()return end
 		local Value=Create'BoolValue'{Parent=CoreGui,Name='IsDrawing',Value=true}
 		local IsDrawing=Value.Value
-		local IsUndoing=false
-		local IsHolding=false
-		local LockedWhileResetting=false --necessary
+		local IsUndoing,IsHolding,LockedWhileResetting=false,false,false
 		local Character=LocalPlayer.Character
 		local Gui=Create'Frame'{Parent=MG,BackgroundTransparency=.5,BackgroundColor3=Color3.fromRGB(34,34,34),Name='DrawGui',Size=UDim2.new(.25,0,.3,0),Position=UDim2.new(0,0,1,0),AnchorPoint=Vector2.new(0,1)}
 		local Wait=.055
@@ -450,7 +467,7 @@ DButton.MouseButton1Click:Connect(function()
 			local g=MG
 			g=g:FindFirstChild'ProfileFrame'or g:FindFirstChild'RatingFrame'or g:FindFirstChild'TutorialFrame'
 			local h=g.Heading:Clone()
-			h.Parent=Gui;h.Text='how 2 use'
+			h.Parent=Gui;h.Text='how 2 use (need swords) (keybinds are messed up)'
 			local n=1
 			local function s(t,p)
 				local v=h:Clone()
@@ -472,10 +489,11 @@ DButton.MouseButton1Click:Connect(function()
 			s('Unequip/Reset = Disconnect',2)
 			s('Reset All Grips = H',3)
 			s('Reset Orientation = J',4)
-			s('Swords: Nan/Nan',5)
-			local d=s('Delay: ',6)
+			s('Swords: 0/0',5)
+			s('Change Mode = E',6)
+			local d=s('Delay: ',7)
 			d.Size=UDim2.new(.15,0,.075,0)
-			local o=s('Rotation: ',7)
+			local o=s('Rotation: ',8)
 			o.Size=d.Size
 		end)
 		local Fuel=Gui.v6
@@ -507,10 +525,11 @@ DButton.MouseButton1Click:Connect(function()
 		local Orientation=CFrame.Angles(math.rad(-90),math.rad(0),math.rad(0))
 		local Mouse=LocalPlayer:GetMouse()
 		local Pointer=Create'Part'{Parent=workspace,Transparency=.6,BrickColor=BrickColor.new(200,0,0),Material='SmoothPlastic',Anchored=true,Size=Vector3.new(1,.8,4),CanCollide=false,CFrame=CFrame.new(0,0,0)*Orientation}
-		Mouse.TargetFilter=Pointer
+		CollectionService:AddTag(Pointer,'theepicfunnyparts')
+		Mouse.TargetFilter=Pointer--CollectionService:GetTagged('theepicfunnyparts')
 		task.wait(1)
 		local CI,CII,CIII,CIV
-		local Debounce=false
+		local DI,DII=false,false
 		local SWR={}
 		local total=0
 		for _,x in next,LocalPlayer.Backpack:GetChildren()do
@@ -546,11 +565,21 @@ DButton.MouseButton1Click:Connect(function()
 			end
 		end)
 		local n=0
+		local Mode=0
 		local InputTable={
 			[KC.R]=function()Orientation=Orientation*CFrame.Angles(rot,0,0)end,
 			[KC.T]=function()Orientation=Orientation*CFrame.Angles(0,rot,0)end,
 			[KC.Y]=function()Orientation=Orientation*CFrame.Angles(0,0,rot)end,
 			[KC.J]=function()Orientation=CFrame.Angles(math.rad(-90),0,0)end,
+			[KC.E]=function()
+				if Mode==1 then
+					Mode=0
+					Pointer.Transparency=.6
+					return
+				end
+				Mode=1
+				Pointer.Transparency=1
+			end,
 			[KC.H]=function()
 				n=0
 				LockedWhileResetting=true
@@ -558,7 +587,7 @@ DButton.MouseButton1Click:Connect(function()
 				for c,x in next,Grouped do
 					if table.find(SWR,x)then
 						x.Grip,x.Parent=CFrame.new(0,0,-1.7,0,0,1,1,0,0,0,1,0),LocalPlayer.Backpack
-						if #Grouped/4%c==0 then
+						if #Grouped%c==0 then
 							task.wait()
 						end
 					end
@@ -583,21 +612,34 @@ DButton.MouseButton1Click:Connect(function()
 					IsHolding=false
 				end
 				IsHolding=true
+				local RaycastParam=RaycastParams.new(CollectionService:GetTagged'theepicfunnyparts',Enum.RaycastFilterType.Blacklist,true)
 				CI=Heartbeat:Connect(function()
 					if not IsDrawing or not IsHolding then 
 						CI:Disconnect()
 						return
 					end
-					if Debounce or n>=total then
+					if Mode==0 then
+						if DI or n>=total then
+							return
+						end
+						DI=true
+						n=n+1 
+						local a=SWR[n]	
+						if a.Parent==Character then a.Parent=LocalPlayer.Backpack end
+						Set(a){Grip=SetCF(CFrame.new(LMouse.Hit.Position)*Orientation),Parent=LocalPlayer.Character}
+						task.wait(Wait)
+						DI=false
 						return
 					end
-					Debounce=true
-					n=n+1 
-					local a=SWR[n]	
-					a.Parent=if a.Parent==Character then LocalPlayer.Backpack else a.Parent
-					Set(a){Grip=SetCF(CFrame.new(Mouse.Hit.Position)*Orientation),Parent=LocalPlayer.Character}
+					local Target=TooComplex(Mouse.X,Mouse.Y)
+					if DII or not Target then return end
+					Target=Target.Instance
+					if not table.find(SWR,Target.Parent)then return end
+					DII=true
+					n=n-1
+					Set(Target.Parent){Grip=CFrame.new(0,0,-1.7,0,0,1,1,0,0,0,1,0),Parent=LocalPlayer.Backpack}
 					task.wait(Wait)
-					Debounce=false
+					DII=false
 				end)
 			elseif input.UserInputType==UIT.Keyboard then
 				pcall(InputTable[input.KeyCode])
@@ -646,18 +688,20 @@ local function CheckHandle(a,b)
 		end 
 		return 
 	end 
-	Set(a){Massless=true,CanCollide=false,CanQuery=false,CanTouch=false}
+	Set(a){Massless=true,CanCollide=false,CanTouch=false}
 	a.Parent.Parent=LocalPlayer.Character 
 end
 local InputTable={
 	[1]=function(Tool)
-		task.spawn(function()	
+		task.spawn(function()
+			local Childrens=Tool.Handle:GetChildren()
+			if #Childrens==0 then return end
 			local Old=Tool.Parent
 			Tool.Parent=LocalPlayer.Character
-			task.wait(.05)
+			task.wait()
 			Destroy(Tool,'LocalScript',1)
 			Destroy(Tool,'Script',1)
-			for _,z in next,Tool.Handle:GetChildren()do
+			for _,z in next,Childrens do
 				if not z:IsA'Attachment'then
 					z:Destroy()
 				end
@@ -691,7 +735,7 @@ local function CheckTool(a,b)
 		if Item:IsA'Tool'and Item.Name=='ClassicSword'then 
 			local Handle=Item:FindFirstChild'Handle'or Item:WaitForChild('Handle',4)
 			if Handle then 
-				Set(Handle){Massless=true,CanCollide=false,CanQuery=false,CanTouch=false}
+				Set(Handle){Massless=true,CanCollide=false,CanQuery=true,CanTouch=false}
 				InputTable[b](Item)
 				continue
 			end
@@ -729,11 +773,11 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 				CheckTool(LocalPlayer.Backpack,3)
 			end)
 			CII=RunService.RenderStepped:Connect(function()
-				if not Val.Value then
-					CI:Disconnect(CII:Disconnect())
+				if Val.Value then
+					RequestSword()
 					return
 				end
-				RequestSword()
+				CI:Disconnect(CII:Disconnect())
 			end)
 		end)
 		SideII.MouseButton1Click:Connect(function()
@@ -924,7 +968,7 @@ local ABButton=CreateDK(BoothMenu,'Anti Barrier',UDim2.new(.05,0,.65,0),'Anti Ba
 					Set(a){CanTouch=true,CastShadow=true,BrickColor=BrickColor.new(165,0,3)}
 					return
 				end 
-				Set(a){CanTouch=false,CanQuery=false,CastShadow=false,Transparency=.95,BrickColor=BrickColor.new(200,200,200)}
+				Set(a){CanTouch=false,CanQuery=true,CastShadow=false,Transparency=.95,BrickColor=BrickColor.new(200,200,200)}
 			end
 		end
 		for _,x in next,workspace:GetChildren()do
