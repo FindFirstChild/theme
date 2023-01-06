@@ -280,7 +280,7 @@ local APButton=CreateDK(LocalMenu,'AP',UDim2.new(.05,0,.65,0),'Anti Proximity: '
 		end)
 	end
 )
-task.spawn(function()
+do
 	Set(TeleportMenu){Size=UDim2.new(.8,0,.5,0),Position=UDim2.new(.5,0,.25,0),AnchorPoint=Vector2.new(.5,0)}
 	local PlaceSelectionFrame=TeleportMenu:FindFirstChild'ContentSelectionFrame'
 	if not PlaceSelectionFrame then
@@ -357,13 +357,18 @@ task.spawn(function()
 	end
 	Players.PlayerAdded:Connect(function(Player)
 		CreateTB(Player)
+		local Character=Player.Charater or Player.CharacterAdded:Wait()
+		if Character then
+			CollectionService:AddTag(Character,'theepicfunnyparts')
+		end
 	end)
 	Players.PlayerRemoving:Connect(function(Player)
 		local Name=Player.Name
 		Destroy(PlayerSelectionFrame,Name)
 		local A=table.find(TableOfPlayers,Name)
-		if not A then return end
-		TableOfPlayers[A]=nil
+		if A then 
+			TableOfPlayers[A]=nil
+		end
 	end)
 	local function CreateIB(Xame,Id,Position,y)
 		local ImageButton=Create'ImageButton'{Parent=PlaceSelectionFrame,Name=Xame,BorderSizePixel=0,Image='rbxassetid://'..Id}
@@ -397,7 +402,7 @@ task.spawn(function()
 	CreateIB('Shop','11833241871',Vector3.new(-64.5,3,56.25),136)
 	CreateIB('Spawn','11833241670',Vector3.new(-8,10,6),90)
 	CreateIB('Stage','11833241495',Vector3.new(-85,43,6),-90)
-end)
+end
 TeleportMenu.CloseButton.MouseButton1Click:Connect(function()
 	ClickSound()
 	TeleportMenu.Visible=false
@@ -450,9 +455,10 @@ local DButton=CreateButton('D',LocalMenu,'DrawGui.lua',UDim2.new(.05,0,.45,0))
 Link(TPButton,TeleportMenu)
 DButton.MouseButton1Click:Connect(function()
 	task.spawn(function()
-		local function TooComplex(x,y,p)
-			local Unit=CurrentCamera:ScreenPointToRay(x,y)
-			return workspace:Raycast(Unit.Origin,Unit.Direction*5000,p)
+		local function TooComplex(p)
+			local Mouse=UserInputService:GetMouseLocation()
+			local Unit=CurrentCamera:ScreenPointToRay(Mouse.X,Mouse.Y-36)
+			return workspace:Raycast(Unit.Origin,Unit.Direction*256,p)
 		end
 		Destroy(CoreGui,'IsDrawing')
 		if CoreGui:FindFirstChild'IsDrawing'then CoreGui.IsDrawing:Destroy()return end
@@ -467,7 +473,7 @@ DButton.MouseButton1Click:Connect(function()
 			local g=MG
 			g=g:FindFirstChild'ProfileFrame'or g:FindFirstChild'RatingFrame'or g:FindFirstChild'TutorialFrame'
 			local h=g.Heading:Clone()
-			h.Parent=Gui;h.Text='how 2 use (need swords) (keybinds are messed up)'
+			h.Parent=Gui;h.Text='how2use(need swords)(keybinds messed up)'
 			local n=1
 			local function s(t,p)
 				local v=h:Clone()
@@ -497,7 +503,7 @@ DButton.MouseButton1Click:Connect(function()
 			o.Size=d.Size
 		end)
 		local Fuel=Gui.v6
-		local Delay=Create'TextBox'{Parent=Gui,Name='delay',Font=Enum.Font.SourceSansSemibold,TextScaled=true,TextWrapped=true,Text='',AnchorPoint=Vector2.new(1,0),Position=UDim2.new(.95,0,.65,0),Size=UDim2.new(.75,0,.075,0),BackgroundColor3=Color3.new(0,0,0),BackgroundTransparency=.7,TextColor3=Color3.new(1,1,1),PlaceholderText='delay here'}
+		local Delay=Create'TextBox'{Parent=Gui,Name='delay',Font=Enum.Font.SourceSansSemibold,TextScaled=true,TextWrapped=true,Text='',AnchorPoint=Vector2.new(1,0),Position=UDim2.new(.95,0,.725,0),Size=UDim2.new(.75,0,.075,0),BackgroundColor3=Color3.new(0,0,0),BackgroundTransparency=.7,TextColor3=Color3.new(1,1,1),PlaceholderText='delay here'}
 		local rot=math.rad(-45)
 		local Rotation=Delay:Clone()
 		Rotation.Parent,Rotation.PlaceholderText,Rotation.Position=Delay.Parent,'rotation here',Delay.Position+UDim2.new(0,0,.075,0)
@@ -523,10 +529,10 @@ DButton.MouseButton1Click:Connect(function()
 		local Placeholder=Create'Tool'{Name='equip me to disconnect',Parent=LocalPlayer.Backpack,ToolTip='OMG INSTANCE.NEW() HACK!!'}
 		local Handle=Create'Part'{Parent=Placeholder,Name='Handle',Transparency=1,Size=Vector3.new(0,0,0)}
 		local Orientation=CFrame.Angles(math.rad(-90),math.rad(0),math.rad(0))
-		local Mouse=LocalPlayer:GetMouse()
-		local Pointer=Create'Part'{Parent=workspace,Transparency=.6,BrickColor=BrickColor.new(200,0,0),Material='SmoothPlastic',Anchored=true,Size=Vector3.new(1,.8,4),CanCollide=false,CFrame=CFrame.new(0,0,0)*Orientation}
+		local Pointer=Create'Part'{Parent=workspace,Transparency=.6,BrickColor=BrickColor.new(1,0,0),CanQuery=false,CanTouch=false,Massless=true,Material='SmoothPlastic',Anchored=true,Size=Vector3.new(1,.8,4),CanCollide=false,CFrame=CFrame.new(0,0,0)*Orientation}
 		CollectionService:AddTag(Pointer,'theepicfunnyparts')
-		Mouse.TargetFilter=Pointer--CollectionService:GetTagged('theepicfunnyparts')
+		CollectionService:AddTag(Character,'theepicfunnyparts')
+		LMouse.TargetFilter=Pointer
 		task.wait(1)
 		local CI,CII,CIII,CIV
 		local DI,DII=false,false
@@ -562,6 +568,7 @@ DButton.MouseButton1Click:Connect(function()
 				table.insert(SWR,Child)
 				total=total+1
 				Child.Handle.Massless=true
+				Child.Handle.CanQuery=true
 			end
 		end)
 		local n=0
@@ -574,11 +581,11 @@ DButton.MouseButton1Click:Connect(function()
 			[KC.E]=function()
 				if Mode==1 then
 					Mode=0
-					Pointer.Transparency=.6
+					Set(Pointer){BrickColor=BrickColor.new(1,0,0),Size=Vector3.new(1,.8,4),Transparency=.6}
 					return
 				end
 				Mode=1
-				Pointer.Transparency=1
+				Set(Pointer){BrickColor=BrickColor.new(Color3.fromRGB(89,211,103)),Size=Vector3.new(1.2,1,4.2),Transparency=1}
 			end,
 			[KC.H]=function()
 				n=0
@@ -605,6 +612,7 @@ DButton.MouseButton1Click:Connect(function()
 				end
 			end
 		}
+		local Target
 		CII=UserInputService.InputBegan:Connect(function(input,input2)
 			if input2 then return end
 			if input.UserInputType==UIT.MouseButton1 then	
@@ -612,7 +620,6 @@ DButton.MouseButton1Click:Connect(function()
 					IsHolding=false
 				end
 				IsHolding=true
-				local RaycastParam=RaycastParams.new(CollectionService:GetTagged'theepicfunnyparts',Enum.RaycastFilterType.Blacklist,true)
 				CI=Heartbeat:Connect(function()
 					if not IsDrawing or not IsHolding then 
 						CI:Disconnect()
@@ -631,13 +638,10 @@ DButton.MouseButton1Click:Connect(function()
 						DI=false
 						return
 					end
-					local Target=TooComplex(Mouse.X,Mouse.Y)
 					if DII or not Target then return end
-					Target=Target.Instance
-					if not table.find(SWR,Target.Parent)then return end
 					DII=true
 					n=n-1
-					Set(Target.Parent){Grip=CFrame.new(0,0,-1.7,0,0,1,1,0,0,0,1,0),Parent=LocalPlayer.Backpack}
+					Set(Target.Instance.Parent){Grip=CFrame.new(0,0,-1.7,0,0,1,1,0,0,0,1,0),Parent=LocalPlayer.Backpack}
 					task.wait(Wait)
 					DII=false
 				end)
@@ -671,10 +675,24 @@ DButton.MouseButton1Click:Connect(function()
 				Destroy(Gui)
 				Destroy(Pointer)
 				CIV:Disconnect(CIII:Disconnect(CII:Disconnect()))
+				CollectionService:RemoveTag'theepicfunnyparts'
 				return
 			end
 			Fuel.Text='Swords: '..tostring(n)..'/'..tostring(total)
-			Pointer.CFrame=CFrame.new(Mouse.Hit.Position)*Orientation
+			if Mode==0 then
+				Pointer.CFrame=CFrame.new(LMouse.Hit.Position)*Orientation
+				return
+			end
+			local Mouse=UserInputService:GetMouseLocation()
+			local RaycastParam=RaycastParams.new(CollectionService:GetTagged'theepicfunnyparts',Enum.RaycastFilterType.Blacklist,true)
+			Target=TooComplex(RaycastParam)
+			if Target and table.find(SWR,Target.Instance.Parent)then
+				Pointer.CFrame=Target.Instance.CFrame
+				Pointer.Transparency=.6
+				return
+			end
+			Target=nil
+			Pointer.Transparency=1
 		end)
 	end)
 end)
