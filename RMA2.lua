@@ -768,8 +768,8 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 		if LocalPlayer.Team~=Knight then Notify('you\'re not knight')end
 		local SideI=CreateButtonOld('DupeButton','Dupe:\noff',UDim2.new(1,-20,.5,-80),Vector2.new(1,0))
 		local Val=Create'BoolValue'{Parent=CoreGui,Name='dupe'}
-		local SideII=CreateIcon('ClearS','rbxassetid://12006807223',UDim2.new(1,-20,.5,-30),Vector2.new(1,0))
-		local SideIII=CreateIcon('BlockM','rbxassetid://11993031978',UDim2.new(1,-20,.5,20),Vector2.new(1,0))
+		local SideII=CreateIcon('ClearS','rbxassetid://12068313338',UDim2.new(1,-20,.5,-30),Vector2.new(1,0))
+		local SideIII=CreateIcon('BlockM','rbxassetid://12068313585',UDim2.new(1,-20,.5,20),Vector2.new(1,0))
 		local SideIV=CreateButtonOld('Counter','clickmetocountsword',UDim2.new(1,-20,.5,70),Vector2.new(1,0))
 		do
 			local CI
