@@ -357,7 +357,7 @@ do
 	end
 	Players.PlayerAdded:Connect(function(Player)
 		CreateTB(Player)
-		local Character=Player.Charater or Player.CharacterAdded:Wait()
+		local Character=Player.Character or Player.CharacterAdded:Wait()
 		if Character then
 			CollectionService:AddTag(Character,'theepicfunnyparts')
 		end
