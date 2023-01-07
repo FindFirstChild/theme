@@ -808,6 +808,7 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 		end)
 		local Total=Create'IntValue'{Parent=SideIV,Name='Amount'}
 		local function CheckH(Item,Mode)
+			Total.Value=0
 			if Item:IsA'Tool'and Item.Name=='ClassicSword'then
 				if Mode then
 					Total.Value=Total.Value-1
