@@ -189,7 +189,7 @@ local function a(p)
 end
 --bools 
 local IsAutoClaim,IsAntiProx,IsShowingDupeMenu,IsShowingDesc=CreateBool'IACK',CreateBool'IAP',CreateBool'ISDM',CreateBool'ISD'
-local IsAutoRespawn,IsAntiBarrier,IsMusicEnabled=CreateBool'IAR',CreateBool'IAB',CreateBool'IME'
+local IsAutoRespawn,IsAntiBarrier,IsMusicEnabled,IsBypassLocal=CreateBool'IAR',CreateBool'IAB',CreateBool'IME',CreateBool'IBL'
 --guis
 local Main=CreateIcon('ExploitButton','rbxassetid://10462982957',UDim2.new(0,20,.5,-80))
 local Frame=CreateFrame('Custom','hi')
@@ -210,7 +210,7 @@ local BoothMenu=CreateFrame('Booth','game.service(\'WorkSpace\',game)[\'Filterin
 local BoothReturn=CreateButton('R',BoothMenu,'Return',UDim2.new(.05,0,.55,0))
 Link(BoothReturn,Frame)
 local LocalMenu=CreateFrame('Local','workspace.FilteringEnabled=false')
-local LocalReturn=CreateButton('R',LocalMenu,'Return',UDim2.new(.05,0,.55,0))
+local LocalReturn=CreateButton('R',LocalMenu,'Return',UDim2.new(.05,0,.35,0))
 local TeleportMenu=MG.ContentMenuFrame:Clone()
 Set(TeleportMenu){Parent=MG,Name='TeleportationFrame'}
 table.insert(Frames,TeleportMenu)
@@ -281,7 +281,7 @@ local APButton=CreateDK(LocalMenu,'AP',UDim2.new(.05,0,.65,0),'Anti Proximity: '
 	end
 )
 do
-	Set(TeleportMenu){Size=UDim2.new(.8,0,.5,0),Position=UDim2.new(.5,0,.25,0),AnchorPoint=Vector2.new(.5,0)}
+	Set(TeleportMenu){Size=UDim2.new(.8,0,.6,0),Position=UDim2.new(.5,0,.5,0),AnchorPoint=Vector2.new(.5,.5)}
 	local PlaceSelectionFrame=TeleportMenu:FindFirstChild'ContentSelectionFrame'
 	if not PlaceSelectionFrame then
 		Notify('Weird, selection frame doesn\'t exist?',2)
@@ -357,10 +357,6 @@ do
 	end
 	Players.PlayerAdded:Connect(function(Player)
 		CreateTB(Player)
-		local Character=Player.Character or Player.CharacterAdded:Wait()
-		if Character then
-			CollectionService:AddTag(Character,'theepicfunnyparts')
-		end
 	end)
 	Players.PlayerRemoving:Connect(function(Player)
 		local Name=Player.Name
@@ -371,7 +367,7 @@ do
 		end
 	end)
 	local function CreateIB(Xame,Id,Position,y)
-		local ImageButton=Create'ImageButton'{Parent=PlaceSelectionFrame,Name=Xame,BorderSizePixel=0,Image='rbxassetid://'..Id}
+		local ImageButton=Create'ImageButton'{Parent=PlaceSelectionFrame,Name=Xame,BorderSizePixel=0,Image='rbxassetid://1183324'..Id}
 		ContentProvider:PreloadAsync({ImageButton})
 		ImageButton.MouseButton1Click:Connect(function()
 			local Character=LocalPlayer.Character
@@ -393,22 +389,44 @@ do
 			HumanoidRootPart.CFrame=CFrame.new(Position)*CFrame.Angles(0,math.rad(y),0)
 		end)
 	end
-	CreateIB('LoungeTop','11833242216',Vector3.new(-5893,100,38),90)
-	CreateIB('Lounge','11833242446',Vector3.new(-5900,-53,21.25),180)
-	CreateIB('TreeI','11833241126',Vector3.new(60.25,38,-65.25),112.5)
-	CreateIB('TreeII','11833240849',Vector3.new(56.5,38.25,72.5),46)
-	CreateIB('Stand','11833241321',Vector3.new(-241.74,5,-241.74),45)
-	CreateIB('Rated','11833242032',Vector3.new(-71,19,-40.74),-105.303)
-	CreateIB('Shop','11833241871',Vector3.new(-64.5,3,56.25),136)
-	CreateIB('Spawn','11833241670',Vector3.new(-8,10,6),90)
-	CreateIB('Stage','11833241495',Vector3.new(-85,43,6),-90)
+	CreateIB('LoungeTop','2216',Vector3.new(-5893,100,38),90)
+	CreateIB('Lounge','2446',Vector3.new(-5900,-53,21.25),180)
+	CreateIB('TreeI','1126',Vector3.new(60.25,38,-65.25),112.5)
+	CreateIB('TreeII','0849',Vector3.new(56.5,38.25,72.5),46)
+	CreateIB('Stand','1321',Vector3.new(-241.74,5,-241.74),45)
+	CreateIB('Rated','2032',Vector3.new(-71,19,-40.74),-105.303)
+	CreateIB('Shop','1871',Vector3.new(-64.5,3,56.25),136)
+	CreateIB('Spawn','1670',Vector3.new(-8,10,6),90)
+	CreateIB('Stage','1495',Vector3.new(-85,43,6),-90)
 end
 TeleportMenu.CloseButton.MouseButton1Click:Connect(function()
 	ClickSound()
 	TeleportMenu.Visible=false
 end)
+local BButton=CreateDK(LocalMenu,'B',UDim2.new(.05,0,.45,0),'bypass vip stuff: ',IsBypassLocal,
+	function()
+		Notify('this is local only i meant most stuff are localized')
+		local CI,CII
+		local Part=workspace:FindFirstChild'GroupAccessPart'
+		if not Part then Notify('Missing \'workspace\'.GroupAccessPart',3)end
+		Part.CanCollide,Part.CanTouch,Part.CanQuery=false,false,false
+		local Window=workspace['VIP Entrance']:FindFirstChild'Window'
+		if not Window then Notify('Missing \'VIP Entrance\'.Window',3)return end
+		CI=Window.VIPProximityPrompt.Triggered:Connect(function()
+			local p=game.Players.LocalPlayer.Character.HumanoidRootPart
+			p.CFrame=CFrame.new(-5900,-51.49,23,-1,0,0,0,1,0,0,0,-1)
+		end)
+		CII=IsBypassLocal:GetPropertyChangedSignal'Value':Connect(function()
+			if Part then
+				Part.CanCollide,Part.CanTouch,Part.CanQuery=true,true,true
+			end
+			CI:Disconnect(CII:Disconnect())
+		end)
+	end
+)
 local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',IsAutoRespawn,
 	function()
+		Notify('I don\'t recommend using this if you\'re trying to toolkill people, or reanimations/god')
 		local Position,CI,CII
 		local function CharCheck()
 			local Character=LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
@@ -451,10 +469,11 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 local CKButton=CreateButton('CK',KnightMenu,'Claim Knight',UDim2.new(.05,0,.35,0))
 local RSButton=CreateButton('RS',KnightMenu,'Request Sword',UDim2.new(.05,0,.45,0))
 local TPButton=CreateButton('TP',WorldMenu,'Teleportations',UDim2.new(.05,0,.75,0))
-local DButton=CreateButton('D',LocalMenu,'DrawGui.lua',UDim2.new(.05,0,.45,0))
+local DButton=CreateButton('D',LocalMenu,'DrawGui.lua',UDim2.new(.05,0,.25,0))
 Link(TPButton,TeleportMenu)
 DButton.MouseButton1Click:Connect(function()
 	task.spawn(function()
+		Notify('this only work for swords',4)
 		local function TooComplex(p)
 			local Mouse=UserInputService:GetMouseLocation()
 			local Unit=CurrentCamera:ScreenPointToRay(Mouse.X,Mouse.Y-36)
@@ -534,7 +553,7 @@ DButton.MouseButton1Click:Connect(function()
 		CollectionService:AddTag(Character,'theepicfunnyparts')
 		LMouse.TargetFilter=Pointer
 		task.wait(1)
-		local CI,CII,CIII,CIV
+		local CI,CII,CIII,CIV,CV
 		local DI,DII=false,false
 		local SWR={}
 		local total=0
@@ -669,12 +688,21 @@ DButton.MouseButton1Click:Connect(function()
 			Placeholder:Destroy(HAnimation:Destroy(Track:Stop(task.wait(.25))))
 			t()
 		end)
-		CIV=RunService.RenderStepped:Connect(function()
+		CIV=Players.PlayerAdded:Connect(function(Player)
+			local CVI=Player.CharacterAdded:Connect(function(Character)
+				CollectionService:AddTag(Character,'theepicfunnyparts')
+			end)
+			if not IsDrawing then
+				Destroy(CVI)
+				return
+			end
+		end)
+		CV=RunService.RenderStepped:Connect(function()
 			if not IsDrawing then
 				Destroy(Value)
 				Destroy(Gui)
 				Destroy(Pointer)
-				CIV:Disconnect(CIII:Disconnect(CII:Disconnect()))
+				CV:Disconnect(CIV:Disconnect(CIII:Disconnect(CII:Disconnect())))
 				CollectionService:RemoveTag'theepicfunnyparts'
 				return
 			end
@@ -761,16 +789,17 @@ local function CheckTool(a,b)
 		end
 	end
 end
-RSButton.MouseButton1Click:Connect(function()RequestSword()if LocalPlayer.Team~=Knight then Notify('You dont have knight role, but okay')end end)
+RSButton.MouseButton1Click:Connect(function()RequestSword()if LocalPlayer.Team~=Knight then Notify('You dont have knight role')end end)
 local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui',IsShowingDupeMenu,
 	function()
 		--should rework this function later
+		Notify('Do i need to explain these icons? yes? no lol')
 		if LocalPlayer.Team~=Knight then Notify('you\'re not knight')end
 		local SideI=CreateButtonOld('DupeButton','Dupe:\noff',UDim2.new(1,-20,.5,-80),Vector2.new(1,0))
 		local Val=Create'BoolValue'{Parent=CoreGui,Name='dupe'}
 		local SideII=CreateIcon('ClearS','rbxassetid://12068313338',UDim2.new(1,-20,.5,-30),Vector2.new(1,0))
 		local SideIII=CreateIcon('BlockM','rbxassetid://12068313585',UDim2.new(1,-20,.5,20),Vector2.new(1,0))
-		local SideIV=CreateButtonOld('Counter','clickmetocountsword',UDim2.new(1,-20,.5,70),Vector2.new(1,0))
+		local SideIV=CreateButtonOld('Counter','clikme2coutswrd',UDim2.new(1,-20,.5,70),Vector2.new(1,0))
 		do
 			local CI
 			CI=IsShowingDupeMenu:GetPropertyChangedSignal'Value':Connect(function()
