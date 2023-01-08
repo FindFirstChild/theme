@@ -66,6 +66,15 @@ local function Create(Type) 	 	 --useful for lazy people
 		return Xnstance
 	end
 end
+local function SetBarrier(a,b)
+	if string.match(a.Name,'^BarrierFor')and a:IsA'BasePart'then
+		if b then
+			Set(a){CanTouch=true,CastShadow=true,BrickColor=BrickColor.new(165,0,3)}
+			return
+		end 
+		Set(a){CanTouch=false,CanQuery=true,CastShadow=false,Transparency=.95,BrickColor=BrickColor.new(200,200,200)}
+	end
+end
 local function Destroy(a,b,c)
 	local d=a if not b then if d then if typeof(d)=='RBXScriptConnection'then d:Disconnect()return end d:Destroy()end return end d=d:FindFirstChild(b)if c then d=a:FindFirstChildWhichIsA(b)end if d then
 d:Destroy()return end
@@ -146,20 +155,19 @@ local function CreateButtonOld(Xame,Xext,Xosition,XnchorPoint)
 	return Label
 end
 local function CreateDK(Xarent,Xame,Xosition,Xext,Bool,CodeOn,CodeOff)
+	local Instances
 	local Frame=Create'Frame'{Parent=Xarent,AutomaticSize=Enum.AutomaticSize.None,BackgroundTransparency=1,Name=Xame,Position=Xosition,Size=UDim2.new(.9,0,.075,0),Style=Enum.FrameStyle.Custom}
 	local Value=Create'ImageButton'{Parent=Frame,AnchorPoint=Vector2.new(1,.5),BackgroundTransparency=1,Name='Value',Position=UDim2.new(1,0,.5,0),Size=UDim2.new(.1,40,1,40),Image='rbxassetid://1759563960',ImageColor3=Color3.fromRGB(90,90,90)}
 	Value.MouseButton1Click:Connect(function()
 		if Bool.Value then
 			Bool.Value=false
 			Value.ImageColor3=Color3.fromRGB(90,90,90)
-			if CodeOff then
-				task.spawn(CodeOff)
-			end
+			CodeOff(Instances)
 			return
 		end
 		Bool.Value=true
 		Value.ImageColor3=Color3.new(1,1,1)
-		task.spawn(CodeOn)
+		Instances=CodeOn()
 	end)
 	local TextL=Create'TextLabel'{Parent=Frame,AutomaticSize=Enum.AutomaticSize.None,BackgroundTransparency=1,Name='Text',Size=UDim2.new(.9,0,1,0),Font=Enum.Font.SourceSansSemibold,Text=Xext,TextColor3=Color3.new(1,1,1),TextScaled=true,TextSize=14,TextXAlignment=Enum.TextXAlignment.Left}
 	return Frame
@@ -216,14 +224,20 @@ Set(TeleportMenu){Parent=MG,Name='TeleportationFrame'}
 table.insert(Frames,TeleportMenu)
 TeleportMenu.Heading.Text='teleportations'
 TeleportMenu.Subheading.Text='HumanoidRootPart.CFrame=CFrame.new(pos)*CFrame.Angles(0,ori,0)'
+
+local CKButton=CreateButton('CK',KnightMenu,'Claim Knight',UDim2.new(.05,0,.35,0))
+local RSButton=CreateButton('RS',KnightMenu,'Request Sword',UDim2.new(.05,0,.45,0))
+local TPButton=CreateButton('TP',Frame,'Teleportations',UDim2.new(.05,0,.35,0))
+local DButton=CreateButton('D',LocalMenu,'DrawGui.lua',UDim2.new(.05,0,.25,0))
 --linkers
-Link(TeleportMenu.ReturnButton,WorldMenu)
+Link(TeleportMenu.ReturnButton,Frame)
 Link(LocalReturn,Frame)
 Link(Main,Frame)
 Link(Worlds,WorldMenu)
 Link(Knights,KnightMenu)
 Link(Locals,LocalMenu)
 Link(Booths,BoothMenu)
+Link(TPButton,TeleportMenu)
 --buttons function
 GuiDestroy.MouseButton1Click:Connect(function()
 	ClickSound()
@@ -261,23 +275,27 @@ GuiDestroy.MouseButton1Click:Connect(function()
 		CI:Disconnect()
 	end)
 end)
+TeleportMenu.CloseButton.MouseButton1Click:Connect(function()
+	ClickSound()
+	TeleportMenu.Visible=false
+end)
 local APButton=CreateDK(LocalMenu,'AP',UDim2.new(.05,0,.65,0),'Anti Proximity: ',IsAntiProx,
 	function()
-		local CI,CII
 		task.spawn(function()
 			local Humanoid=LocalPlayer.Character:FindFirstChildOfClass'Humanoid'
 			if not Humanoid then return end
 			task.wait(.1)
 			Destroy(Humanoid.RootPart,'ProximityPrompt')
 		end)
-		CI=LocalPlayer.CharacterAdded:Connect(function(char)
+		local CI=LocalPlayer.CharacterAdded:Connect(function(char)
 			local Humanoid=char:FindFirstChildOfClass'Humanoid'or char:WaitForChild'Humanoid'
 			task.wait(.1)
 			Destroy(Humanoid.RootPart,'ProximityPrompt')
 		end)
-		CII=IsAntiProx:GetPropertyChangedSignal'Value':Connect(function()
-			CI:Disconnect(CII:Disconnect())
-		end)
+		return CI
+	end,
+	function(CI)
+		CI:Disconnect()
 	end
 )
 do
@@ -399,10 +417,6 @@ do
 	CreateIB('Spawn','1670',Vector3.new(-8,10,6),90)
 	CreateIB('Stage','1495',Vector3.new(-85,43,6),-90)
 end
-TeleportMenu.CloseButton.MouseButton1Click:Connect(function()
-	ClickSound()
-	TeleportMenu.Visible=false
-end)
 local BButton=CreateDK(LocalMenu,'B',UDim2.new(.05,0,.45,0),'bypass vip stuff: ',IsBypassLocal,
 	function()
 		Notify('this is local only i meant most stuff are localized')
@@ -416,12 +430,13 @@ local BButton=CreateDK(LocalMenu,'B',UDim2.new(.05,0,.45,0),'bypass vip stuff: '
 			local p=game.Players.LocalPlayer.Character.HumanoidRootPart
 			p.CFrame=CFrame.new(-5900,-51.49,23,-1,0,0,0,1,0,0,0,-1)
 		end)
-		CII=IsBypassLocal:GetPropertyChangedSignal'Value':Connect(function()
-			if Part then
-				Part.CanCollide,Part.CanTouch,Part.CanQuery=true,true,true
-			end
-			CI:Disconnect(CII:Disconnect())
-		end)
+		return{CI,Part}
+	end,
+	function(Table)
+		Destroy(Table[1])
+		if Table[2]then
+			Set(Table[2]){CanCollide=true,CanTouch=true,CanQuery=true}
+		end
 	end
 )
 local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',IsAutoRespawn,
@@ -460,17 +475,13 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 		end
 		CharCheck()
 		CI=LocalPlayer.CharacterAdded:Connect(CharCheck)
-		CII=IsAutoRespawn:GetPropertyChangedSignal'Value':Connect(function()
-			CI:Disconnect(CII:Disconnect())
-			Position=nil
-		end)
+		return{CI,Position}
+	end,
+	function(Table)
+		Destroy(Table[1])
+		Table[2]=nil
 	end
 )
-local CKButton=CreateButton('CK',KnightMenu,'Claim Knight',UDim2.new(.05,0,.35,0))
-local RSButton=CreateButton('RS',KnightMenu,'Request Sword',UDim2.new(.05,0,.45,0))
-local TPButton=CreateButton('TP',WorldMenu,'Teleportations',UDim2.new(.05,0,.75,0))
-local DButton=CreateButton('D',LocalMenu,'DrawGui.lua',UDim2.new(.05,0,.25,0))
-Link(TPButton,TeleportMenu)
 DButton.MouseButton1Click:Connect(function()
 	task.spawn(function()
 		Notify('this only work for swords',4)
@@ -525,7 +536,7 @@ DButton.MouseButton1Click:Connect(function()
 		local Delay=Create'TextBox'{Parent=Gui,Name='delay',Font=Enum.Font.SourceSansSemibold,TextScaled=true,TextWrapped=true,Text='',AnchorPoint=Vector2.new(1,0),Position=UDim2.new(.95,0,.725,0),Size=UDim2.new(.75,0,.075,0),BackgroundColor3=Color3.new(0,0,0),BackgroundTransparency=.7,TextColor3=Color3.new(1,1,1),PlaceholderText='delay here'}
 		local rot=math.rad(-45)
 		local Rotation=Delay:Clone()
-		Rotation.Parent,Rotation.PlaceholderText,Rotation.Position=Delay.Parent,'rotation here',Delay.Position+UDim2.new(0,0,.075,0)
+		Set(Rotation){Parent=Delay.Parent,PlaceholderText='rotation here',Position=Delay.Position+UDim2.new(0,0,.075,0)}
 		Rotation.FocusLost:Connect(function()
 			rot=tonumber(Rotation.Text)or math.rad(-45)
 			Rotation.Text=tostring(rot)
@@ -659,6 +670,10 @@ DButton.MouseButton1Click:Connect(function()
 					end
 					if DII or not Target then return end
 					DII=true
+					--might rework this part later
+					local cout=SWR[table.find(SWR,Target.Instance.Parent)]
+					SWR[table.find(SWR,Target.Instance.Parent)]=SWR[n]
+					SWR[n]=cout
 					n=n-1
 					Set(Target.Instance.Parent){Grip=CFrame.new(0,0,-1.7,0,0,1,1,0,0,0,1,0),Parent=LocalPlayer.Backpack}
 					task.wait(Wait)
@@ -793,22 +808,13 @@ RSButton.MouseButton1Click:Connect(function()RequestSword()if LocalPlayer.Team~=
 local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui',IsShowingDupeMenu,
 	function()
 		--should rework this function later
-		Notify('Do i need to explain these icons? yes? no lol')
+		--Notify('Do i need to explain these icons? yes? no lol')
 		if LocalPlayer.Team~=Knight then Notify('you\'re not knight')end
 		local SideI=CreateButtonOld('DupeButton','Dupe:\noff',UDim2.new(1,-20,.5,-80),Vector2.new(1,0))
 		local Val=Create'BoolValue'{Parent=CoreGui,Name='dupe'}
 		local SideII=CreateIcon('ClearS','rbxassetid://12068313338',UDim2.new(1,-20,.5,-30),Vector2.new(1,0))
 		local SideIII=CreateIcon('BlockM','rbxassetid://12068313585',UDim2.new(1,-20,.5,20),Vector2.new(1,0))
-		local SideIV=CreateButtonOld('Counter','clikme2coutswrd',UDim2.new(1,-20,.5,70),Vector2.new(1,0))
-		do
-			local CI
-			CI=IsShowingDupeMenu:GetPropertyChangedSignal'Value':Connect(function()
-				if not IsShowingDupeMenu.Value then
-					Val.Value=false
-					Val:Destroy(SideI:Destroy(SideII:Destroy(SideIII:Destroy(SideIV:Destroy(CI:Disconnect())))))
-				end
-			end)
-		end
+		local SideIV=CreateButtonOld('Counter','COUNT SWORD',UDim2.new(1,-20,.5,70),Vector2.new(1,0))
 		SideI.MouseButton1Click:Connect(function()
 			Val.Value=not Val.Value
 			if not Val.Value then
@@ -837,7 +843,6 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 		end)
 		local Total=Create'IntValue'{Parent=SideIV,Name='Amount'}
 		local function CheckH(Item,Mode)
-			Total.Value=0
 			if Item:IsA'Tool'and Item.Name=='ClassicSword'then
 				if Mode then
 					Total.Value=Total.Value-1
@@ -850,6 +855,7 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 			SideIV.Text='Items: '..tostring(Total.Value)
 		end)
 		SideIV.MouseButton1Click:Connect(function()
+			Total.Value=0
 			for _,x in next,LocalPlayer.Character:GetChildren()do
 				CheckH(x)
 			end
@@ -864,6 +870,13 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 			end
 			SideI.Text='Dupe:\noff'
 		end)
+		return{Val,SideI,SideII,SideIII,SideIV}
+	end,
+	function(Table)
+		Table[1].Value=false
+		for i=2,5 do
+			Table[i]:Disconnect()
+		end
 	end
 )
 local EBButton=CreateDK(BoothMenu,'Extra Banner',UDim2.new(.05,0,.85,0),'Show Id: ',IsShowingDesc,
@@ -908,7 +921,7 @@ local EBButton=CreateDK(BoothMenu,'Extra Banner',UDim2.new(.05,0,.85,0),'Show Id
 					Text.Text='text should appear here, or it is not important (Ctrl+A copy)'
 				end)
 				IBanner:FindFirstChildWhichIsA'ClickDetector'.MouseClick:Connect(function()	
-					local ID=string.gsub(Icon.Image,'rbxassetid://','')
+					local ID=string.match(Icon.Image,'%d+$')
 					if tonumber(ID)and tonumber(ID)>10 then
 						SetClip(ID)
 						Notify('Copied, ID: '..ID..'.',3,'hi')
@@ -920,13 +933,12 @@ local EBButton=CreateDK(BoothMenu,'Extra Banner',UDim2.new(.05,0,.85,0),'Show Id
 				table.insert(ExtraBanners,TBanner)
 			end
 		end
-		local CI
-		CI=IsShowingDesc:GetPropertyChangedSignal'Value':Connect(function()
-			for _,x in next,ExtraBanners do
-				x:Destroy()
-			end
-			CI:Disconnect()
-		end)
+		return ExtraBanners
+	end,
+	function(ExtraBanners)
+		for _,x in next,ExtraBanners do
+			x:Destroy()
+		end
 	end
 )
 EBButton.Text.Size=UDim2.new(.75,0,1,0)
@@ -1000,38 +1012,32 @@ local DMButton=CreateDK(Frame,'Music',UDim2.new(.05,0,.15,0),'music',IsMusicEnab
 			end
 			playmusic()
 		end
-		IsMusicEnabled:GetPropertyChangedSignal'Value':Connect(function()
-			the_ultimate_disconnector=false
-			Destroy(Folder)		
-			Tag.Text='v.1.436 | LOCAL MODIFIED.'
-		end)
-		playmusic()
+		task.spawn(playmusic())
+		return{the_ultimate_disconnector,Folder,Tag}
+	end,
+	function(Table)
+		Destroy(Table[1])
+		Destroy(Table[2])
+		Table[3].Text='v.1.436 | LOCAL MODIFIED.'
 	end
 )
 local ABButton=CreateDK(BoothMenu,'Anti Barrier',UDim2.new(.05,0,.65,0),'Anti Barrier: ',IsAntiBarrier,
 	function()
-		local function set(a,b)
-			if string.match(a.Name,'^BarrierFor')and a:IsA'BasePart'then
-				if b then
-					Set(a){CanTouch=true,CastShadow=true,BrickColor=BrickColor.new(165,0,3)}
-					return
-				end 
-				Set(a){CanTouch=false,CanQuery=true,CastShadow=false,Transparency=.95,BrickColor=BrickColor.new(200,200,200)}
-			end
-		end
+		
 		for _,x in next,workspace:GetChildren()do
-			set(x)
+			SetBarrier(x)
 		end
 		local CI
 		CI=workspace.ChildAdded:Connect(function(p)
-			set(p)
+			SetBarrier(p)
 		end)
-		IsAntiBarrier:GetPropertyChangedSignal'Value':Connect(function()
-			CI:Disconnect()
-			for _,v in next,workspace:GetChildren()do
-				set(v,'blah blah blah')
-			end
-		end)
+		return CI
+	end,
+	function(CI)
+		Destroy(CI)
+		for _,v in next,workspace:GetChildren()do
+			SetBarrier(v,'blah blah blah')
+		end
 	end
 )
 local ACKButton=CreateDK(KnightMenu,'ACK',UDim2.new(.05,0,.85,0),'Auto Claim Knight: ',IsAutoClaim,
@@ -1066,21 +1072,21 @@ local ACKButton=CreateDK(KnightMenu,'ACK',UDim2.new(.05,0,.85,0),'Auto Claim Kni
 				return
 			end
 			Notify('Missing HumanoidRootPart.',3)
-		else
-			local CI
-			CI=Prox:GetPropertyChangedSignal'Enabled':Connect(function()
-				if not IsAutoClaim.Value then					
-					CI:Disconnect()
-					return
-				end
-				local Check=a(Prox)
-				if Check then
-					CI:Disconnect()
-					KnightMenu.ACK.Value.ImageColor3=Color3.fromRGB(90,90,90)
-					IsAutoClaim.Value=false
-				end
-			end)
+			return
 		end
+		local CI
+		CI=Prox:GetPropertyChangedSignal'Enabled':Connect(function()
+			local Check=a(Prox)
+			if Check then
+				CI:Disconnect()
+				KnightMenu.ACK.Value.ImageColor3=Color3.fromRGB(90,90,90)
+				IsAutoClaim.Value=false
+			end
+		end)
+		return CI
+	end,
+	function(CI)
+		Destroy(CI)
 	end
 )
 CKButton.MouseButton1Click:Connect(function()
