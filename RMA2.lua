@@ -10,7 +10,6 @@ credits:
 		
 
 ]]
-task.wait(2)
 if not game:IsLoaded()then game.Loaded:Wait()end
 if _G.RMA2ENABLED then
 	error'RMA2 is already running!'
