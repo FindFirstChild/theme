@@ -7,10 +7,7 @@ credits:
 		
 	scripting:
 		kevinYMHGmlg#1822 (me)
-		
-
 ]]
-if not game:IsLoaded()then game.Loaded:Wait()end
 if _G.RMA2ENABLED then
 	error'RMA2 is already running!'
 	return
@@ -39,7 +36,7 @@ local Tag,CurrentVersion=MG.VersionTag						,						'v1.1.5.(1)'
 local Heartbeat=RunService.Heartbeat
 local AllBools,Frames={},{}
 --functions
--local SetClip=toclipboard or setclipboard 
+local SetClip=toclipboard or setclipboard 
 local IS=RunService:IsStudio()	
 local function Set(Xnstance)
 	return function(Parameters)
@@ -1113,10 +1110,9 @@ CKButton.MouseButton1Click:Connect(function()
 		a(Prox)
 	end
 end)
-pcall(function()
-	local a=LocalPlayer.PlayerGui.ManagerGui.ServerSettingFrame.KillButton
-	getconnections(a.MouseButton1Click)[1]:Disable()
-	a.MouseButton1Click:Connect(function()
-		Notify('No.',3)
-	end)
+local Manager=LocalPlayer.PlayerGui.ManagerGui.ServerSettingFrame
+getconnections(a.KillButton.MouseButton1Click)[1]:Disable()
+Manager.KillButton.MouseButton1Click:Connect(function()
+	Manager.Visible=false
+	Notify('No.',3)
 end)
