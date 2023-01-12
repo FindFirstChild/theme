@@ -28,6 +28,7 @@ local LMouse=LocalPlayer:GetMouse()
 local CoreGui=game.CoreGui
 local LPG=LocalPlayer.PlayerGui
 local MG=LPG.MainGui
+local Manager=LocalPlayer.PlayerGui.ManagerGui.ServerSettingFrame
 local Knight=Teams.Knight
 local KC,UIT=Enum.KeyCode,Enum.UserInputType
 local ReplicatedStorage=game.ReplicatedStorage
@@ -236,6 +237,11 @@ Link(Locals,LocalMenu)
 Link(Booths,BoothMenu)
 Link(TPButton,TeleportMenu)
 --buttons function
+getconnections(M.KillButton.MouseButton1Click)[1]:Disable()
+local CI_UNKNOWN=Manager.KillButton.MouseButton1Click:Connect(function()
+	Manager.Visible=false
+	Notify('No.',3)
+end)
 GuiDestroy.MouseButton1Click:Connect(function()
 	ClickSound()
 	local CountDown=5
@@ -243,6 +249,8 @@ GuiDestroy.MouseButton1Click:Connect(function()
 	local CI
 	CI=GuiDestroy.MouseButton1Click:Connect(function()
 		_G.RMA2ENABLED=false
+		CI_UNKNOWN:Disconnect()
+		getconnections(M.KillButton.MouseButton1Click)[1]:Enable()
 		for _,x in next,AllBools do
 			task.spawn(function()
 				x.Value=false
@@ -1109,10 +1117,4 @@ CKButton.MouseButton1Click:Connect(function()
 		end
 		a(Prox)
 	end
-end)
-local Manager=LocalPlayer.PlayerGui.ManagerGui.ServerSettingFrame
-getconnections(a.KillButton.MouseButton1Click)[1]:Disable()
-Manager.KillButton.MouseButton1Click:Connect(function()
-	Manager.Visible=false
-	Notify('No.',3)
 end)
