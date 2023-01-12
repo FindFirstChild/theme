@@ -10,6 +10,8 @@ credits:
 		
 
 ]]
+task.wait(2)
+if not game:IsLoaded()then game.Loaded:Wait()end
 if _G.RMA2ENABLED then
 	error'RMA2 is already running!'
 	return
@@ -34,34 +36,33 @@ local Knight=Teams.Knight
 local KC,UIT=Enum.KeyCode,Enum.UserInputType
 local ReplicatedStorage=game.ReplicatedStorage
 local JewellStand=workspace:FindFirstChild'JewelleryStand'
+local Tag,CurrentVersion=MG.VersionTag						,						'v1.1.5.(1)'
 local Heartbeat=RunService.Heartbeat
 local AllBools,Frames={},{}
 --functions
-local SetClip=toclipboard or setclipboard 
+-local SetClip=toclipboard or setclipboard 
 local IS=RunService:IsStudio()	
 local function Set(Xnstance)
 	return function(Parameters)
 		for Parameter,Value in next,Parameters do
 			if type(Parameter)=='number'then
 				Value.Parent=Xnstance
-			else
-				Xnstance[Parameter]=Value
+				continue
 			end
+			Xnstance[Parameter]=Value
 		end
 	end
 end
-pcall(function()
-	Set(MG.VersionTag){TextSize=20,TextXAlignment=Enum.TextXAlignment.Left,Size=UDim2.new(0,360,0,40),Position=UDim2.new(0,40,1,-50),Text='v.1.436 | LOCAL MODIFIED.',TextScaled=false,TextWrapped=false,RichText=true}
-end)
+Set(Tag){TextSize=20,TextXAlignment=Enum.TextXAlignment.Left,Size=UDim2.new(0,360,0,40),Position=UDim2.new(0,40,1,-50),Text='v.1.436 | '..CurrentVersion..' LOCAL MODIFIED.',TextScaled=false,TextWrapped=false,RichText=true}
 local function Create(Type) 	 	 --useful for lazy people
 	local Xnstance=Instance.new(Type)
 	return function(Parameters)
 		for Parameter,Value in next,Parameters do
 			if type(Parameter)=='number'then
 				Value.Parent=Xnstance
-			else
-				Xnstance[Parameter]=Value
+				continue
 			end
+			Xnstance[Parameter]=Value
 		end
 		return Xnstance
 	end
@@ -110,7 +111,7 @@ local function Link(button,frame)
 end
 local function Notify(Message,Duration,Warn)
 	task.spawn(function()
-		if not Warn then warn(Message)end
+		if Warn then warn(Message)end
 		if not Duration then Duration=5 end
 		local NFrame=Create'Frame'{Parent=MG,BackgroundColor3=Color3.fromRGB(34,34,34),Name='NFrame',Position=UDim2.new(.2,0,.05,0),Size=UDim2.new(.6,0,.06,0),Style=Enum.FrameStyle.Custom}
 		local Notif=Create'TextLabel'{Parent=NFrame,AutomaticSize=Enum.AutomaticSize.None,BackgroundColor3=Color3.new(1,1,1),BackgroundTransparency=1,Name='NotificationText',Position=UDim2.new(.05,0,.175,0),Size=UDim2.new(.9,0,.65,0),Font=Enum.Font.SourceSansSemibold,Text=Message,TextColor3=Color3.new(1,1,1),TextScaled=true,TextSize=14}
@@ -390,12 +391,12 @@ do
 		ImageButton.MouseButton1Click:Connect(function()
 			local Character=LocalPlayer.Character
 			if not Character then 
-				Notify('Missing character',3)
+				Notify('Missing character',3,true)
 				return 
 			end
 			local HumanoidRootPart=Character:FindFirstChild'HumanoidRootPart'
 			if not HumanoidRootPart then
-				Notify('Missing HMR',3)
+				Notify('Missing HMR',3,true)
 				return
 			end
 			task.spawn(function()
@@ -422,10 +423,10 @@ local BButton=CreateDK(LocalMenu,'B',UDim2.new(.05,0,.45,0),'bypass vip stuff: '
 		Notify('this is local only i meant most stuff are localized')
 		local CI,CII
 		local Part=workspace:FindFirstChild'GroupAccessPart'
-		if not Part then Notify('Missing \'workspace\'.GroupAccessPart',3)end
+		if not Part then Notify('Missing \'workspace\'.GroupAccessPart',3,true)end
 		Part.CanCollide,Part.CanTouch,Part.CanQuery=false,false,false
 		local Window=workspace['VIP Entrance']:FindFirstChild'Window'
-		if not Window then Notify('Missing \'VIP Entrance\'.Window',3)return end
+		if not Window then Notify('Missing \'VIP Entrance\'.Window',3,true)return end
 		CI=Window.VIPProximityPrompt.Triggered:Connect(function()
 			local p=game.Players.LocalPlayer.Character.HumanoidRootPart
 			p.CFrame=CFrame.new(-5900,-51.49,23,-1,0,0,0,1,0,0,0,-1)
@@ -484,7 +485,7 @@ local ARButton=CreateDK(LocalMenu,'AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 )
 DButton.MouseButton1Click:Connect(function()
 	task.spawn(function()
-		Notify('this only work for swords',4)
+		Notify('this only work for swords, very buggy indeed.',4)
 		local function TooComplex(p)
 			local Mouse=UserInputService:GetMouseLocation()
 			local Unit=CurrentCamera:ScreenPointToRay(Mouse.X,Mouse.Y-36)
@@ -538,11 +539,16 @@ DButton.MouseButton1Click:Connect(function()
 		local Rotation=Delay:Clone()
 		Set(Rotation){Parent=Delay.Parent,PlaceholderText='rotation here',Position=Delay.Position+UDim2.new(0,0,.075,0)}
 		Rotation.FocusLost:Connect(function()
-			rot=tonumber(Rotation.Text)or math.rad(-45)
-			Rotation.Text=tostring(rot)
+			local RotationOutput=tonumber(Rotation.Text)
+			if RotationOutput then
+				rot=math.rad(RotationOutput)
+				return
+			end
+			rot=math.rad(-45)
+			Rotation.Text='-45'
 		end)
 		Delay.FocusLost:Connect(function()
-			Wait=tonumber(Delay.Text)or.065
+			Wait=tonumber(Delay.Text)or.055
 			Delay.Text=tostring(Wait)
 		end)
 		local Arm=Character:FindFirstChild'Right Arm'or Character:FindFirstChild'RightHand'
@@ -718,7 +724,6 @@ DButton.MouseButton1Click:Connect(function()
 				Destroy(Gui)
 				Destroy(Pointer)
 				CV:Disconnect(CIV:Disconnect(CIII:Disconnect(CII:Disconnect())))
-				CollectionService:RemoveTag'theepicfunnyparts'
 				return
 			end
 			Fuel.Text='Swords: '..tostring(n)..'/'..tostring(total)
@@ -886,15 +891,15 @@ local EBButton=CreateDK(BoothMenu,'Extra Banner',UDim2.new(.05,0,.85,0),'Show Id
 			if x.Name=='Booth'and x:IsA'Model'then
 				local Banner=x:FindFirstChild'Banner'
 				if not Banner then
-					Notify('a banner is missing',1)
+					Notify('a banner is missing',1,true)
 				end
 				local Icon=Banner.SurfaceGui.Frame:FindFirstChild'Icon'
 				local Description=Banner.SurfaceGui.Frame:FindFirstChild'Description'
 				if not Icon then
-					Notify('an icon is missing',1)
+					Notify('an icon is missing',1,true)
 				end
 				if not Description then
-					Notify('a description is missing',1)
+					Notify('a description is missing',1,true)
 				end
 				local IBanner=Banner:Clone()
 				Set(IBanner){Parent=Banner.Parent,CanCollide=false,Size=Vector3.new(3.8,2.8,.4),CFrame=Banner.CFrame:ToWorldSpace(CFrame.new(6.2,0,0,1,0,0,0,1,0,0,0,1)),Name='ExtraBanner'}
@@ -924,7 +929,7 @@ local EBButton=CreateDK(BoothMenu,'Extra Banner',UDim2.new(.05,0,.85,0),'Show Id
 					local ID=string.match(Icon.Image,'%d+$')
 					if tonumber(ID)and tonumber(ID)>10 then
 						SetClip(ID)
-						Notify('Copied, ID: '..ID..'.',3,'hi')
+						Notify('Copied, ID: '..ID..'.',3)
 						return
 					end
 					Notify('This booth has no image.')
@@ -942,83 +947,84 @@ local EBButton=CreateDK(BoothMenu,'Extra Banner',UDim2.new(.05,0,.85,0),'Show Id
 	end
 )
 EBButton.Text.Size=UDim2.new(.75,0,1,0)
+local MCI=true
 local DMButton=CreateDK(Frame,'Music',UDim2.new(.05,0,.15,0),'music',IsMusicEnabled,
 	function()
 		do do end do do end end do end do end end
 		--GOD I DONT KNOW HOW TO MAKE TRANSITION PLEASE IGNORE BECAUSE IT'S SPAGHETTI AS HELL
-		task.wait(1)
-		local Tag=MG.VersionTag
-		local the_ultimate_disconnector=true
+		MCI=true
 		local Folder=Create'Folder'{Name='OSTs',Parent=workspace}
-		local TweenValue=Create'NumberValue'{Parent=Folder};
-		local function text(Name)
-			local Trans=tostring(1-TweenValue.Value)
-			Tag.Text='v.1.436 | LOCAL MODIFIED. | <i><b><font color="#66e3e5"><stroke color="#66965d" joins="miter" thickness="1" transparency="'..Trans..'"><u>うみとまもののこどもたち</u>  - <font transparency="'..Trans..'">'..Name..'</font></stroke></font>  ^^</b></i>'
-		end
-		Set(Tag){TextSize=20,TextXAlignment=Enum.TextXAlignment.Left,Size=UDim2.new(0,360,0,40),Position=UDim2.new(0,40,1,-50),TextScaled=false,TextWrapped=false,RichText=true}
-		local CCXXXII
-		local CXXXll=TweenService:Create(TweenValue,TweenInfo.new(1),{Value=1});CXXXll:Play()
-		CXXXll.Completed:Connect(function()CCXXXII:Disconnect()end)
-		CCXXXII=TweenValue:GetPropertyChangedSignal'Value':Connect(function()
-			Tag.Text='v.1.436 | LOCAL MODIFIED. | <i><b><font color="#66e3e5"><stroke color="#66965d" joins="miter" thickness="1" transparency="'..tostring(1-TweenValue.Value)..'"><u>うみとまもののこどもたち</u>  - <font transparency="1">'..'.edley is great'..'</font></stroke></font>  ^^</b></i>'
-		end)
-		CXXXll.Completed:Wait()
-		TweenValue.Value=0
-		local music={
-			--credits to K-san, うみとまもののこどもたち (The Children Of The Sea And The Devil)
-			[1]={['タイトル']=11971802088}, --title
-			[2]={['あるいていこう']=11971804906}, --let's walk!
-			[3]={['はれのひ']=11971810581},--sunny day
-			[4]={['ほんをよむ']=11971808229}, --reading a book
-			[5]={['ちったはなびら']=11971807402}, --flower petals
-			[6]={['かいていどうくつ']=11971806642}, --begin
-		}
-		local ignore=#music
-		for i=1,ignore do
-			for Counter,Id in next,music[i]do
-				local OST=Create'Sound'{Volume=0,SoundId='rbxassetid://'..tostring(Id),Parent=Folder,Name=('うみとまののこどもたち - '..Counter)}
-				music[i][Counter]=OST
-				OST.Loaded:Wait()
+		task.spawn(function()
+			local TweenValue=Create'NumberValue'{Parent=Folder};
+			local function text(Name)
+				local Trans=tostring(1-TweenValue.Value)
+				Tag.Text='v.1.436 | '..CurrentVersion..' LOCAL MODIFIED. | <i><b><font color="#07e8f0"><stroke color="#66965d" joins="miter" thickness="1" transparency="'..Trans..'"><u>うみとまもののこどもたち</u>  - <font transparency="'..Trans..'">'..Name..'</font></stroke></font>  ^^</b></i>'
 			end
-		end
-		local function playmusic()
-			if not the_ultimate_disconnector then return end
+			local CCXXXII
+			local CXXXll=TweenService:Create(TweenValue,TweenInfo.new(1),{Value=1});CXXXll:Play()	
+			CCXXXII=TweenValue:GetPropertyChangedSignal'Value':Connect(function()
+				Tag.Text='v.1.436 | '..CurrentVersion..' LOCAL MODIFIED. | <i><b><font color="#07e8f0"><stroke color="#66965d" joins="miter" thickness="1" transparency="'..tostring(1-TweenValue.Value)..'"><u>うみとまもののこどもたち</u>  - <font transparency="1">'..'.edley is great'..'</font></stroke></font>  ^^</b></i>'
+			end)
+			CXXXll.Completed:Connect(function()CCXXXII:Disconnect()end)
+			CXXXll.Completed:Wait()
+			TweenValue.Value=0
+			local music={
+				--credits to K-san, うみとまもののこどもたち (The Children Of The Sea And The Devil)
+				[1]={['タイトル']=11971802088}, --title
+				[2]={['あるいていこう']=11971804906}, --let's walk!
+				[3]={['はれのひ']=11971810581},--sunny day
+				[4]={['ほんをよむ']=11971808229}, --reading a book
+				[5]={['ちったはなびら']=11971807402}, --flower petals
+				[6]={['かいていどうくつ']=11971806642}, --begin
+			}
+			local ignore=#music
 			for i=1,ignore do
-				for Name,Theme in next,music[i]do
-					Theme:Play()
-					local CI,CII,CIII
-					do
-						local Ret=TweenService:Create(TweenValue,TweenInfo.new(3),{Value=1});Ret:Play()
-						Ret.Completed:Connect(function()CII:Disconnect()end)
-						CII=TweenValue:GetPropertyChangedSignal'Value':Connect(function()
-							Theme.Volume=TweenValue.Value
-							text(Name)
-						end)
-					end
-					CI=RunService.RenderStepped:Connect(function()
-						if not the_ultimate_disconnector then Destroy(CI)Destroy(CII)Destroy(CIII)return end
-						if Theme.TimePosition>=Theme.TimeLength-3 then
-							local Ret=TweenService:Create(TweenValue,TweenInfo.new(3),{Value=0});Ret:Play()
-							Ret.Completed:Connect(function()CIII:Disconnect()end)
-							CIII=TweenValue:GetPropertyChangedSignal'Value':Connect(function()
+				for Counter,Id in next,music[i]do
+					if not Folder then break end
+					local OST=Create'Sound'{Volume=0,SoundId='rbxassetid://'..tostring(Id),Parent=Folder,Name='うみとまののこどもたち - '..Counter}
+					music[i][Counter]=OST
+					OST.Loaded:Wait()
+				end
+			end
+			local function playmusic()
+				if not MCI then return end
+				for i=1,ignore do
+					for Name,Theme in next,music[i]do
+						Theme:Play()
+						local CI,CII,CIII
+						do
+							local Ret=TweenService:Create(TweenValue,TweenInfo.new(3),{Value=1});Ret:Play()
+							CII=TweenValue:GetPropertyChangedSignal'Value':Connect(function()
 								Theme.Volume=TweenValue.Value
 								text(Name)
 							end)
-							CI:Disconnect()
+							Ret.Completed:Connect(function()CII:Disconnect()end)
 						end
-					end)
-					Theme.Ended:Wait()
+						CI=RunService.RenderStepped:Connect(function()
+							if not MCI then Destroy(CI)Destroy(CII)Destroy(CIII)return end
+							if Theme.TimePosition>=Theme.TimeLength-3 then
+								local Ret=TweenService:Create(TweenValue,TweenInfo.new(3),{Value=0});Ret:Play()
+								Ret.Completed:Connect(function()CIII:Disconnect()end)
+								CIII=TweenValue:GetPropertyChangedSignal'Value':Connect(function()
+									Theme.Volume=TweenValue.Value
+									text(Name)
+								end)
+								CI:Disconnect()
+							end
+						end)
+						Theme.Ended:Wait()
+					end
 				end
+				playmusic()
 			end
 			playmusic()
-		end
-		task.spawn(playmusic())
-		return{the_ultimate_disconnector,Folder,Tag}
+		end)
+		return{Folder}
 	end,
 	function(Table)
+		MCI=false
 		Destroy(Table[1])
-		Destroy(Table[2])
-		Table[3].Text='v.1.436 | LOCAL MODIFIED.'
+		Tag.Text='v.1.436 | '..CurrentVersion..' LOCAL MODIFIED.'
 	end
 )
 local ABButton=CreateDK(BoothMenu,'Anti Barrier',UDim2.new(.05,0,.65,0),'Anti Barrier: ',IsAntiBarrier,
@@ -1107,4 +1113,11 @@ CKButton.MouseButton1Click:Connect(function()
 		end
 		a(Prox)
 	end
+end)
+pcall(function()
+	local a=LocalPlayer.PlayerGui.ManagerGui.ServerSettingFrame.KillButton
+	getconnections(a.MouseButton1Click)[1]:Disable()
+	a.MouseButton1Click:Connect(function()
+		Notify('No.',3)
+	end)
 end)
