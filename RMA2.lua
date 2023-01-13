@@ -238,8 +238,8 @@ Link(Booths,BoothMenu)
 Link(TPButton,TeleportMenu)
 --buttons function
 getconnections(M.KillButton.MouseButton1Click)[1]:Disable()
-local CI_UNKNOWN=Manager.KillButton.MouseButton1Click:Connect(function()
-	Manager.Visible=false
+local CI_UNKNOWN=M.KillButton.MouseButton1Click:Connect(function()
+	M.Visible=false
 	Notify('No.',3)
 end)
 GuiDestroy.MouseButton1Click:Connect(function()
