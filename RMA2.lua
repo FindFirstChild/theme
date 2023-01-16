@@ -3,12 +3,14 @@
 credits:
 	ideas:
 		absence#5446
-		cam1494#7363
+		cam1494
+		night
 		
 	scripting:
 		kevinYMHGmlg#1822 (me)
 		
-
+why do you need to obfuscate to prevent from skiddies when, like you have proof of owning it?
+ > this message was to some guy that uses "while wait() do"
 ]]
 if not game:IsLoaded()then game.Loaded:Wait()end
 if _G.RMA2ENABLED then
@@ -28,7 +30,7 @@ local CollectionService=game:GetService'CollectionService'
 local LocalPlayer=Players.LocalPlayer
 local CurrentCamera=workspace.CurrentCamera
 local LMouse=LocalPlayer:GetMouse()
-local CoreGui=LocalPlayer.PlayerGui --game.CoreGui
+local CoreGui=game.CoreGui
 local LPG=LocalPlayer.PlayerGui
 local MG=LPG:FindFirstChild'MainGui'or LPG:WaitForChild'MainGui'
 local M=LPG.ManagerGui.ServerSettingFrame
@@ -74,7 +76,7 @@ local function Create(Type) 	 	 --useful for lazy people
 	end
 end
 local function SetBarrier(a,b)
-	if string.match(a.Name,'^BarrierFor')and a:IsA'BasePart'then
+	if a.Name:match'^BarrierFor'and a:IsA'BasePart'then
 		if b then
 			Set(a){CanTouch=true,CastShadow=true,BrickColor=BrickColor.new(165,0,3)}
 			return
@@ -118,7 +120,7 @@ local function Link(button,frame)
 		frame.Visible=not frame.Visible
 		if frame.Visible then
 			for _,x in next,MG:GetChildren()do
-				if string.match(x.Name,'Frame$')and x:IsA'Frame'and x~=frame then
+				if x.Name:match'Frame$'and x:IsA'Frame'and x~=frame then
 					x.Visible=false
 				end
 			end
@@ -257,7 +259,7 @@ Link(Locals,LocalMenu)
 Link(Booths,BoothMenu)
 Link(TPButton,TeleportMenu)
 --buttons function
-Notify('2 get started, click on the goofy icon thing on the left, oh! dont forget that this script might break if you change even a small detail in game.',5,true)
+Notify('2 get started, click on the goofy icon thing on the left, oh! dont forget that this script might break if you change even a small detail in game.',7,true)
 getconnections(M.KillButton.MouseButton1Click)[1]:Disable()
 local CI_UNKNOWN=M.KillButton.MouseButton1Click:Connect(function()
 	M.Visible=false
@@ -875,68 +877,74 @@ local SGButton=CreateDK(KnightMenu,'Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 		end
 	end
 )
+local function Repos(a,b,c)
+	a.CFrame=b
+	a.Anchored=c
+end
+--[[for anyone saying "omg u can just use getpropertychangedsignal if booth text = clik her to 
+clem dis buth, no crap sherlock, that's a bad practice considering the booth sometimes
+unclaimed but still has image and/or text" in it.]]
 local ACBButton=CreateDK(BoothMenu,'Auto Claim Booth',UDim2.new(.05,0,.45,0),'Auto Claim Booth: ',IsSnipingBooth,
 	function()
 		local HumanoidRootPart=LocalPlayer.Character.HumanoidRootPart
 		local Old,Old2=HumanoidRootPart.CFrame,HumanoidRootPart.CanCollide
+		local function Dep(a)
+			HumanoidRootPart.CFrame=a.CFrame-Vector3.new(0,15,0)
+			HumanoidRootPart.Anchored=true
+		end
 		local ListOfConnections={}
-		--local AlreadyRunning=false i wanna make it pause if there is already one booth with no owner
-		task.spawn(function()
-			for _,x in next,workspace:GetChildren()do
-				if x.Name=='Booth'and x:IsA'Model'then
-					local Banner=x:FindFirstChild'Banner'
-					if not Banner then continue end
-					local ClickDetector=Banner:FindFirstChildWhichIsA'ClickDetector'
-					if not ClickDetector then continue end
-					local Temp=x:GetAttribute'TenantUsername'
-					if Temp==''then 
+		--local AlreadyRunning=false
+		local AlreadyOwnBooth=false
+		for _,x in next,workspace:GetChildren()do
+			if x.Name~='Booth'and not x:IsA'Model'then continue end
+			if AlreadyOwnBooth then break end
+			task.spawn(function()
+				local Banner=x:FindFirstChild'Banner'
+				if not Banner then return end
+				local ClickDetector=Banner:FindFirstChildWhichIsA'ClickDetector'
+				if not ClickDetector then return end
+				local Temp=x:GetAttribute'TenantUsername'
+				local CI
+				if Temp==''then 
+					repeat
+						if not IsSnipingBooth.Value or AlreadyOwnBooth then break end
+						Dep(Banner)
+						task.wait(.1)
+						fireclickdetector(ClickDetector)
+					until x:GetAttribute'TenantUsername'~=''or not IsSnipingBooth.Value
+					if x:GetAttribute'TenantUsername'==LocalPlayer.Name then
+						Repos(HumanoidRootPart,Old,Old2)
+						return
+					end
+					CI=x:GetAttributeChangedSignal'TenantUsername':Connect(function()
+						local Temp=x:GetAttribute'TenantUsername'
+						if Temp~=''then return end
 						repeat
-							if not IsSnipingBooth.Value then break end --smal detail check lol
-							HumanoidRootPart.Velocity=Vector3.new(0,16,0)
-							HumanoidRootPart.CFrame=Banner.CFrame-Vector3.new(0,15,0)
-							HumanoidRootPart.CanCollide=false
 							task.wait(.1)
 							fireclickdetector(ClickDetector)
 						until x:GetAttribute'TenantUsername'~=''or not IsSnipingBooth.Value
 						if x:GetAttribute'TenantUsername'==LocalPlayer.Name then
-							HumanoidRootPart.CanCollide=Old2
-							HumanoidRootPart.CFrame=Old
-							break
+							CI:Disconnect()
 						end
-						local CI
-						CI=x:GetAttributeChangedSignal'TenantUsername':Connect(function()
-							-- there's no way it will have an owner in matter of 0.000000000001 second but whatever
-							local Temp=x:GetAttribute'TenantUsername'
-							if Temp~=''then return end
-							repeat
-								HumanoidRootPart.Velocity=Vector3.new(0,16,0)
-								HumanoidRootPart.CFrame=Banner.CFrame-Vector3.new(0,15,0)
-								HumanoidRootPart.CanCollide=false
-								task.wait(.1)
-								fireclickdetector(ClickDetector)
-							until x:GetAttribute'TenantUsername'~=''or not IsSnipingBooth.Value
-							if x:GetAttribute'TenantUsername'==LocalPlayer.Name then
-								CI:Disconnect()
-							end
-							HumanoidRootPart.CanCollide=Old2
-							HumanoidRootPart.CFrame=Old
-						end)
-						table.insert(ListOfConnections,CI)
-					end
-					
+						Repos(HumanoidRootPart,Old,Old2)
+					end)
+					table.insert(ListOfConnections,CI)
+				elseif Temp==LocalPlayer.Name then
+					AlreadyOwnBooth=true
+					Destroy(CI)
+					Repos(HumanoidRootPart,Old,Old2)
 				end
-			end
-			
-		end)
-		return{ListOfConnections,Old}
+			end)
+		end
+		return{ListOfConnections,Old,Old2}
 	end,
 	function(Table)
 		for _,x in next,Table[1]do
 			x:Disconnect()
 		end
-		local HumanoidRootPart=LocalPlayer.Character.HumanoidRootPart
+		local HumanoidRootPart=LocalPlayer.Character:FindFirstChild'HumanoidRootPart'
 		if HumanoidRootPart then
-			HumanoidRootPart.CFrame=Table[2]
+			Repos(HumanoidRootPart,Table[2],Table[3])
 		end
 	end
 )
@@ -957,7 +965,7 @@ local EBButton=CreateDK(BoothMenu,'Extra Banner',UDim2.new(.05,0,.85,0),'extra d
 				Notify('a description is missing',1,true)
 			end
 			local IBanner=Banner:Clone()
-			Set(IBanner){Parent=Banner.Parent,CanCollide=false,Size=Vector3.new(3.8,2.8,.4),CFrame=Banner.CFrame:ToWorldSpace(CFrame.new(6.2,0,0,1,0,0,0,1,0,0,0,1)),Name='ExtraBanner'}
+			Set(IBanner){Parent=Banner.Parent,CanCollide=false,Size=Vector3.new(3.8,2.8,.4),CFrame=Banner.CFrame:ToWorldSpace(CFrame.new(6.2,0,0,1,0,0,0,1,0,0,0,1)),Name='IBanner'}
 			local Img=IBanner.SurfaceGui.Frame.Description
 			for _,v in next,Img.Parent:GetChildren()do
 				if v~=Img then
@@ -966,42 +974,47 @@ local EBButton=CreateDK(BoothMenu,'Extra Banner',UDim2.new(.05,0,.85,0),'extra d
 			end
 			local TBanner=IBanner:Clone()
 			local OBanner=TBanner:Clone()
-			Set(OBanner){Parent=Banner.Parent,Size=Vector3.new(8.6,2.8,.4),CFrame=Banner.CFrame:ToWorldSpace(CFrame.new(0,2.8,0,1,0,0,0,1,0,0,0,1))}
-			Set(TBanner){Parent=Banner.Parent,Size=Vector3.new(3.8,1.05,.4),CFrame=Banner.CFrame:ToWorldSpace(CFrame.new(6.2,-1.925,0,1,0,0,0,1,0,0,0,1))}
+			Destroy(OBanner,'ClickDetector')
+			local ODesc=OBanner.SurfaceGui.Frame.Description
+			Set(ODesc){Size=UDim2.new(1,0,1,0),Position=UDim2.new(0,0,0,0)}
+			Set(OBanner){Parent=Banner.Parent,Size=Vector3.new(8.6,1.8,.4),Name='OBanner',CFrame=Banner.CFrame:ToWorldSpace(CFrame.new(0,1.8,0,1,0,0,0,1,0,0,0,1))}
+			Set(TBanner){Parent=Banner.Parent,Size=Vector3.new(3.8,1.05,.4),Name='TBanner',CFrame=Banner.CFrame:ToWorldSpace(CFrame.new(6.2,-1.925,0,1,0,0,0,1,0,0,0,1))}
 			TBanner.SurfaceGui.Frame.Description:Destroy()
 			local Text=Create'TextBox'{Parent=TBanner.SurfaceGui.Frame,BackgroundTransparency=1,Size=UDim2.new(1,0,1,0),Font=Enum.Font.SourceSansBold,TextColor3=Color3.new(1,1,1),PlaceholderText='text should appear here (Ctrl+A copy)',TextScaled=true,TextWrapped=true,Name='Extra',Text=Description.Text,TextEditable=false,ClearTextOnFocus=false}
-			Set(Img){RichText=true,Text='roblox.com/library/'..string.match(Icon.Image,'%d+$'),AnchorPoint=Vector2.new(0,.5),Position=UDim2.new(0,0,.5,0),Size=UDim2.new(1,0,.5,0)}
+			Set(Img){RichText=true,Text='roblox.com/library/'..Icon.Image:match'%d+$',AnchorPoint=Vector2.new(0,.5),Position=UDim2.new(0,0,.5,0),Size=UDim2.new(1,0,.5,0)}
 			Icon:GetPropertyChangedSignal'Image':Connect(function()
-				Img.Text='roblox.com/library/'..string.match(Icon.Image,'%d+$')
+				Img.Text='roblox.com/library/'..Icon.Image:match'%d+$'
 			end)
 			local Temp=x:GetAttribute'TenantUsername'
-			OBanner.SurfaceGui.Frame.Description.Text=Temp
+			ODesc.Text=Temp
 			if Temp==''then 
-				OBanner.SurfaceGui.Frame.Description.Text='No one'
+				ODesc.Text='No one'
 			end
 			local CI=x:GetAttributeChangedSignal'TenantUsername':Connect(function()
 				local String=x:GetAttribute'TenantUsername'
 				if String==''then 
-					OBanner.SurfaceGui.Frame.Description.Text='No one'
+					ODesc.Text='No one'
 					return
 				end
-				OBanner.SurfaceGui.Frame.Description.Text=String
+				ODesc.Text=String
 			end)
-			Description:GetPropertyChangedSignal'Text':Connect(function()
+			local CII=Description:GetPropertyChangedSignal'Text':Connect(function()
 				local T=Description.Text
-				if T~='Click here to rent this booth'and not string.match(T,'^This booth is claimed by')then
+				if T~='Click here to rent this booth'and not T:match'^This booth is claimed by'then
 					Text.Text=T
 					return
 				end
 				Text.Text='text should appear here, or it contains bs (Ctrl+A copy)'
 			end)
-			local CII=Banner.ClickDetector:GetPropertyChangedSignal'MaxActivationDistance':Connect(function()
-				IBanner.ClickDetector.MaxActivationDistance=Banner.ClickDetector.MaxActivationDistance
-				TBanner.ClickDetector.MaxActivationDistance=Banner.ClickDetector.MaxActivationDistance
+			local CD=Banner.ClickDetector
+			local CIII=CD:GetPropertyChangedSignal'MaxActivationDistance':Connect(function()
+				local MAD=CD.MaxActivationDistance
+				IBanner.ClickDetector.MaxActivationDistance=MAD
+				TBanner.ClickDetector.MaxActivationDistance=MAD
 				--i think this is a little bit too long
 			end)
 			IBanner.ClickDetector.MouseClick:Connect(function()	
-				local ID=string.match(Icon.Image,'%d+$')
+				local ID=Icon.Image:match'%d+$'
 				if tonumber(ID)and tonumber(ID)>10 then
 					SetClip(ID)
 					Notify('Copied, ID: '..ID..'.',3)
@@ -1014,6 +1027,7 @@ local EBButton=CreateDK(BoothMenu,'Extra Banner',UDim2.new(.05,0,.85,0),'extra d
 			table.insert(ExtraBanners,OBanner)
 			table.insert(ListOfConnections,CI)
 			table.insert(ListOfConnections,CII)
+			table.insert(ListOfConnections,CIII)
 		end
 		return{ListOfConnections,ExtraBanners}
 	end,
@@ -1033,7 +1047,7 @@ local DMButton=CreateDK(Frame,'Music',UDim2.new(.05,0,.15,0),'music',IsMusicEnab
 		do do end do do end end do end do end end
 		Notify('function discontinued because uhh yeah roblox audio update')
 		return
-		--GOD I DONT KNOW HOW TO MAKE TRANSITION PLEASE IGNORE BECAUSE IT'S SPAGHETTI AS HELL			
+		--GOD I DONT KNOW HOW TO MAKE TRANSITION PLEASE IGNORE BECAUSE IT'S SPAGHETTI AS HELL
 		--[[MCI=true
 		local Folder=Create'Folder'{Name='OSTs',Parent=workspace}
 		task.spawn(function()
@@ -1111,7 +1125,6 @@ local DMButton=CreateDK(Frame,'Music',UDim2.new(.05,0,.15,0),'music',IsMusicEnab
 )
 local ABButton=CreateDK(BoothMenu,'Anti Barrier',UDim2.new(.05,0,.65,0),'Anti Barrier: ',IsAntiBarrier,
 	function()
-		
 		for _,x in next,workspace:GetChildren()do
 			SetBarrier(x)
 		end
