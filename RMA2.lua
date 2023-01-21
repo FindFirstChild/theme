@@ -334,7 +334,6 @@ do
 	local function CreateTB(Player)
 		local Xame=Player.Name
 		local dn=Player.DisplayName
-		PlayersTable[Xame]=dn
 		if dn==''then dn=Xame end
 		local TextButton=Create'TextButton'{Parent=PlayerSelectionFrame,Name=Xame,Size=UDim2.new(1,-10,0,40),BackgroundColor3=Color3.fromRGB(163,162,165),BackgroundTransparency=.9,TextColor3=Color3.new(1,1,1),TextScaled=true,Text=dn..' (@'..Xame..')'}
 		TextButton.MouseButton1Click:Connect(function()
@@ -365,8 +364,7 @@ do
 		CreateTB(Player)
 	end)
 	PlayerRemoving.Event:Connect(function(Player)
-		local Name=Player.Name
-		Destroy(PlayerSelectionFrame,Name)
+		Destroy(PlayerSelectionFrame,Player.Name)
 	end)
 	local function CreateIB(Xame,Id,Position,y)
 		local ImageButton=Create'ImageButton'{Parent=PlaceSelectionFrame,Name=Xame,BorderSizePixel=0,Image='rbxassetid://1183324'..Id}
