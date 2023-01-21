@@ -51,7 +51,7 @@ local M=LPG.ManagerGui.ServerSettingFrame
 local Knight=Teams.Knight
 local KC,UIT=Enum.KeyCode,Enum.UserInputType
 local JewellStand=workspace:FindFirstChild'JewelleryStand'
-local Tag,CurrentVersion=MG.VersionTag						,						'v1.1.6'
+local Tag,CurrentVersion=MG.VersionTag						,						'v1.1.8'
 local Heartbeat=RunService.Heartbeat
 local AllBools,Frames={},{}
 local TableBooth={}
@@ -176,7 +176,7 @@ end
 --bools 
 local IsAutoClaim,IsAntiProx,IsShowingDupeMenu,IsShowingDesc=CreateBool'IACK',CreateBool'IAP',CreateBool'ISDM',CreateBool'ISD'
 local IsAutoRespawn,IsAntiBarrier,IsMusicEnabled,IsBypassLocal=CreateBool'IAR',CreateBool'IAB',CreateBool'IME',CreateBool'IBL'
-local IsSnipingBooth=CreateBool'ISB'
+local IsSnipingBooth,IsWhitelisting=CreateBool'ISB',CreateBool'IW'
 --guis
 local Frame=Main.CreateFrame('Custom','hi')
 Frame.CreateSub('credits:\nideas:\ncryniz#5446\ncam1494#7363\nscript:\nkevinYMHGmlg#1822',UDim2.new(.6,0,.9,0),Vector2.new(0,.5),UDim2.new(1.05,0,.5,0),.9)
@@ -192,7 +192,7 @@ local WorldReturn=WorldMenu.CreateButton('R','Return',UDim2.new(.05,0,.85,0))
 local KnightMenu=Main.CreateFrame('Knight','knight panel')
 local KnightReturn=KnightMenu.CreateButton('R','Return',UDim2.new(.05,0,.55,0))
 local BoothMenu=Main.CreateFrame('Booth','game.service(\'WorkSpace\',game)[\'FilteringEnabled\']=not not Instance.new\'BoolValue\'.Value')
-local Snipings=BoothMenu.CreateButton('Snipe','Auto Claim Booth..',UDim2.new(.05,0,.45,0))
+local SnipeMenu=BoothMenu.CreateButton('Snipe','Auto Claim Booth..',UDim2.new(.05,0,.45,0))
 local SnipeBooth=Main.CreateFrame('AutoSnipe','hiyah')
 local BoothReturn=BoothMenu.CreateButton('R','Return',UDim2.new(.05,0,.35,0))
 local LocalMenu=Main.CreateFrame('Local','workspace.FilteringEnabled=false')
@@ -213,6 +213,7 @@ KnightReturn:BindTo(Frame)
 WorldReturn:BindTo(Frame)
 LocalReturn:BindTo(Frame)
 BoothReturn:BindTo(Frame)
+SnipeMenu:BindTo(SnipeBooth)
 WorldButton:BindTo(WorldMenu)
 KnightButton:BindTo(KnightMenu)
 LocalButton:BindTo(LocalMenu)
@@ -250,9 +251,8 @@ GuiDestroy.OnClick(function()
 				x:Destroy()
 			end
 		end
-		local t={'BlockM','DupeButton','Counter','ClearS'}
 		for _,x in next,MG:GetChildren()do
-			if table.find(t,x.Name)then
+			if table.find({'BlockM','DupeButton','Counter','ClearS'},x.Name)then
 				x:Destroy()
 			end
 		end
@@ -834,13 +834,71 @@ local function Repos(a,b,c)
 	a.CFrame=b
 	a.CanCollide=c
 end
+local Table={}
+local SelectButtons={}
+do
+	local SOsub=SnipeBooth.CreateSub('sorry it ran out of budget',UDim2.new(.9,0,.075,0),Vector2.new(0,0),UDim2.new(-.303,0,-.11,0))
+	local SOi=SnipeBooth.CreateSub('Ask Me Anything Booths',UDim2.new(.5,0,.075,0),Vector2.new(.5,0),UDim2.new(.5,0,.15,0),.5)
+	local SOii=SnipeBooth.CreateSub('Rate My Avatar Booths',UDim2.new(.5,0,.075,0),Vector2.new(.5,0),UDim2.new(.5,0,.3,0),.5)
+	local SOiii=SnipeBooth.CreateSub('Guessing Booths',UDim2.new(.5,0,.075,0),Vector2.new(.5,0),UDim2.new(.5,0,.45,0),.5)
+	for x,y in next,Booths do
+		Table[x]=y
+	end
+	for m,x in next,{SOi,SOii,SOiii}do
+		for i=1,6 do
+			local Button=Create'TextButton'{BackgroundColor3=Color3.fromRGB(90,90,90),Position=UDim2.new((i*.3)-.65,0,1,0),Name='hi',Text='P'..tostring(i),Size=UDim2.new(.2,0,1,0),Parent=x}
+			local VFTO=false
+			local ID=(m-1)*6+i
+			local Temp=Table[ID]
+			table.insert(SelectButtons,Button)
+			Button.MouseButton1Click:Connect(function()
+				VFTO=not VFTO
+				if VFTO then
+					Table[ID]=nil
+					if IsWhitelisting.Value then
+						Button.BackgroundColor3=Color3.fromRGB(90,90,90)
+						return
+					end
+					Button.BackgroundColor3=Color3.fromRGB(178,235,53)
+					return
+				end
+				Table[ID]=Temp
+				if IsWhitelisting.Value then
+					Button.BackgroundColor3=Color3.fromRGB(178,235,53)
+					return
+				end
+				Button.BackgroundColor3=Color3.fromRGB(90,90,90)
+			end)
+		end
+	end
+end
 --[[
 for anyone saying "omg u can just use getpropertychangedsignal if booth text = clik her to 
 clem dis buth, no crap sherlock that's a bad practice considering the booth sometimes
 unclaimed but still has image and/or text" in it
 if you use infinite loops i will kill you
 ]]
-local ACBButton=SnipeBooth.CreateDK('Auto Claim Booth',UDim2.new(.05,0,.45,0),'Auto Claim Booth: ',IsSnipingBooth,
+local ACBSButton=SnipeBooth.CreateDK('BLWL',UDim2.new(.05,0,.7,0),'Whitelist mode: ',IsWhitelisting,
+	function()
+		for _,x in next,SelectButtons do
+			if x.BackgroundColor3==Color3.fromRGB(90,90,90)then
+				x.BackgroundColor3=Color3.fromRGB(178,235,53)
+				continue
+			end
+			x.BackgroundColor3=Color3.fromRGB(90,90,90)
+		end
+	end,
+	function()
+		for _,x in next,SelectButtons do
+			if x.BackgroundColor3==Color3.fromRGB(178,235,53)then
+				x.BackgroundColor3=Color3.fromRGB(90,90,90)
+				continue
+			end
+			x.BackgroundColor3=Color3.fromRGB(178,235,53)
+		end
+	end
+)
+local ACBButton=SnipeBooth.CreateDK('AutoClaimBooth',UDim2.new(.05,0,.085,0),'Enable: ',IsSnipingBooth,
 	function()
 		local HumanoidRootPart=LocalPlayer.Character.HumanoidRootPart
 		local Old,Old2=HumanoidRootPart.CFrame,HumanoidRootPart.CanCollide
@@ -850,11 +908,13 @@ local ACBButton=SnipeBooth.CreateDK('Auto Claim Booth',UDim2.new(.05,0,.45,0),'A
 			HumanoidRootPart.AssemblyLinearVelocity=Vector3.new(0,25,0)
 		end
 		local ListOfConnections={}
-		--local AlreadyRunning=false
+		local AlreadyRunning=false
 		local AlreadyOwnBooth=false
 		for _,x in next,workspace:GetChildren()do
 			if x.Name~='Booth'and not x:IsA'Model'then continue end
-			if AlreadyOwnBooth then break end
+			if(table.find(Booths,x)~=table.find(Table,x)and IsWhitelisting)or(table.find(Booths,x)==table.find(Table,x)and not IsWhitelisting)then 
+				continue end
+			if AlreadyOwnBooth or AlreadyRunning then break end
 			task.spawn(function()
 				local Banner=x:FindFirstChild'Banner'
 				if not Banner then return end
@@ -863,6 +923,7 @@ local ACBButton=SnipeBooth.CreateDK('Auto Claim Booth',UDim2.new(.05,0,.45,0),'A
 				local Temp=x:GetAttribute'TenantUsername'
 				local CI
 				if Temp==''then 
+					AlreadyRunning=true
 					repeat
 						if not IsSnipingBooth.Value or AlreadyOwnBooth then break end
 						Dep(Banner)
