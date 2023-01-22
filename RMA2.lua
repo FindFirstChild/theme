@@ -17,7 +17,7 @@ if _G.RMA2ENABLED then
 	return
 end
 _G.RMA2ENABLED=true
-local Main=loadstring(game:HttpGet('https://raw.githubusercontent.com/kevinYMHGmlg/theme/main/LibraryBeta'))()
+local Main=require(game.ReplicatedStorage.RMA) --local Main=loadstring(game:HttpGet('https://raw.githubusercontent.com/kevinYMHGmlg/theme/main/LibraryBeta'))()
 -- services
 local Players=game:GetService'Players'
 local UserInputService=game:GetService'UserInputService'
@@ -44,14 +44,14 @@ local Create=Main.Create
 local LocalPlayer=Players.LocalPlayer
 local CurrentCamera=workspace.CurrentCamera
 local LMouse=LocalPlayer:GetMouse()
-local CoreGui=game.CoreGui
+local CoreGui=LocalPlayer.PlayerGui --game.CoreGui
 local LPG=LocalPlayer.PlayerGui
 local MG=LPG:FindFirstChild'MainGui'or LPG:WaitForChild'MainGui'
 local M=LPG.ManagerGui.ServerSettingFrame
 local Knight=Teams.Knight
 local KC,UIT=Enum.KeyCode,Enum.UserInputType
 local JewellStand=workspace:FindFirstChild'JewelleryStand'
-local Tag,CurrentVersion=MG.VersionTag						,						'v1.1.9'
+local Tag,CurrentVersion=MG.VersionTag						,						'v1.1.6'
 local Heartbeat=RunService.Heartbeat
 local AllBools,Frames={},{}
 local TableBooth={}
@@ -88,8 +88,19 @@ local BII=Players.PlayerRemoving:Connect(function(Player)
 	PlayerRemoving:Fire(Player)
 end)
 --functions
-local SetClip=toclipboard or setclipboard 
+local function SetClip(thing)
+	print('Copied '..thing)
+end									 --local SetClip=toclipboard or setclipboard 
 local IS=RunService:IsStudio()	
+local function getconnections(thing)
+	print('uh, yeah')
+end									 --remove after release
+local function fireproximityprompt(thing)
+	print('ProxFired '..tostring(thing))
+end								 	 --remove after release
+local function fireclickdetector(thing)
+	print('ClickFired '..tostring(thing))
+end 							 	 --remove after release
 local function SetBarrier(a,b)
 	if a.Name:match'^BarrierFor'and a:IsA'BasePart'then
 		if b then
@@ -220,7 +231,7 @@ BoothButton:BindTo(BoothMenu)
 Link(TPButton.Gui,TeleportMenu)
 --//////////////////      CtC Stage 1B Theme: Extend Ash ~ Hourai Victim      //////////////////--
 Notify('2 get started, click on the goofy icon thing on the left, oh! dont forget that this script might break if you change even a small detail in game.',6,true)
-getconnections(M.KillButton.MouseButton1Click)[1]:Disable()
+--getconnections(M.KillButton.MouseButton1Click)[1]:Disable()
 Set(Tag){TextSize=20,TextXAlignment=Enum.TextXAlignment.Left,Size=UDim2.new(0,360,0,40),Position=UDim2.new(0,40,1,-50),Text='v.1.436 | '..CurrentVersion..' LOCAL MODIFIED.',TextScaled=false,TextWrapped=false,RichText=true}
 local CI_UNKNOWN=M.KillButton.MouseButton1Click:Connect(function()
 	M.Visible=false
@@ -331,7 +342,6 @@ do
 	local function CreateTB(Player)
 		local Xame=Player.Name
 		local dn=Player.DisplayName
-		PlayersTable[Xame]=dn
 		if dn==''then dn=Xame end
 		local TextButton=Create'TextButton'{Parent=PlayerSelectionFrame,Name=Xame,Size=UDim2.new(1,-10,0,40),BackgroundColor3=Color3.fromRGB(163,162,165),BackgroundTransparency=.9,TextColor3=Color3.new(1,1,1),TextScaled=true,Text=dn..' (@'..Xame..')'}
 		TextButton.MouseButton1Click:Connect(function()
