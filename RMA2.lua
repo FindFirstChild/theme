@@ -44,14 +44,14 @@ local Create=Main.Create
 local LocalPlayer=Players.LocalPlayer
 local CurrentCamera=workspace.CurrentCamera
 local LMouse=LocalPlayer:GetMouse()
-local CoreGui=LocalPlayer.PlayerGui --game.CoreGui
+local CoreGui=game.CoreGui
 local LPG=LocalPlayer.PlayerGui
 local MG=LPG:FindFirstChild'MainGui'or LPG:WaitForChild'MainGui'
 local M=LPG.ManagerGui.ServerSettingFrame
 local Knight=Teams.Knight
 local KC,UIT=Enum.KeyCode,Enum.UserInputType
 local JewellStand=workspace:FindFirstChild'JewelleryStand'
-local Tag,CurrentVersion=MG.VersionTag						,						'v1.1.9(3)'
+local Tag,CurrentVersion=MG.VersionTag						,						'v1.2.0)'
 local Heartbeat=RunService.Heartbeat
 local AllBools,Frames={},{}
 local TableBooth={}
@@ -156,21 +156,28 @@ local function a(p)
 	return true
 end
 local function Notify(Message,Duration,Warn)
-    task.spawn(function()
-		if Warn then warn(Message)end
-		if not Duration then Duration=5 end
-		local NFrame=Create'Frame'{Parent=MG,BackgroundColor3=Color3.fromRGB(34,34,34),Name='NFrame',Position=UDim2.new(.2,0,.05,0),Size=UDim2.new(.6,0,.06,0),Style=Enum.FrameStyle.Custom}
-		local Notif=Create'TextLabel'{Parent=NFrame,AutomaticSize=Enum.AutomaticSize.None,BackgroundColor3=Color3.new(1,1,1),BackgroundTransparency=1,Name='NotificationText',Position=UDim2.new(.05,0,.175,0),Size=UDim2.new(.9,0,.65,0),Font=Enum.Font.SourceSansSemibold,Text=Message,TextColor3=Color3.new(1,1,1),TextScaled=true,TextSize=14}
-		local UISC=Create'UISizeConstraint'{Parent=Notif.Parent}
-		local UIC=Create'UICorner'{Parent=Notif.Parent}
-		local NSound=MG['Main Gui Core']:FindFirstChild'NotificationSound'
-		if NSound then
-			NSound:Play()
-			NFrame:Destroy(task.wait(Duration-NSound.TimePosition))
-			return
+	if Warn then warn(Message)end
+	if not Duration then Duration=5 end
+	local Yheight=.05
+	local NFrame=Create'Frame'{Parent=MG,BackgroundColor3=Color3.fromRGB(34,34,34),Name='NotificationFrame',Position=UDim2.new(.2,0,Yheight,0),Size=UDim2.new(.6,0,.06,0),Style=Enum.FrameStyle.Custom}
+	local Notif=Create'TextLabel'{Parent=NFrame,AutomaticSize=Enum.AutomaticSize.None,BackgroundColor3=Color3.new(1,1,1),BackgroundTransparency=1,Name='NotificationText',Position=UDim2.new(.05,0,.175,0),Size=UDim2.new(.9,0,.65,0),Font=Enum.Font.SourceSansSemibold,Text=Message,TextColor3=Color3.new(1,1,1),TextScaled=true,TextSize=14}
+	local UISC=Create'UISizeConstraint'{Parent=Notif.Parent}
+	local UIC=Create'UICorner'{Parent=Notif.Parent}
+	local NSound=MG['Main Gui Core']:FindFirstChild'NotificationSound'
+	for _,x in next,MG:GetChildren()do
+		if x~=NFrame and x:IsA'Frame'and x.Name=='NotificationFrame'and x.Visible then
+			Yheight=Yheight+.07
+			NFrame.Position=UDim2.new(.2,0,Yheight,0)
+			x.Destroying:Once(function()
+				Yheight=Yheight-.07
+				if not NFrame then return end
+				NFrame.Position=UDim2.new(.2,0,Yheight,0)
+			end)
 		end
-		warn'Notif Missing, creating a new one..'
-		local NewNSound=Create'Sound'{SoundId='rbxassetid://4590662766',Volume=.5,Parent=MG['Main Gui Core']}
+	end
+	task.spawn(function()
+		NSound:Play()
+		NFrame:Destroy(task.wait(Duration-NSound.TimePosition))
 	end)
 end
 --bools 
@@ -193,7 +200,6 @@ local KnightMenu=Main.CreateFrame('Knight','knight panel')
 local KnightReturn=KnightMenu.CreateButton('R','Return',UDim2.new(.05,0,.55,0))
 local BoothMenu=Main.CreateFrame('Booth','game.service(\'WorkSpace\',game)[\'FilteringEnabled\']=not not Instance.new\'BoolValue\'.Value')
 local SnipeMenu=BoothMenu.CreateButton('Snipe','Auto Claim Booth..',UDim2.new(.05,0,.45,0))
-local Snipings=BoothMenu.CreateButton('Snipe','Auto Claim Booth..',UDim2.new(.05,0,.45,0))
 local SnipeBooth=Main.CreateFrame('AutoSnipe','hiyah')
 local BoothReturn=BoothMenu.CreateButton('R','Return',UDim2.new(.05,0,.35,0))
 local LocalMenu=Main.CreateFrame('Local','workspace.FilteringEnabled=false')
@@ -231,13 +237,13 @@ end)
 GuiDestroy.OnClick(function()
 	ClickSound()
 	local CountDown=5
-	GuiDestroy.Text='o rlly? ('..tostring(CountDown)..')'
-	local CI=GuiDestroy.OnClick(function()
+	GuiDestroy.Gui.Text='o rlly? ('..tostring(CountDown)..')'
+	GuiDestroy.OnClick(function()
 		_G.RMA2ENABLED=false
 		CI_UNKNOWN:Disconnect()
 		PlayerAdded:Destroy(PlayerRemoving:Destroy())
 		BI:Disconnect(BII:Disconnect())
-		getconnections(M.KillButton.MouseButton1Click)[1]:Enable()
+		--getconnections(M.KillButton.MouseButton1Click)[1]:Enable()
 		for _,x in next,AllBools do
 			task.spawn(function()
 				x.Value=false
@@ -245,24 +251,21 @@ GuiDestroy.OnClick(function()
 				x:Destroy()
 			end)
 		end
-		Main:Destroy()
+		MainIcon.Gui:Destroy()
 		for _,x in next,Frames do
-			if x then
-				x:Destroy()
-			end
+			x:Destroy()
 		end
 		for _,x in next,MG:GetChildren()do
-if table.find({'BlockM','DupeButton','Counter','ClearS'},x.Name)then
+			if table.find({'BlockM','DupeButton','Counter','ClearS'},x.Name)then
 				x:Destroy()
 			end
 		end
-	end)
-	for i=CountDown-1,0,-1 do
+	end,true)
+	for i=CountDown,0,-1 do
 		CountDown,GuiDestroy.Text=i,'are you sure? ('..tostring(CountDown)..')'
 		task.wait(1)
 	end
 	GuiDestroy.Text='Disconnect Gui'
-	CI:Disconnect()
 end)
 TeleportMenu.CloseButton.MouseButton1Click:Connect(function()
 	ClickSound()
@@ -430,7 +433,7 @@ local ARButton=LocalMenu.CreateDK('AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 			if not Character then return end
 			local Humanoid=Character:WaitForChild'Humanoid'or Character:FindFirstChildOfClass'Humanoid'
 			local Root=Character:WaitForChild'HumanoidRootPart'or Character:FindFirstChild'HumanoidRootPart'
-			if not Humanoid or not Root then print('return')return end			
+			if not Humanoid or not Root then return end			
 			if Position~=nil then
 				Root.CFrame=Position
 				Position=nil
@@ -446,7 +449,7 @@ local ARButton=LocalMenu.CreateDK('AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 				if Root and Root.Position.Y>Height then
 					Position=Root.CFrame
 				end
-				task.wait(Delay)
+				--task.wait(Delay)
 				ReplicatedStorage.RequestRespawn:FireServer()
 			end
 			Destroying=Character.ChildRemoved:Connect(function(Part)
@@ -469,17 +472,31 @@ local ARButton=LocalMenu.CreateDK('AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 	end
 )
 DButton.OnClick(function()
-	Notify('this only work for swords, very buggy indeed.',4)
+	task.wait(Notify('this only work for swords, very buggy indeed.',4))
 	local function TooComplex(p)
 		local Mouse=UserInputService:GetMouseLocation()
 		local Unit=CurrentCamera:ScreenPointToRay(Mouse.X,Mouse.Y-36)
 		return workspace:Raycast(Unit.Origin,Unit.Direction*256,p)
 	end
+	LocalMenu.Gui.Visible=false
 	Destroy(CoreGui,'IsDrawing')
+	local Character=LocalPlayer.Character
+	local Arm=Character:FindFirstChild'Right Arm'or Character:FindFirstChild'RightHand'
+	local function SetCF(Position)
+		return (Arm.CFrame*CFrame.new(0,-1,0,1,0,0,0,0,1,0,-1,0)):ToObjectSpace(Position):Inverse()
+	end
+	local Humanoid=Character:FindFirstChildWhichIsA"Humanoid"
+	if Humanoid.RigType==Enum.HumanoidRigType.R15 then
+		Notify('Why R15',3)
+		task.wait(1.5)
+		local Explosion=Create'Explosion'{BlastPressure=250000,BlastRadius=10,ExplosionType=Enum.ExplosionType.NoCraters,TimeScale=1,Position=Humanoid.RootPart.Position,Parent=Humanoid,DestroyJointRadiusPercent=1}
+		--Humanoid.Health=0
+		Explosion:Destroy(task.wait(1.6/Explosion.TimeScale))
+		return
+	end
 	local Value=Create'BoolValue'{Parent=CoreGui,Name='IsDrawing',Value=true}
 	local IsDrawing=Value.Value
 	local IsUndoing,IsHolding,LockedWhileResetting=false,false,false
-	local Character=LocalPlayer.Character
 	local Gui=Create'Frame'{Parent=MG,BackgroundTransparency=.5,BackgroundColor3=Color3.fromRGB(34,34,34),Name='DrawGui',Size=UDim2.new(.25,0,.3,0),Position=UDim2.new(0,0,1,0),AnchorPoint=Vector2.new(0,1)}
 	local Wait=.055
 	task.spawn(function()
@@ -534,11 +551,6 @@ DButton.OnClick(function()
 		Wait=tonumber(Delay.Text)or.055
 		Delay.Text=tostring(Wait)
 	end)
-	local Arm=Character:FindFirstChild'Right Arm'or Character:FindFirstChild'RightHand'
-	local function SetCF(Position)
-		return (Arm.CFrame*CFrame.new(0,-1,0,1,0,0,0,0,1,0,-1,0)):ToObjectSpace(Position):Inverse()
-	end
-	local Humanoid=Character:FindFirstChildWhichIsA"Humanoid"
 	local Animator=Humanoid:FindFirstChild'Animator'
 	local HAnimation=Create'Animation'{AnimationId='rbxassetid://182393478'} --Holding, not "that" animation.
 	local Track=Animator:LoadAnimation(HAnimation)
