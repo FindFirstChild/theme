@@ -17,7 +17,7 @@ if _G.RMA2ENABLED then
 	return
 end
 _G.RMA2ENABLED=true
-local Main=loadstring(game:HttpGet('https://raw.githubusercontent.com/kevinYMHGmlg/theme/main/LibraryTest.lua'))()
+local Main=local Main=loadstring(game:HttpGet('https://raw.githubusercontent.com/kevinYMHGmlg/theme/main/LibraryTest'))()
 -- services
 local Players=game:GetService'Players'
 local UserInputService=game:GetService'UserInputService'
@@ -51,9 +51,9 @@ local M=LPG.ManagerGui.ServerSettingFrame
 local Knight=Teams.Knight
 local KC,UIT=Enum.KeyCode,Enum.UserInputType
 local JewellStand=workspace:FindFirstChild'JewelleryStand'
-local Tag,CurrentVersion=MG.VersionTag						,						'v1.2.0)'
+local Tag,CurrentVersion=MG.VersionTag						,						'v1.2.1'
 local Heartbeat=RunService.Heartbeat
-local AllBools,Frames={},{}
+local AllBools={}
 local TableBooth={}
 for _,x in next,workspace:GetChildren()do
 	if x.Name=='Booth'and x:IsA'Model'then
@@ -192,7 +192,7 @@ local KnightButton=Frame.CreateButton('Knight','Knight Panel',UDim2.new(.05,0,.7
 local WorldButton=Frame.CreateButton('World','W o r l d',UDim2.new(.05,0,.65,0))
 local LocalButton=Frame.CreateButton('Local','Localplayer',UDim2.new(.05,0,.55,0))
 local BoothButton=Frame.CreateButton('Booth','Booth',UDim2.new(.05,0,.45,0))
-local GuiDestroy=Frame.CreateButton('SelfDestruct','Disconnect Gui',UDim2.new(.05,0,.85,0))
+local GuiDestroy=Frame.CreateButton('SelfDestruct','Destroy Gui',UDim2.new(.05,0,.85,0))
 GuiDestroy.Gui.BackgroundColor3=Color3.fromRGB(150,64,27)
 local WorldMenu=Main.CreateFrame('others','s')
 local WorldReturn=WorldMenu.CreateButton('R','Return',UDim2.new(.05,0,.85,0))
@@ -206,7 +206,6 @@ local LocalMenu=Main.CreateFrame('Local','workspace.FilteringEnabled=false')
 local LocalReturn=LocalMenu.CreateButton('R','Return',UDim2.new(.05,0,.35,0))
 local TeleportMenu=MG.ContentMenuFrame:Clone()
 Set(TeleportMenu){Parent=MG,Name='TeleportationFrame'}
-table.insert(Frames,TeleportMenu)
 TeleportMenu.Heading.Text='teleportations'
 TeleportMenu.Subheading.Text='HumanoidRootPart.CFrame=CFrame.new(pos)*CFrame.Angles(0,ori,0)'
 local CKButton=KnightMenu.CreateButton('CK','Claim Knight',UDim2.new(.05,0,.35,0))
@@ -234,16 +233,18 @@ local CI_UNKNOWN=M.KillButton.MouseButton1Click:Connect(function()
 	M.Visible=false
 	Notify('No.',3)
 end)
+local poop=false
 GuiDestroy.OnClick(function()
+	if poop then return end
+	poop=true
 	ClickSound()
-	local CountDown=5
-	GuiDestroy.Gui.Text='o rlly? ('..tostring(CountDown)..')'
+	GuiDestroy.Gui.Text='o rlly? (5)'
 	GuiDestroy.OnClick(function()
 		_G.RMA2ENABLED=false
 		CI_UNKNOWN:Disconnect()
 		PlayerAdded:Destroy(PlayerRemoving:Destroy())
 		BI:Disconnect(BII:Disconnect())
-		--getconnections(M.KillButton.MouseButton1Click)[1]:Enable()
+		getconnections(M.KillButton.MouseButton1Click)[1]:Enable()
 		for _,x in next,AllBools do
 			task.spawn(function()
 				x.Value=false
@@ -252,20 +253,22 @@ GuiDestroy.OnClick(function()
 			end)
 		end
 		MainIcon.Gui:Destroy()
-		for _,x in next,Frames do
+		for _,x in next,Main.Frames do
 			x:Destroy()
 		end
+		TeleportMenu:Destroy()
 		for _,x in next,MG:GetChildren()do
 			if table.find({'BlockM','DupeButton','Counter','ClearS'},x.Name)then
 				x:Destroy()
 			end
 		end
 	end,true)
-	for i=CountDown,0,-1 do
-		CountDown,GuiDestroy.Text=i,'are you sure? ('..tostring(CountDown)..')'
+	for i=5,0,-1 do
+		GuiDestroy.Gui.Text='are you sure? ('..tostring(i)..')'
 		task.wait(1)
 	end
-	GuiDestroy.Text='Disconnect Gui'
+	poop=false
+	GuiDestroy.Gui.Text='Destroy Gui'
 end)
 TeleportMenu.CloseButton.MouseButton1Click:Connect(function()
 	ClickSound()
@@ -1079,6 +1082,7 @@ local EBButton=BoothMenu.CreateDK('Extra Banner',UDim2.new(.05,0,.85,0),'extra d
 )
 --EBButton.Text.Size=UDim2.new(.75,0,1,0)
 local MCI=true
+--[[
 local DMButton=Frame.CreateDK('Music',UDim2.new(.05,0,.15,0),'music',IsMusicEnabled,
 	function()
 		do do end do do end end do end do end end
@@ -1086,11 +1090,12 @@ local DMButton=Frame.CreateDK('Music',UDim2.new(.05,0,.15,0),'music',IsMusicEnab
 		return
 	end,
 	function()
-		--[[MCI=false
+		MCI=false
 		Destroy(Table[1])
-		Tag.Text='v.1.436 | '..CurrentVersion..' LOCAL MODIFIED.']]
+		Tag.Text='v.1.436 | '..CurrentVersion..' LOCAL MODIFIED.'
 	end
 )
+]]
 local ABButton=BoothMenu.CreateDK('Anti Barrier',UDim2.new(.05,0,.65,0),'Anti Barrier: ',IsAntiBarrier,
 	function()
 		for _,x in next,workspace:GetChildren()do
