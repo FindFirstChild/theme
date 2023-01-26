@@ -17,7 +17,7 @@ if _G.RMA2ENABLED then
 	return
 end
 _G.RMA2ENABLED=true
-local Main=local Main=loadstring(game:HttpGet('https://raw.githubusercontent.com/kevinYMHGmlg/theme/main/LibraryTest'))()
+local Main=loadstring(game:HttpGet('https://raw.githubusercontent.com/kevinYMHGmlg/theme/main/LibraryTest'))()
 -- services
 local Players=game:GetService'Players'
 local UserInputService=game:GetService'UserInputService'
