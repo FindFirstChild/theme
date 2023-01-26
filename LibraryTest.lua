@@ -138,4 +138,5 @@ function RMA.CreateFrame(Xame,Heading)
 	Panel.Gui=Label
 	return Panel
 end
+RMA.Frames=Frames
 return RMA
