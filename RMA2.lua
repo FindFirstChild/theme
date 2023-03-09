@@ -27,7 +27,7 @@ local Teams=game:GetService'Teams'
 local ContentProvider=game:GetService'ContentProvider'
 local CollectionService=game:GetService'CollectionService'
 local ReplicatedStorage=game:GetService'ReplicatedStorage'
-local MarketPlaceService=game:GetService'MarketPlaceService'
+local MarketPlaceService=game:GetService'MarketplaceService'
 -- main functions
 local function Set(Xnstance)
 	return function(Parameters)
