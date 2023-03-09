@@ -27,6 +27,7 @@ local Teams=game:GetService'Teams'
 local ContentProvider=game:GetService'ContentProvider'
 local CollectionService=game:GetService'CollectionService'
 local ReplicatedStorage=game:GetService'ReplicatedStorage'
+local MarketPlaceService=game:GetService'MarketPlaceService'
 -- main functions
 local function Set(Xnstance)
 	return function(Parameters)
@@ -53,6 +54,7 @@ local KC,UIT=Enum.KeyCode,Enum.UserInputType
 local JewellStand=workspace:FindFirstChild'JewelleryStand'
 local Tag,CurrentVersion=MG.VersionTag						,						'v1.2.1'
 local Heartbeat=RunService.Heartbeat
+local USRemote=ReplicatedStorage.UpdateSign
 local AllBools={}
 local TableBooth={}
 for _,x in next,workspace:GetChildren()do
@@ -136,6 +138,9 @@ local Link=Main.Link
 local function RequestSword()
 	ReplicatedStorage.RequestTool:FireServer'ClassicSword'
 end
+local function RequestItem(Id)
+	ReplicatedStorage.RequestGamepassTool:FireServer(tonumber(Id))
+end
 local function a(p)
 	local HumanoidRootPart=LocalPlayer.Character:FindFirstChild'HumanoidRootPart'
 	if not HumanoidRootPart then
@@ -199,19 +204,32 @@ local WorldReturn=WorldMenu.CreateButton('R','Return',UDim2.new(.05,0,.85,0))
 local KnightMenu=Main.CreateFrame('Knight','knight panel')
 local KnightReturn=KnightMenu.CreateButton('R','Return',UDim2.new(.05,0,.55,0))
 local BoothMenu=Main.CreateFrame('Booth','game.service(\'WorkSpace\',game)[\'FilteringEnabled\']=not not Instance.new\'BoolValue\'.Value')
-local SnipeMenu=BoothMenu.CreateButton('Snipe','Auto Claim Booth..',UDim2.new(.05,0,.45,0))
-local SnipeBooth=Main.CreateFrame('AutoSnipe','hiyah')
+local SnipeMenu=Main.CreateFrame('AutoSnipe','hiyah')
 local BoothReturn=BoothMenu.CreateButton('R','Return',UDim2.new(.05,0,.35,0))
 local LocalMenu=Main.CreateFrame('Local','workspace.FilteringEnabled=false')
 local LocalReturn=LocalMenu.CreateButton('R','Return',UDim2.new(.05,0,.35,0))
 local TeleportMenu=MG.ContentMenuFrame:Clone()
-Set(TeleportMenu){Parent=MG,Name='TeleportationFrame'}
+Set(TeleportMenu){Name='TeleportationFrame',Parent=MG}
 TeleportMenu.Heading.Text='teleportations'
 TeleportMenu.Subheading.Text='HumanoidRootPart.CFrame=CFrame.new(pos)*CFrame.Angles(0,ori,0)'
+local PBoothMenu=MG.BoothCustomisationFrame:Clone()
+Set(PBoothMenu){Name='PortableFrame',Parent=MG}
+PBoothMenu.Heading.Text='Portable Booth'
+for _,x in next,PBoothMenu:GetChildren()do
+	if not x:IsA'TextLabel'or x.Name~='Subheading'then continue end
+	if x.Text=='Booth Description'then x.Text='Sign Description'continue end
+	x.Text='Image ID (rbxassetid only, im lazy to convert it)'
+end
+PBoothMenu.BrowseImageButton.Visible=false
+PBoothMenu.BrowseDescriptionButton.Visible=false
+PBoothMenu.BlacklistButton:Destroy()
+PBoothMenu.AbandonButton.Visible=false
 local CKButton=KnightMenu.CreateButton('CK','Claim Knight',UDim2.new(.05,0,.35,0))
 local RSButton=KnightMenu.CreateButton('RS','Request Sword',UDim2.new(.05,0,.45,0))
 local TPButton=Frame.CreateButton('TP','Teleportations',UDim2.new(.05,0,.35,0))
 local DButton=LocalMenu.CreateButton('D','DrawGui.lua',UDim2.new(.05,0,.25,0))
+local SnipeButton=BoothMenu.CreateButton('Snipe','Auto Claim Booth..',UDim2.new(.05,0,.45,0))
+local PortableButton=BoothMenu.CreateButton('B','portable booth',UDim2.new(.05,0,.55,0))
 --linkers
 Link(TeleportMenu.ReturnButton,Frame.Gui)
 MainIcon:BindTo(Frame)
@@ -219,11 +237,12 @@ KnightReturn:BindTo(Frame)
 WorldReturn:BindTo(Frame)
 LocalReturn:BindTo(Frame)
 BoothReturn:BindTo(Frame)
-SnipeMenu:BindTo(SnipeBooth)
+SnipeButton:BindTo(SnipeMenu)
 WorldButton:BindTo(WorldMenu)
 KnightButton:BindTo(KnightMenu)
 LocalButton:BindTo(LocalMenu)
 BoothButton:BindTo(BoothMenu)
+Link(PortableButton.Gui,PBoothMenu)
 Link(TPButton.Gui,TeleportMenu)
 --//////////////////      CtC Stage 1B Theme: Extend Ash ~ Hourai Victim      //////////////////--
 Notify('2 get started, click on the goofy icon thing on the left, oh! dont forget that this script might break if you change even a small detail in game.',6,true)
@@ -274,6 +293,53 @@ TeleportMenu.CloseButton.MouseButton1Click:Connect(function()
 	ClickSound()
 	TeleportMenu.Visible=false
 end)
+PBoothMenu.CloseButton.MouseButton1Click:Connect(function()
+	ClickSound()
+	PBoothMenu.Visible=false
+end)
+--MarketService:UserOwnsGamePassAsync(LocalPlayer.UserId, GamePassID)
+--[[
+17290248 stop
+17291427 image
+17291420 text
+]]
+
+do
+	local HELPME=false
+	if not MarketPlaceService:UserOwnsGamePassAsync(LocalPlayer.UserId,17291427)or not MarketPlaceService:UserOwnsGamePassAsync(LocalPlayer.UserId,17291420)then 
+		HELPME=true
+	end
+	local Desc=PBoothMenu.BoothDescriptionBox
+	local Img=PBoothMenu.ImageIdBox
+	PBoothMenu.UpdateButton.MouseButton1Click:Connect(function()
+		if HELPME then
+			Notify('you need text sign and an image sign')
+			return
+		end
+		local Character=LocalPlayer.Character
+		if not Character then return end
+		local ISign=Character:FindFirstChild'Image Sign'or LocalPlayer.Backpack:FindFirstChild'Image Sign'
+		local TSign=Character:FindFirstChild'Text Sign'or LocalPlayer.Backpack:FindFirstChild'Text Sign'
+		if not ISign then 
+			RequestItem(17291427)
+			ISign=LocalPlayer.Backpack.ChildAdded:Wait()
+		end
+		if not TSign then
+			RequestItem(17291420)
+			TSign=LocalPlayer.Backpack.ChildAdded:Wait()
+		end
+		USRemote:FireServer("Decal",("rbxassetid://%s"):format(Img.Text))
+		USRemote:FireServer("Text",Desc.Text)
+		for _,x in next,{ISign,TSign}do
+			if x.Parent==Character then
+				x.Parent=LocalPlayer.Backpack
+			end
+			x.Parent=Character
+		end
+		ISign.Grip=CFrame.new(0,0,0,0,0,-1,0,1,0,1,0,0)
+		TSign.Grip=CFrame.new(0,-2,0,0,0,-1,0,1,0,1,0,0)
+	end)
+end
 local APButton=LocalMenu.CreateDK('AP',UDim2.new(.05,0,.65,0),'Anti Proximity: ',IsAntiProx,
 	function()
 		task.spawn(function()
@@ -426,7 +492,7 @@ local BButton=LocalMenu.CreateDK('B',UDim2.new(.05,0,.45,0),'bypass vip stuff: '
 		end
 	end
 )
-local Delay=0.1
+local Delay=.1
 local ARButton=LocalMenu.CreateDK('AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',IsAutoRespawn,
 	function()
 		Notify('I don\'t recommend using this if you\'re trying to toolkill people, or reanimations/god')
@@ -434,8 +500,8 @@ local ARButton=LocalMenu.CreateDK('AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 		local function CharCheck(Character)
 			local Character=Character or LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 			if not Character then return end
-			local Humanoid=Character:WaitForChild'Humanoid'or Character:FindFirstChildOfClass'Humanoid'
-			local Root=Character:WaitForChild'HumanoidRootPart'or Character:FindFirstChild'HumanoidRootPart'
+			local Humanoid=Character:WaitForChild('Humanoid',1)or Character:FindFirstChildWhichIsA'Humanoid'
+			local Root=Character:WaitForChild('HumanoidRootPart',1)or Character:FindFirstChild'HumanoidRootPart'
 			if not Humanoid or not Root then return end			
 			if Position~=nil then
 				Root.CFrame=Position
@@ -464,9 +530,7 @@ local ARButton=LocalMenu.CreateDK('AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',I
 			end)
 		end
 		CharCheck()
-		CI=LocalPlayer.CharacterAdded:Connect(function(Character)
-			CharCheck(Character)
-		end)
+		CI=LocalPlayer.CharacterAdded:Connect(CharCheck)
 		return{CI,Position}
 	end,
 	function(Table)
@@ -837,7 +901,7 @@ local SGButton=KnightMenu.CreateDK('Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 			Total.Value=0
 			Loop(LocalPlayer.Character,function()Total.Value=Total.Value+1 end)
 			Loop(LocalPlayer.Backpack,function()Total.Value=Total.Value+1 end)
-			SideIV.Text='Items: '..tostring(Total.Value)
+			SideIV.Gui.Text='Items: '..tostring(Total.Value)
 		end)
 		return{Val,SideI,SideII,SideIII,SideIV}
 	end,
@@ -855,10 +919,10 @@ end
 local Table={}
 local SelectButtons={}
 do
-	local SOsub=SnipeBooth.CreateSub('sorry it ran out of budget',UDim2.new(.9,0,.075,0),Vector2.new(0,0),UDim2.new(-.303,0,-.11,0))
-	local SOi=SnipeBooth.CreateSub('Ask Me Anything Booths',UDim2.new(.5,0,.075,0),Vector2.new(.5,0),UDim2.new(.5,0,.15,0),.5)
-	local SOii=SnipeBooth.CreateSub('Rate My Avatar Booths',UDim2.new(.5,0,.075,0),Vector2.new(.5,0),UDim2.new(.5,0,.3,0),.5)
-	local SOiii=SnipeBooth.CreateSub('Guessing Booths',UDim2.new(.5,0,.075,0),Vector2.new(.5,0),UDim2.new(.5,0,.45,0),.5)
+	local SOsub=SnipeMenu.CreateSub('sorry it ran out of budget',UDim2.new(.9,0,.075,0),Vector2.new(0,0),UDim2.new(-.303,0,-.11,0))
+	local SOi=SnipeMenu.CreateSub('Ask Me Anything Booths',UDim2.new(.5,0,.075,0),Vector2.new(.5,0),UDim2.new(.5,0,.15,0),.5)
+	local SOii=SnipeMenu.CreateSub('Rate My Avatar Booths',UDim2.new(.5,0,.075,0),Vector2.new(.5,0),UDim2.new(.5,0,.3,0),.5)
+	local SOiii=SnipeMenu.CreateSub('Guessing Booths',UDim2.new(.5,0,.075,0),Vector2.new(.5,0),UDim2.new(.5,0,.45,0),.5)
 	for x,y in next,Booths do
 		Table[x]=y
 	end
@@ -896,7 +960,7 @@ clem dis buth, no crap sherlock that's a bad practice considering the booth some
 unclaimed but still has image and/or text" in it
 if you use infinite loops i will kill you
 ]]
-local ACBSButton=SnipeBooth.CreateDK('BLWL',UDim2.new(.05,0,.7,0),'Whitelist mode: ',IsWhitelisting,
+local ACBSButton=SnipeMenu.CreateDK('BLWL',UDim2.new(.05,0,.7,0),'Whitelist mode: ',IsWhitelisting,
 	function()
 		for _,x in next,SelectButtons do
 			if x.BackgroundColor3==Color3.fromRGB(90,90,90)then
@@ -916,7 +980,7 @@ local ACBSButton=SnipeBooth.CreateDK('BLWL',UDim2.new(.05,0,.7,0),'Whitelist mod
 		end
 	end
 )
-local ACBButton=SnipeBooth.CreateDK('AutoClaimBooth',UDim2.new(.05,0,.085,0),'Enable: ',IsSnipingBooth,
+local ACBButton=SnipeMenu.CreateDK('AutoClaimBooth',UDim2.new(.05,0,.085,0),'Enable: ',IsSnipingBooth,
 	function()
 		local HumanoidRootPart=LocalPlayer.Character.HumanoidRootPart
 		local Old,Old2=HumanoidRootPart.CFrame,HumanoidRootPart.CanCollide
@@ -1021,9 +1085,9 @@ local EBButton=BoothMenu.CreateDK('Extra Banner',UDim2.new(.05,0,.85,0),'extra d
 			Set(TBanner){Parent=Banner.Parent,Size=Vector3.new(3.8,1.05,.4),Name='TBanner',CFrame=Banner.CFrame:ToWorldSpace(CFrame.new(6.2,-1.925,0,1,0,0,0,1,0,0,0,1))}
 			TBanner.SurfaceGui.Frame.Description:Destroy()
 			local Text=Create'TextBox'{Parent=TBanner.SurfaceGui.Frame,BackgroundTransparency=1,Size=UDim2.new(1,0,1,0),Font=Enum.Font.SourceSansBold,TextColor3=Color3.new(1,1,1),PlaceholderText='text should appear here (Ctrl+A copy)',TextScaled=true,TextWrapped=true,Name='Extra',Text=Description.Text,TextEditable=false,ClearTextOnFocus=false}
-			Set(Img){RichText=true,Text='roblox.com/library/'..Icon.Image:match'%d+$'or'0',AnchorPoint=Vector2.new(0,.5),Position=UDim2.new(0,0,.5,0),Size=UDim2.new(1,0,.5,0)}
+			Set(Img){RichText=true,Text='roblox.com/library/'..Icon.Image:match'%d+$',AnchorPoint=Vector2.new(0,.5),Position=UDim2.new(0,0,.5,0),Size=UDim2.new(1,0,.5,0)}
 			Icon:GetPropertyChangedSignal'Image':Connect(function()
-				Img.Text='roblox.com/library/'..Icon.Image:match'%d+$'or'0'
+				Img.Text='roblox.com/library/'..Icon.Image:match'%d+$'
 			end)
 			local Temp=x:GetAttribute'TenantUsername'
 			ODesc.Text=Temp
