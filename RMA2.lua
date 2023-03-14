@@ -2,14 +2,16 @@
 --[[
 credits:
 	ideas:
-		absence#5446
+		ab5ence
 		cam1494
-		night
+		alonelypersoninpain
 		
 	scripting:
 		kevinYMHGmlg#1822 (me)
 		
 まもるクンは呪われてしまった！　「Great Tribulation」
+
+Poor true ternary and bitoperations
 ]]
 if not game:IsLoaded()then game.Loaded:Wait()end
 if _G.RMA2ENABLED then
@@ -52,7 +54,7 @@ local M=LPG.ManagerGui.ServerSettingFrame
 local Knight=Teams.Knight
 local KC,UIT=Enum.KeyCode,Enum.UserInputType
 local JewellStand=workspace:FindFirstChild'JewelleryStand'
-local Tag,CurrentVersion=MG.VersionTag						,						'v1.2.1'
+local Tag,CurrentVersion=MG.VersionTag						,						'v1.2.5'
 local Heartbeat=RunService.Heartbeat
 local USRemote=ReplicatedStorage.UpdateSign
 local AllBools={}
@@ -188,19 +190,19 @@ end
 --bools 
 local IsAutoClaim,IsAntiProx,IsShowingDupeMenu,IsShowingDesc=CreateBool'IACK',CreateBool'IAP',CreateBool'ISDM',CreateBool'ISD'
 local IsAutoRespawn,IsAntiBarrier,IsMusicEnabled,IsBypassLocal=CreateBool'IAR',CreateBool'IAB',CreateBool'IME',CreateBool'IBL'
-local IsSnipingBooth,IsWhitelisting=CreateBool'ISB',CreateBool'IW'
+local IsSnipingBooth,IsWhitelisting,IsASTOP,IsAIS,IsATS=CreateBool'ISB',CreateBool'IW',CreateBool'IAS(explicitlol)',CreateBool'IAIS',CreateBool'IATS'
 --guis
 local Frame=Main.CreateFrame('Custom','hi')
 Frame.CreateSub('credits:\nideas:\ncryniz#5446\ncam1494#7363\nscript:\nkevinYMHGmlg#1822',UDim2.new(.6,0,.9,0),Vector2.new(0,.5),UDim2.new(1.05,0,.5,0),.9)
 local MainIcon=Main.CreateIcon('ExploitButton','rbxassetid://10462982957',UDim2.new(0,20,.5,-80))
 local KnightButton=Frame.CreateButton('Knight','Knight Panel',UDim2.new(.05,0,.75,0))
-local WorldButton=Frame.CreateButton('World','W o r l d',UDim2.new(.05,0,.65,0))
+local MiscButton=Frame.CreateButton('Other','others',UDim2.new(.05,0,.65,0))
 local LocalButton=Frame.CreateButton('Local','Localplayer',UDim2.new(.05,0,.55,0))
 local BoothButton=Frame.CreateButton('Booth','Booth',UDim2.new(.05,0,.45,0))
 local GuiDestroy=Frame.CreateButton('SelfDestruct','Destroy Gui',UDim2.new(.05,0,.85,0))
 GuiDestroy.Gui.BackgroundColor3=Color3.fromRGB(150,64,27)
-local WorldMenu=Main.CreateFrame('others','s')
-local WorldReturn=WorldMenu.CreateButton('R','Return',UDim2.new(.05,0,.85,0))
+local MiscMenu=Main.CreateFrame('others','s')
+local MiscReturn=MiscMenu.CreateButton('R','Return',UDim2.new(.05,0,.25,0))
 local KnightMenu=Main.CreateFrame('Knight','knight panel')
 local KnightReturn=KnightMenu.CreateButton('R','Return',UDim2.new(.05,0,.55,0))
 local BoothMenu=Main.CreateFrame('Booth','game.service(\'WorkSpace\',game)[\'FilteringEnabled\']=not not Instance.new\'BoolValue\'.Value')
@@ -234,12 +236,15 @@ local PortableButton=BoothMenu.CreateButton('B','portable booth',UDim2.new(.05,0
 Link(TeleportMenu.ReturnButton,Frame.Gui)
 MainIcon:BindTo(Frame)
 KnightReturn:BindTo(Frame)
-WorldReturn:BindTo(Frame)
+MiscReturn:BindTo(Frame)
 LocalReturn:BindTo(Frame)
 BoothReturn:BindTo(Frame)
 SnipeButton:BindTo(SnipeMenu)
-WorldButton:BindTo(WorldMenu)
+MiscButton:BindTo(MiscMenu)
 KnightButton:BindTo(KnightMenu)
+KnightButton.OnClick(function()
+	Notify('what\'s the point of using this without swords')
+end)
 LocalButton:BindTo(LocalMenu)
 BoothButton:BindTo(BoothMenu)
 Link(PortableButton.Gui,PBoothMenu)
@@ -283,7 +288,7 @@ GuiDestroy.OnClick(function()
 		end
 	end,true)
 	for i=5,0,-1 do
-		GuiDestroy.Gui.Text='are you sure? ('..tostring(i)..')'
+		GuiDestroy.Gui.Text=('are you sure? (%d)'):format(i)
 		task.wait(1)
 	end
 	poop=false
@@ -303,38 +308,45 @@ end)
 17291427 image
 17291420 text
 ]]
-
+local Gamepasses={
+	[1]={17290248,nil}, --stop
+	[3]={17291427,nil}, --img
+	[2]={17291420,nil}, --text
+}
+for Count,Table in next,Gamepasses do
+	local Id,Value=Table[1],Table[2]
+	if MarketPlaceService:UserOwnsGamePassAsync(LocalPlayer.UserId,Id)then
+		Value=true
+		continue
+	end
+	Value=false
+end
 do
 	local HELPME=false
-	if not MarketPlaceService:UserOwnsGamePassAsync(LocalPlayer.UserId,17291427)or not MarketPlaceService:UserOwnsGamePassAsync(LocalPlayer.UserId,17291420)then 
+	if not Gamepasses[2][2]or not Gamepasses[3][2]then 
 		HELPME=true
 	end
 	local Desc=PBoothMenu.BoothDescriptionBox
 	local Img=PBoothMenu.ImageIdBox
 	PBoothMenu.UpdateButton.MouseButton1Click:Connect(function()
-		
+		if HELPME then
+			Notify('you need text sign and/or an image sign')
+			return
+		end
 		local Character=LocalPlayer.Character
 		if not Character then return end
 		local ISign=Character:FindFirstChild'Image Sign'or LocalPlayer.Backpack:FindFirstChild'Image Sign'
 		local TSign=Character:FindFirstChild'Text Sign'or LocalPlayer.Backpack:FindFirstChild'Text Sign'
 		if not ISign then 
-			if HELPME then
-				Notify('you need text sign and an image sign')
-				return
-			end
 			RequestItem(17291427)
 			ISign=LocalPlayer.Backpack.ChildAdded:Wait()
 		end
 		if not TSign then
-			if HELPME then
-				Notify('you need text sign and an image sign')
-				return
-			end
 			RequestItem(17291420)
 			TSign=LocalPlayer.Backpack.ChildAdded:Wait()
 		end
-		USRemote:FireServer("Decal",("rbxassetid://%s"):format(Img.Text))
-		USRemote:FireServer("Text",Desc.Text)
+		USRemote:FireServer("Decal",("rbxassetid://%s"):format(Img.Text)or'')
+		USRemote:FireServer("Text",Desc.Text or'')
 		for _,x in next,{ISign,TSign}do
 			if x.Parent==Character then
 				x.Parent=LocalPlayer.Backpack
@@ -347,14 +359,15 @@ do
 end
 local APButton=LocalMenu.CreateDK('AP',UDim2.new(.05,0,.65,0),'Anti Proximity: ',IsAntiProx,
 	function()
-		task.spawn(function()
-			local Humanoid=LocalPlayer.Character:FindFirstChildOfClass'Humanoid'
+		local Character=LocalPlayer.Character
+		if Character then
+			local Humanoid=LocalPlayer.Character:FindFirstChildWhichIs'Humanoid'
 			if not Humanoid then return end
 			task.wait(.1)
 			Destroy(Humanoid.RootPart,'ProximityPrompt')
-		end)
-		local CI=LocalPlayer.CharacterAdded:Connect(function(char)
-			local Humanoid=char:FindFirstChildOfClass'Humanoid'or char:WaitForChild'Humanoid'
+		end
+		local CI=LocalPlayer.CharacterAdded:Connect(function(Character)
+			local Humanoid=Character:WaitForChild('Humanoid',1)or Character:FindFirstChildOfClass'Humanoid'
 			task.wait(.1)
 			Destroy(Humanoid.RootPart,'ProximityPrompt')
 		end)
@@ -497,52 +510,103 @@ local BButton=LocalMenu.CreateDK('B',UDim2.new(.05,0,.45,0),'bypass vip stuff: '
 		end
 	end
 )
-local Delay=.1
-local ARButton=LocalMenu.CreateDK('AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',IsAutoRespawn,
-	function()
-		Notify('I don\'t recommend using this if you\'re trying to toolkill people, or reanimations/god')
-		local Position,CI,CII
-		local function CharCheck(Character)
-			local Character=Character or LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-			if not Character then return end
-			local Humanoid=Character:WaitForChild('Humanoid',1)or Character:FindFirstChildWhichIsA'Humanoid'
-			local Root=Character:WaitForChild('HumanoidRootPart',1)or Character:FindFirstChild'HumanoidRootPart'
-			if not Humanoid or not Root then return end			
-			if Position~=nil then
-				Root.CFrame=Position
-				Position=nil
-			end
-			local Destroying,Die
-			local function yeahwhatever(Connection)
-				if not IsAutoRespawn.Value then
-					Destroy(Connection)
-					return
-				end
-				local Height=workspace.FallenPartsDestroyHeight
-				if Height~=Height then Height=-500 end
-				if Root and Root.Position.Y>Height then
-					Position=Root.CFrame
-				end
-				--task.wait(Delay)
-				ReplicatedStorage.RequestRespawn:FireServer()
-			end
-			Destroying=Character.ChildRemoved:Connect(function(Part)
-				if Part~=Root and Part~=Humanoid then return end
-				yeahwhatever(Destroying)
-			end)
-			Die=Humanoid.Died:Connect(function()
-				yeahwhatever(Die)
-			end)
+do
+	for i,x in next,{IsASTOP,IsAIS,IsATS}do
+		local Id,Value=Gamepasses[i][1],Gamepasses[i][2]
+		local TBN,N='',''
+		if i==1 then
+			TBN,N='Auto Stop Sign: ','AS(explicitlol)'
+		elseif i==2 then
+			TBN,N='Auto Image Sign: ','AIS'
+		elseif i==3 then
+			TBN,N='Auto Text Sign: ','ATS'
 		end
-		CharCheck()
-		CI=LocalPlayer.CharacterAdded:Connect(CharCheck)
-		return{CI,Position}
-	end,
-	function(Table)
-		Destroy(Table[1])
-		Table[2]=nil
+		local funnyButton=MiscMenu.CreateDK(N,UDim2.new(.05,0,.85-(.2*(i-1)),0),TBN,x,
+			function()
+				if not Value then
+					Notify('goofy ahh noob you dont own this gamepass',3)
+				end
+				RequestItem(Id)
+				local CI=LocalPlayer.CharacterAdded:Connect(function(Character)
+					local Humanoid=Character:WaitForChild('Humanoid',3)or Character:FindFirstChildWhichIsA'Humanoid'
+					if not Humanoid then return end
+					RequestItem(Id)
+				end)
+				return CI
+			end,
+			function(Connection)
+				if not Connection then return end
+				Destroy(Connection)
+			end
+		)
 	end
-)
+end
+do
+	local Delay=nil
+	local ARButton=LocalMenu.CreateDK('AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',IsAutoRespawn,
+		function()
+			Notify('I don\'t recommend using this if you\'re trying to toolkill people, or reanimations/god')
+			Notify('now with delay',2)
+			local Position,CI,CII
+			local function CharCheck(Character)
+				local Character=Character or LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+				if not Character then 
+					ReplicatedStorage.RequestRespawn:FireServer()
+					return 
+				end
+				local Humanoid=Character:WaitForChild('Humanoid',1)or Character:FindFirstChildWhichIsA'Humanoid'
+				local Root=Humanoid.RootPart--Character:WaitForChild('HumanoidRootPart',1)or Character:FindFirstChild'HumanoidRootPart'
+				if not Humanoid or not Root then return end			
+				if Position~=nil then
+					Root.CFrame=Position
+					Position=nil
+				end
+				local Destroying,Die
+				local function yeahwhatever(Connection)
+					if not IsAutoRespawn.Value then
+						Destroy(Connection)
+						return
+					end
+					local Height=workspace.FallenPartsDestroyHeight
+					if Height~=Height then Height=-400 end
+					if Root and Root.Position.Y>Height then
+						Position=Root.CFrame
+					end
+					if not Delay then
+						ReplicatedStorage.RequestRespawn:FireServer()
+						return
+					end
+					Delay=math.abs(Delay)
+					if Delay>Players.RespawnTime then
+						task.wait(2.9)
+					else
+						task.wait(Delay)
+					end
+					ReplicatedStorage.RequestRespawn:FireServer()
+				end
+				Destroying=Character.ChildRemoved:Connect(function(Part)
+					if Part~=Root and Part~=Humanoid then return end
+					yeahwhatever(Destroying)
+				end)
+				Die=Humanoid.Died:Connect(function()
+					yeahwhatever(Die)
+				end)
+			end
+			CharCheck()
+			CI=LocalPlayer.CharacterAdded:Connect(CharCheck)
+			return{CI,Position}
+		end,
+		function(Table)
+			Destroy(Table[1])
+			Table[2]=nil
+		end
+	)
+	local DelayBox=Create'TextBox'{Text='',PlaceholderText='delay after death (sec)',TextScaled=true,PlaceholderColor3=Color3.new(.1,.1,.1),Position=UDim2.new(0,0,1,0),Size=UDim2.new(.5,0,1,0),TextXAlignment=Enum.TextXAlignment.Left,TextColor3=Color3.new(0,0,0),ClearTextOnFocus=false,BackgroundColor3=Color3.fromRGB(111,111,111),Parent=ARButton.Gui.Text}
+	DelayBox.FocusLost:Connect(function()
+		Delay=tonumber(DelayBox.Text)
+		DelayBox.Text=tostring(Delay)
+	end)
+end
 DButton.OnClick(function()
 	task.wait(Notify('this only work for swords, very buggy indeed.',4))
 	local function TooComplex(p)
@@ -588,7 +652,7 @@ DButton.OnClick(function()
 			end
 			v.Size=UDim2.new(.9,0,.075,0)
 			v.Text=t
-			v.Name='v'..tostring(n)
+			v.Name=('v%d'):format(n)
 			v.TextXAlignment=Enum.TextXAlignment.Left
 			n=n+1
 			return v
@@ -703,7 +767,7 @@ DButton.OnClick(function()
 				end
 			end
 			LockedWhileResetting=false
-			Fuel.Text='Swords: 0/'..tostring(total)
+			Fuel.Text=('Swords: 0/%d'):format(total)
 		end,
 		[KC.G]=function()
 			IsUndoing=true
@@ -802,7 +866,7 @@ DButton.OnClick(function()
 			CV:Disconnect(CIV:Disconnect(CIII:Disconnect(CII:Disconnect())))
 			return
 		end
-		Fuel.Text='Swords: '..tostring(n)..'/'..tostring(total)
+		Fuel.Text=('Swords: %d/%d'):format(n,total)
 		if Mode==0 then
 			Pointer.CFrame=CFrame.new(LMouse.Hit.Position)*Orientation
 			return
@@ -906,7 +970,7 @@ local SGButton=KnightMenu.CreateDK('Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui'
 			Total.Value=0
 			Loop(LocalPlayer.Character,function()Total.Value=Total.Value+1 end)
 			Loop(LocalPlayer.Backpack,function()Total.Value=Total.Value+1 end)
-			SideIV.Gui.Text='Items: '..tostring(Total.Value)
+			SideIV.Gui.Text=('Items: %d'):format(Total.Value)
 		end)
 		return{Val,SideI,SideII,SideIII,SideIV}
 	end,
@@ -933,7 +997,7 @@ do
 	end
 	for m,x in next,{SOi,SOii,SOiii}do
 		for i=1,6 do
-			local Button=Create'TextButton'{BackgroundColor3=Color3.fromRGB(90,90,90),Position=UDim2.new((i*.3)-.65,0,1,0),Name='hi',Text='P'..tostring(i),Size=UDim2.new(.2,0,1,0),Parent=x}
+			local Button=Create'TextButton'{BackgroundColor3=Color3.fromRGB(90,90,90),Position=UDim2.new((i*.3)-.65,0,1,0),Name='hi',Text=('P%d'):format(i),Size=UDim2.new(.2,0,1,0),Parent=x}
 			local VFTO=false
 			local ID=(m-1)*6+i
 			local Temp=Table[ID]
@@ -1090,9 +1154,9 @@ local EBButton=BoothMenu.CreateDK('Extra Banner',UDim2.new(.05,0,.85,0),'extra d
 			Set(TBanner){Parent=Banner.Parent,Size=Vector3.new(3.8,1.05,.4),Name='TBanner',CFrame=Banner.CFrame:ToWorldSpace(CFrame.new(6.2,-1.925,0,1,0,0,0,1,0,0,0,1))}
 			TBanner.SurfaceGui.Frame.Description:Destroy()
 			local Text=Create'TextBox'{Parent=TBanner.SurfaceGui.Frame,BackgroundTransparency=1,Size=UDim2.new(1,0,1,0),Font=Enum.Font.SourceSansBold,TextColor3=Color3.new(1,1,1),PlaceholderText='text should appear here (Ctrl+A copy)',TextScaled=true,TextWrapped=true,Name='Extra',Text=Description.Text,TextEditable=false,ClearTextOnFocus=false}
-			Set(Img){RichText=true,Text='roblox.com/library/'..Icon.Image:match'%d+$',AnchorPoint=Vector2.new(0,.5),Position=UDim2.new(0,0,.5,0),Size=UDim2.new(1,0,.5,0)}
+			Set(Img){RichText=true,Text=('roblox.com/library/%s'):format(Icon.Image:match'%d+$'),AnchorPoint=Vector2.new(0,.5),Position=UDim2.new(0,0,.5,0),Size=UDim2.new(1,0,.5,0)}
 			Icon:GetPropertyChangedSignal'Image':Connect(function()
-				Img.Text='roblox.com/library/'..Icon.Image:match'%d+$'
+				Img.Text=('roblox.com/library/%s'):format(Icon.Image:match'%d+$')
 			end)
 			local Temp=x:GetAttribute'TenantUsername'
 			ODesc.Text=Temp
@@ -1126,17 +1190,17 @@ local EBButton=BoothMenu.CreateDK('Extra Banner',UDim2.new(.05,0,.85,0),'extra d
 				local ID=Icon.Image:match'%d+$'
 				if tonumber(ID)and tonumber(ID)>10 then
 					SetClip(ID)
-					Notify('Copied, ID: '..ID..'.',3)
+					Notify(('Copied, ID: %s.'):format(ID),3)
 					return
 				end
 				Notify('This booth has no image.')
 			end)
-			table.insert(ExtraBanners,IBanner)
-			table.insert(ExtraBanners,TBanner)
-			table.insert(ExtraBanners,OBanner)
-			table.insert(ListOfConnections,CI)
-			table.insert(ListOfConnections,CII)
-			table.insert(ListOfConnections,CIII)
+			for _,x in next,{IBanner,TBanner,OBanner}do
+				table.insert(ExtraBanners,x)
+			end
+			for _,x in next,{CI,CII,CIII}do
+				table.insert(ListOfConnections,x)
+			end
 		end
 		return{ListOfConnections,ExtraBanners}
 	end,
