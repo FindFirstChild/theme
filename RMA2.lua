@@ -329,19 +329,23 @@ do
 	local Desc=PBoothMenu.BoothDescriptionBox
 	local Img=PBoothMenu.ImageIdBox
 	PBoothMenu.UpdateButton.MouseButton1Click:Connect(function()
-		if HELPME then
-			Notify('you need text sign and/or an image sign')
-			return
-		end
 		local Character=LocalPlayer.Character
 		if not Character then return end
 		local ISign=Character:FindFirstChild'Image Sign'or LocalPlayer.Backpack:FindFirstChild'Image Sign'
 		local TSign=Character:FindFirstChild'Text Sign'or LocalPlayer.Backpack:FindFirstChild'Text Sign'
 		if not ISign then 
+			if HELPME then
+				Notify('you need text sign and/or an image sign')
+				return
+			end
 			RequestItem(17291427)
 			ISign=LocalPlayer.Backpack.ChildAdded:Wait()
 		end
 		if not TSign then
+			if HELPME then
+				Notify('you need text sign and/or an image sign')
+				return
+			end
 			RequestItem(17291420)
 			TSign=LocalPlayer.Backpack.ChildAdded:Wait()
 		end
