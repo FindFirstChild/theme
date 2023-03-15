@@ -1,3 +1,4 @@
+
 -- i got bored so i assigned multiple variables in one-line
 --[[
 credits:
@@ -54,7 +55,7 @@ local M=LPG.ManagerGui.ServerSettingFrame
 local Knight=Teams.Knight
 local KC,UIT=Enum.KeyCode,Enum.UserInputType
 local JewellStand=workspace:FindFirstChild'JewelleryStand'
-local Tag,CurrentVersion=MG.VersionTag						,						'v1.2.5'
+local Tag,CurrentVersion=MG.VersionTag						,						'v1.2.8'
 local Heartbeat=RunService.Heartbeat
 local USRemote=ReplicatedStorage.UpdateSign
 local AllBools={}
@@ -193,7 +194,7 @@ local IsAutoRespawn,IsAntiBarrier,IsMusicEnabled,IsBypassLocal=CreateBool'IAR',C
 local IsSnipingBooth,IsWhitelisting,IsASTOP,IsAIS,IsATS=CreateBool'ISB',CreateBool'IW',CreateBool'IAS(explicitlol)',CreateBool'IAIS',CreateBool'IATS'
 --guis
 local Frame=Main.CreateFrame('Custom','hi')
-Frame.CreateSub('credits:\nideas:\ncryniz#5446\ncam1494#7363\nscript:\nkevinYMHGmlg#1822',UDim2.new(.6,0,.9,0),Vector2.new(0,.5),UDim2.new(1.05,0,.5,0),.9)
+Frame.CreateSub('credits:\nideas:\nab5ence,cam1492,alonelypersoninpain\nscript:\nkevinYMHGmlg#1822',UDim2.new(.6,0,.9,0),Vector2.new(0,.5),UDim2.new(1.05,0,.5,0),.9)
 local MainIcon=Main.CreateIcon('ExploitButton','rbxassetid://10462982957',UDim2.new(0,20,.5,-80))
 local KnightButton=Frame.CreateButton('Knight','Knight Panel',UDim2.new(.05,0,.75,0))
 local MiscButton=Frame.CreateButton('Other','others',UDim2.new(.05,0,.65,0))
@@ -335,7 +336,7 @@ do
 		local TSign=Character:FindFirstChild'Text Sign'or LocalPlayer.Backpack:FindFirstChild'Text Sign'
 		if not ISign then 
 			if HELPME then
-				Notify('you need text sign and/or an image sign')
+				Notify('you need an image sign')
 				return
 			end
 			RequestItem(17291427)
@@ -343,7 +344,7 @@ do
 		end
 		if not TSign then
 			if HELPME then
-				Notify('you need text sign and/or an image sign')
+				Notify('you need a text sign')
 				return
 			end
 			RequestItem(17291420)
@@ -357,8 +358,11 @@ do
 			end
 			x.Parent=Character
 		end
-		ISign.Grip=CFrame.new(0,0,0,0,0,-1,0,1,0,1,0,0)
+		--ISign.Grip=CFrame.new(0,0,0,0,0,-1,0,1,0,1,0,0)
 		TSign.Grip=CFrame.new(0,-2,0,0,0,-1,0,1,0,1,0,0)
+		TSign.Unequipped:Connect(function()
+			TSign.Grip=CFrame.new(0,0,0,0,0,-1,0,1,0,1,0,0)
+		end)
 	end)
 end
 local APButton=LocalMenu.CreateDK('AP',UDim2.new(.05,0,.65,0),'Anti Proximity: ',IsAntiProx,
@@ -442,7 +446,7 @@ do
 			end
 			task.spawn(function()
 				for i=1,7 do
-					HumanoidRootPart.Velocity=Vector3.new(0,0,0)
+					HumanoidRootPart.AssemblyLinearVelocity=Vector3.new(0,0,0)
 					task.wait()
 				end
 			end)
@@ -515,7 +519,7 @@ local BButton=LocalMenu.CreateDK('B',UDim2.new(.05,0,.45,0),'bypass vip stuff: '
 	end
 )
 do
-	for i,x in next,{IsASTOP,IsAIS,IsATS}do
+	for i,x in next,{IsASTOP,IsATS,IsAIS}do
 		local Id,Value=Gamepasses[i][1],Gamepasses[i][2]
 		local TBN,N='',''
 		if i==1 then
@@ -528,7 +532,10 @@ do
 		local funnyButton=MiscMenu.CreateDK(N,UDim2.new(.05,0,.85-(.2*(i-1)),0),TBN,x,
 			function()
 				if not Value then
+					MiscMenu.Gui[N].Value.ImageColor3=Color3.fromRGB(90,90,90)
+					x.Value=false
 					Notify('goofy ahh noob you dont own this gamepass',3)
+					return
 				end
 				RequestItem(Id)
 				local CI=LocalPlayer.CharacterAdded:Connect(function(Character)
@@ -581,7 +588,7 @@ do
 						return
 					end
 					Delay=math.abs(Delay)
-					if Delay>Players.RespawnTime then
+					if Delay>999 then
 						task.wait(2.9)
 					else
 						task.wait(Delay)
@@ -1028,7 +1035,7 @@ do
 	end
 end
 --[[
-for anyone saying "omg u can just use getpropertychangedsignal if booth text = clik her to 
+for anyone saying "omg u can just use .changed/getpropertychangedsignal if booth text = clik her to 
 clem dis buth, no crap sherlock that's a bad practice considering the booth sometimes
 unclaimed but still has image and/or text" in it
 if you use infinite loops i will kill you
@@ -1239,9 +1246,7 @@ local ABButton=BoothMenu.CreateDK('Anti Barrier',UDim2.new(.05,0,.65,0),'Anti Ba
 			SetBarrier(x)
 		end
 		local CI
-		CI=workspace.ChildAdded:Connect(function(p)
-			SetBarrier(p)
-		end)
+		CI=workspace.ChildAdded:Connect(SetBarrier)
 		return CI
 	end,
 	function(CI)
