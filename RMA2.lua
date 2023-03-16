@@ -55,7 +55,7 @@ local M=LPG.ManagerGui.ServerSettingFrame
 local Knight=Teams.Knight
 local KC,UIT=Enum.KeyCode,Enum.UserInputType
 local JewellStand=workspace:FindFirstChild'JewelleryStand'
-local Tag,CurrentVersion=MG.VersionTag						,						'v1.2.8'
+local Tag,CurrentVersion=MG.VersionTag						,						'v1.2.9'
 local Heartbeat=RunService.Heartbeat
 local USRemote=ReplicatedStorage.UpdateSign
 local AllBools={}
@@ -350,7 +350,7 @@ do
 			RequestItem(17291420)
 			TSign=LocalPlayer.Backpack.ChildAdded:Wait()
 		end
-		USRemote:FireServer("Decal",("rbxassetid://%s"):format(Img.Text)or'')
+		USRemote:FireServer("Decal",("rbxassetid://%s"):format(Img.Text or'0')or'')
 		USRemote:FireServer("Text",Desc.Text or'')
 		for _,x in next,{ISign,TSign}do
 			if x.Parent==Character then
@@ -456,9 +456,7 @@ do
 	for _,x in next,PlayersTable do
 		CreateTB(x)
 	end
-	PlayerAdded.Event:Connect(function(Player)
-		CreateTB(Player)
-	end)
+	PlayerAdded.Event:Connect(CreateTB)
 	PlayerRemoving.Event:Connect(function(Player)
 		local Name=Player.Name
 		Destroy(PlayerSelectionFrame,Name)
@@ -519,7 +517,7 @@ local BButton=LocalMenu.CreateDK('B',UDim2.new(.05,0,.45,0),'bypass vip stuff: '
 	end
 )
 do
-	for i,x in next,{IsASTOP,IsATS,IsAIS}do
+	for i,x in next,{IsASTOP,IsAIS,IsATS}do
 		local Id,Value=Gamepasses[i][1],Gamepasses[i][2]
 		local TBN,N='',''
 		if i==1 then
@@ -619,7 +617,8 @@ do
 	end)
 end
 DButton.OnClick(function()
-	task.wait(Notify('this only work for swords, very buggy indeed.',4))
+	--task.wait(Notify('this only work for swords, very buggy indeed.',4))
+	task.wait(Notify('swords patched but i still want to keep this thing',4))
 	local function TooComplex(p)
 		local Mouse=UserInputService:GetMouseLocation()
 		local Unit=CurrentCamera:ScreenPointToRay(Mouse.X,Mouse.Y-36)
@@ -717,7 +716,8 @@ DButton.OnClick(function()
 	local SWR={}
 	local total=0
 	for _,x in next,LocalPlayer.Backpack:GetChildren()do
-		if x:IsA'Tool'and x.Name=='ClassicSword'then
+		--if x:IsA'Tool'and x.Name=='ClassicSword'then
+		if x:IsA'Tool'and x.Name=='Image Sign'then
 			local handle=x:FindFirstChild'Handle'
 			if handle then
 				handle.Massless=true
@@ -729,7 +729,7 @@ DButton.OnClick(function()
 		end
 	end
 	for _,x in next,Character:GetChildren()do
-		if x:IsA'Tool'and x.Name=='ClassicSword'then
+		if x:IsA'Tool'and x.Name=='Image Sign'then
 			local handle=x:FindFirstChild'Handle'
 			if handle then
 				handle.Massless=true
@@ -742,7 +742,7 @@ DButton.OnClick(function()
 		end
 	end
 	LocalPlayer.Character.ChildAdded:Connect(function(Child)
-		if Child:IsA'Tool'and Child.Name=='ClassicSword'and Child:FindFirstChild'Handle'and not table.find(SWR,Child)then
+		if Child:IsA'Tool'and Child.Name=='Image Sign'and Child:FindFirstChild'Handle'and not table.find(SWR,Child)then
 			table.insert(SWR,Child)
 			total=total+1
 			Child.Handle.Massless=true
@@ -819,9 +819,10 @@ DButton.OnClick(function()
 				if DII or not Target then return end
 				DII=true
 				--might rework this part later
-				local cout=SWR[table.find(SWR,Target.Instance.Parent)]
-				SWR[table.find(SWR,Target.Instance.Parent)]=SWR[n]
-				SWR[n]=cout
+				local cout=table.find(SWR,Target.Instance.Parent)
+				local temp=SWR[cout]
+				SWR[cout]=SWR[n]
+				SWR[n]=temp
 				n=n-1
 				Set(Target.Instance.Parent){Grip=CFrame.new(0,0,-1.7,0,0,1,1,0,0,0,1,0),Parent=LocalPlayer.Backpack}
 				task.wait(Wait)
@@ -877,7 +878,7 @@ DButton.OnClick(function()
 			CV:Disconnect(CIV:Disconnect(CIII:Disconnect(CII:Disconnect())))
 			return
 		end
-		Fuel.Text=('Swords: %d/%d'):format(n,total)
+		Fuel.Text=('lol: %d/%d'):format(n,total)
 		if Mode==0 then
 			Pointer.CFrame=CFrame.new(LMouse.Hit.Position)*Orientation
 			return
@@ -1035,7 +1036,7 @@ do
 	end
 end
 --[[
-for anyone saying "omg u can just use .changed/getpropertychangedsignal if booth text = clik her to 
+for anyone saying "omg u can just use getpropertychangedsignal if booth text = clik her to 
 clem dis buth, no crap sherlock that's a bad practice considering the booth sometimes
 unclaimed but still has image and/or text" in it
 if you use infinite loops i will kill you
