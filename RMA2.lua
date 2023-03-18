@@ -369,7 +369,7 @@ local APButton=LocalMenu.CreateDK('AP',UDim2.new(.05,0,.65,0),'Anti Proximity: '
 	function()
 		local Character=LocalPlayer.Character
 		if Character then
-			local Humanoid=LocalPlayer.Character:FindFirstChildWhichIs'Humanoid'
+			local Humanoid=LocalPlayer.Character:FindFirstChildWhichIsA'Humanoid'
 			if not Humanoid then return end
 			task.wait(.1)
 			Destroy(Humanoid.RootPart,'ProximityPrompt')
