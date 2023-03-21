@@ -55,7 +55,7 @@ local M=LPG.ManagerGui.ServerSettingFrame
 local Knight=Teams.Knight
 local KC,UIT=Enum.KeyCode,Enum.UserInputType
 local JewellStand=workspace:FindFirstChild'JewelleryStand'
-local Tag,CurrentVersion=MG.VersionTag						,						'v1.2.9'
+local Tag,CurrentVersion=MG.VersionTag						,						'v1.3.0'
 local Heartbeat=RunService.Heartbeat
 local USRemote=ReplicatedStorage.UpdateSign
 local AllBools={}
@@ -251,6 +251,14 @@ BoothButton:BindTo(BoothMenu)
 Link(PortableButton.Gui,PBoothMenu)
 Link(TPButton.Gui,TeleportMenu)
 --//////////////////      CtC Stage 1B Theme: Extend Ash ~ Hourai Victim      //////////////////--
+local Old
+Old=hookmetamethod(game,"__namecall",function(Self,...)
+    if Self==USRemote and getnamecallmethod()=='FireServer'then
+        local Type,Id=...
+        return Old(Self,Type,('https://www.roblox.com/asset-thumbnail/image?assetId=%s&width=10000&height=10000&format=png'):format(Id:match('%d+')))
+    end
+    return Old(Self,...)
+end)
 Notify('2 get started, click on the goofy icon thing on the left, oh! dont forget that this script might break if you change even a small detail in game.',6,true)
 getconnections(M.KillButton.MouseButton1Click)[1]:Disable()
 Set(Tag){TextSize=20,TextXAlignment=Enum.TextXAlignment.Left,Size=UDim2.new(0,360,0,40),Position=UDim2.new(0,40,1,-50),Text='v.1.436 | '..CurrentVersion..' LOCAL MODIFIED.',TextScaled=false,TextWrapped=false,RichText=true}
@@ -264,7 +272,8 @@ GuiDestroy.OnClick(function()
 	poop=true
 	ClickSound()
 	GuiDestroy.Gui.Text='o rlly? (5)'
-	GuiDestroy.OnClick(function()
+	local CI
+	CI=GuiDestroy.Gui.MouseButton1Click:Connect(function()
 		_G.RMA2ENABLED=false
 		CI_UNKNOWN:Disconnect()
 		PlayerAdded:Destroy(PlayerRemoving:Destroy())
@@ -292,6 +301,7 @@ GuiDestroy.OnClick(function()
 		GuiDestroy.Gui.Text=('are you sure? (%d)'):format(i)
 		task.wait(1)
 	end
+	CI:Disconnect()
 	poop=false
 	GuiDestroy.Gui.Text='Destroy Gui'
 end)
@@ -315,18 +325,14 @@ local Gamepasses={
 	[2]={17291420,nil}, --text
 }
 for Count,Table in next,Gamepasses do
-	local Id,Value=Table[1],Table[2]
+	local Id=Table[1]
 	if MarketPlaceService:UserOwnsGamePassAsync(LocalPlayer.UserId,Id)then
-		Value=true
+		Table[2]=true
 		continue
 	end
-	Value=false
+	Table[2]=false
 end
 do
-	local HELPME=false
-	if not Gamepasses[2][2]or not Gamepasses[3][2]then 
-		HELPME=true
-	end
 	local Desc=PBoothMenu.BoothDescriptionBox
 	local Img=PBoothMenu.ImageIdBox
 	PBoothMenu.UpdateButton.MouseButton1Click:Connect(function()
@@ -335,7 +341,7 @@ do
 		local ISign=Character:FindFirstChild'Image Sign'or LocalPlayer.Backpack:FindFirstChild'Image Sign'
 		local TSign=Character:FindFirstChild'Text Sign'or LocalPlayer.Backpack:FindFirstChild'Text Sign'
 		if not ISign then 
-			if HELPME then
+			if Gamepasses[2][2]then
 				Notify('you need an image sign')
 				return
 			end
@@ -343,7 +349,7 @@ do
 			ISign=LocalPlayer.Backpack.ChildAdded:Wait()
 		end
 		if not TSign then
-			if HELPME then
+			if Gamepasses[3][2]then
 				Notify('you need a text sign')
 				return
 			end
@@ -369,15 +375,15 @@ local APButton=LocalMenu.CreateDK('AP',UDim2.new(.05,0,.65,0),'Anti Proximity: '
 	function()
 		local Character=LocalPlayer.Character
 		if Character then
-			local Humanoid=LocalPlayer.Character:FindFirstChildWhichIsA'Humanoid'
+			local Humanoid=LocalPlayer.Character:FindFirstChild'HumanoidRootPart'
 			if not Humanoid then return end
 			task.wait(.1)
-			Destroy(Humanoid.RootPart,'ProximityPrompt')
+			Destroy(Humanoid,'ProximityPrompt')
 		end
 		local CI=LocalPlayer.CharacterAdded:Connect(function(Character)
-			local Humanoid=Character:WaitForChild('Humanoid',1)or Character:FindFirstChildOfClass'Humanoid'
+			local Humanoid=Character:WaitForChild('HumanoidRootPart',1/0)
 			task.wait(.1)
-			Destroy(Humanoid.RootPart,'ProximityPrompt')
+			Destroy(Humanoid,'ProximityPrompt')
 		end)
 		return CI
 	end,
@@ -415,14 +421,14 @@ do
 	Searcher:GetPropertyChangedSignal'Text':Connect(function()
 		local text=Searcher.Text:lower()
 		if text==''then
-			for n,_ in next,PlayersTable do
-				local UFrame=PlayerSelectionFrame[n]
+			for n,d in next,PlayersTable do
+				local UFrame=PlayerSelectionFrame[d]
 				UFrame.Visible=true
 			end
 			return
 		end
 		for n,d in next,PlayersTable do
-			local UFrame=PlayerSelectionFrame[n]
+			local UFrame=PlayerSelectionFrame[d]
 			condition(Frame,#text,n)
 			condition(Frame,#text,d)
 		end
@@ -504,7 +510,8 @@ local BButton=LocalMenu.CreateDK('B',UDim2.new(.05,0,.45,0),'bypass vip stuff: '
 		local Window=workspace['VIP Entrance']:FindFirstChild'Window'
 		if not Window then Notify('Missing \'VIP Entrance\'.Window',3,true)return end
 		CI=Window.VIPProximityPrompt.Triggered:Connect(function()
-			local p=game.Players.LocalPlayer.Character.HumanoidRootPart
+			local p=game.Players.LocalPlayer.Character:FindFirstChild'HumanoidRootPart'
+			if not p then return end
 			p.CFrame=CFrame.new(-5900,-51.49,23,-1,0,0,0,1,0,0,0,-1)
 		end)
 		return{CI,Part}
@@ -564,7 +571,7 @@ do
 					return 
 				end
 				local Humanoid=Character:WaitForChild('Humanoid',1)or Character:FindFirstChildWhichIsA'Humanoid'
-				local Root=Humanoid.RootPart--Character:WaitForChild('HumanoidRootPart',1)or Character:FindFirstChild'HumanoidRootPart'
+				local Root=Character:WaitForChild('HumanoidRootPart',1/0)or Character:FindFirstChild'HumanoidRootPart'
 				if not Humanoid or not Root then return end			
 				if Position~=nil then
 					Root.CFrame=Position
