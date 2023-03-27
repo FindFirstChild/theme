@@ -156,7 +156,7 @@ local function a(p)
 		if not p.Enabled then
 			break
 		end
-		HumanoidRootPart.CFrame,HumanoidRootPart.Velocity=JewellStand.CFrame,Vector3.new(0,0,0)
+		HumanoidRootPart.CFrame,HumanoidRootPart.AssemblyLinearVelocity=JewellStand.CFrame,Vector3.zero
 		fireproximityprompt(p)
 		task.wait(.1)
 	until not p.Enabled
@@ -258,7 +258,6 @@ Old=hookmetamethod(game,"__namecall",function(Self,...)
         return Old(Self,Type,('https://www.roblox.com/asset-thumbnail/image?assetId=%s&width=10000&height=10000&format=png'):format(Id:match('%d+')))
     end
     return Old(Self,...)
-end)
 Notify('2 get started, click on the goofy icon thing on the left, oh! dont forget that this script might break if you change even a small detail in game.',6,true)
 getconnections(M.KillButton.MouseButton1Click)[1]:Disable()
 Set(Tag){TextSize=20,TextXAlignment=Enum.TextXAlignment.Left,Size=UDim2.new(0,360,0,40),Position=UDim2.new(0,40,1,-50),Text='v.1.436 | '..CurrentVersion..' LOCAL MODIFIED.',TextScaled=false,TextWrapped=false,RichText=true}
@@ -418,9 +417,10 @@ do
 	local UIGridLayout=Create'UIGridLayout'{Parent=PlaceSelectionFrame,CellSize=UDim2.new(0,82,0,82),SortOrder=Enum.SortOrder.Name}
 	local Searcher=Create'TextBox'{Parent=TeleportMenu,BackgroundColor3=Color3.fromRGB(61,61,61),AnchorPoint=Vector2.new(1,0),Position=UDim2.new(.95,0,.3,0),Size=UDim2.new(.67,0,.075,0),Font=Enum.Font.SourceSansBold,TextColor3=Color3.new(1,1,1),PlaceholderText='Find player by Name/DisplayName',TextScaled=true,TextWrapped=true,Name='FindSeacher',Text=''}
 	local Count=0
-	local function condition(frame,length,x)
-		for i=1,#length do
-			if x:lower():find(length,i,true)then
+	local function condition(frame,text,plr)
+		for i=1,text:len() do
+			local name,displayname=plr.Name,plr.DisplayName
+			if name:lower():find(text,i,true)or displayname:lower():find(text,i,true)then
 				frame.Visible=true
 				break
 			end
@@ -430,16 +430,13 @@ do
 	Searcher:GetPropertyChangedSignal'Text':Connect(function()
 		local text=Searcher.Text:lower()
 		if text==''then
-			for n,d in next,PlayersTable do
-				local UFrame=PlayerSelectionFrame[d.Name]
-				UFrame.Visible=true
+			for _,d in next,PlayersTable do
+				PlayerSelectionFrame[d.Name].Visible=true
 			end
 			return
 		end
-		for n,d in next,PlayersTable do
-			local UFrame=PlayerSelectionFrame[d.Name]
-			condition(Frame,#text,n)
-			condition(Frame,#text,d.Name)
+		for _,d in next,PlayersTable do
+			condition(PlayerSelectionFrame[d.Name],text,d)			
 		end
 	end)
 	local function CreateTB(Player)
@@ -459,8 +456,7 @@ do
 				Notify('Missing HMR either on local or target.',3)
 				return
 			end
-			HumanoidRootPart.AssemblyLinearVelocity=Vector3.new(0,0,0)
-			HumanoidRootPart.AssemblyAngularVelocity=Vector3.new(0,0,0)
+			HumanoidRootPart.AssemblyLinearVelocity,HumanoidRootPart.AssemblyAngularVelocity=Vector3.zero,Vector3.zer
 			HumanoidRootPart.CFrame=THumanoidRootPart.CFrame
 		end)
 	end
@@ -486,12 +482,7 @@ do
 				Notify('Missing HMR',3,true)
 				return
 			end
-			task.spawn(function()
-				for i=1,7 do
-					HumanoidRootPart.Velocity=Vector3.new(0,0,0)
-					task.wait()
-				end
-			end)
+			HumanoidRootPart.AssemblyLinearVelocity,HumanoidRootPart.AssemblyAngularVelocity=Vector3.zero,Vector3.zero
 			HumanoidRootPart.CFrame=CFrame.new(Position)*CFrame.Angles(0,math.rad(y),0)
 		end)
 	end
@@ -716,9 +707,9 @@ DButton.OnClick(function()
 	Track.Priority=Enum.AnimationPriority.Action
 	Track:AdjustSpeed(0)
 	local Placeholder=Create'Tool'{Name='equip me to disconnect',Parent=LocalPlayer.Backpack,ToolTip='OMG INSTANCE.NEW() HACK!!'}
-	local Handle=Create'Part'{Parent=Placeholder,Name='Handle',Transparency=1,Size=Vector3.new(0,0,0)}
+	local Handle=Create'Part'{Parent=Placeholder,Name='Handle',Transparency=1,Size=Vector3.zero}
 	local Orientation=CFrame.Angles(math.rad(-90),math.rad(0),math.rad(0))
-	local Pointer=Create'Part'{Parent=workspace,Transparency=.6,BrickColor=BrickColor.new(1,0,0),CanQuery=false,CanTouch=false,Massless=true,Material='SmoothPlastic',Anchored=true,Size=Vector3.new(1,.8,4),CanCollide=false,CFrame=CFrame.new(0,0,0)*Orientation}
+	local Pointer=Create'Part'{Parent=workspace,Transparency=.6,BrickColor=BrickColor.new(1,0,0),CanQuery=false,CanTouch=false,Massless=true,Material='SmoothPlastic',Anchored=true,Size=Vector3.new(1,.8,4),CanCollide=false,CFrame=CFrame.identity*Orientation}
 	CollectionService:AddTag(Pointer,'theepicfunnyparts')
 	CollectionService:AddTag(Character,'theepicfunnyparts')
 	LMouse.TargetFilter=Pointer
