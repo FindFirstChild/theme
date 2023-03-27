@@ -55,7 +55,7 @@ local M=LPG.ManagerGui.ServerSettingFrame
 local Knight=Teams.Knight
 local KC,UIT=Enum.KeyCode,Enum.UserInputType
 local JewellStand=workspace:FindFirstChild'JewelleryStand'
-local Tag,CurrentVersion=MG.VersionTag						,						'v1.3.0'
+local Tag,CurrentVersion=MG.VersionTag						,						'v1.3.1'
 local Heartbeat=RunService.Heartbeat
 local USRemote=ReplicatedStorage.UpdateSign
 local AllBools={}
@@ -338,24 +338,34 @@ do
 	PBoothMenu.UpdateButton.MouseButton1Click:Connect(function()
 		local Character=LocalPlayer.Character
 		if not Character then return end
-		local ISign=Character:FindFirstChild'Image Sign'or LocalPlayer.Backpack:FindFirstChild'Image Sign'
-		local TSign=Character:FindFirstChild'Text Sign'or LocalPlayer.Backpack:FindFirstChild'Text Sign'
-		if not ISign then 
+		local ISign=Character:FindFirstChild'Image Sign'or LocalPlayer.Backpack:FindFirstChild'Image Sign'or(function()
 			if Gamepasses[2][2]then
 				Notify('you need an image sign')
 				return
 			end
 			RequestItem(17291427)
-			ISign=LocalPlayer.Backpack.ChildAdded:Wait()
-		end
-		if not TSign then
+			coroutine.resume(coroutine.create(function()
+				local Item=nil
+				while not Item or Item.Name~='Image Sign'do
+					Item=LocalPlayer.Backpack.ChildAdded:Wait()
+				end
+				return Item
+			end))
+		end)()
+		local TSign=Character:FindFirstChild'Text Sign'or LocalPlayer.Backpack:FindFirstChild'Text Sign'or(function()
 			if Gamepasses[3][2]then
 				Notify('you need a text sign')
 				return
 			end
 			RequestItem(17291420)
-			TSign=LocalPlayer.Backpack.ChildAdded:Wait()
-		end
+			coroutine.resume(coroutine.create(function()
+				local Item=nil
+				while not Item or Item.Name~='Text Sign'do
+					Item=LocalPlayer.Backpack.ChildAdded:Wait()
+				end
+				return Item
+			end))
+		end)()
 		USRemote:FireServer("Decal",("rbxassetid://%s"):format(Img.Text or'0')or'')
 		USRemote:FireServer("Text",Desc.Text or'')
 		for _,x in next,{ISign,TSign}do
@@ -364,9 +374,8 @@ do
 			end
 			x.Parent=Character
 		end
-		--ISign.Grip=CFrame.new(0,0,0,0,0,-1,0,1,0,1,0,0)
 		TSign.Grip=CFrame.new(0,-2,0,0,0,-1,0,1,0,1,0,0)
-		TSign.Unequipped:Connect(function()
+		TSign.Unequipped:Once(function()
 			TSign.Grip=CFrame.new(0,0,0,0,0,-1,0,1,0,1,0,0)
 		end)
 	end)
@@ -422,15 +431,15 @@ do
 		local text=Searcher.Text:lower()
 		if text==''then
 			for n,d in next,PlayersTable do
-				local UFrame=PlayerSelectionFrame[d]
+				local UFrame=PlayerSelectionFrame[d.Name]
 				UFrame.Visible=true
 			end
 			return
 		end
 		for n,d in next,PlayersTable do
-			local UFrame=PlayerSelectionFrame[d]
+			local UFrame=PlayerSelectionFrame[d.Name]
 			condition(Frame,#text,n)
-			condition(Frame,#text,d)
+			condition(Frame,#text,d.Name)
 		end
 	end)
 	local function CreateTB(Player)
@@ -450,12 +459,8 @@ do
 				Notify('Missing HMR either on local or target.',3)
 				return
 			end
-			task.spawn(function()
-				for i=1,7 do
-					HumanoidRootPart.AssemblyLinearVelocity=Vector3.new(0,0,0)
-					task.wait()
-				end
-			end)
+			HumanoidRootPart.AssemblyLinearVelocity=Vector3.new(0,0,0)
+			HumanoidRootPart.AssemblyAngularVelocity=Vector3.new(0,0,0)
 			HumanoidRootPart.CFrame=THumanoidRootPart.CFrame
 		end)
 	end
@@ -571,7 +576,7 @@ do
 					return 
 				end
 				local Humanoid=Character:WaitForChild('Humanoid',1)or Character:FindFirstChildWhichIsA'Humanoid'
-				local Root=Character:WaitForChild('HumanoidRootPart',1/0)or Character:FindFirstChild'HumanoidRootPart'
+				local Root=Character:WaitForChild('HumanoidRootPart',1)or Character:FindFirstChild'HumanoidRootPart'
 				if not Humanoid or not Root then return end			
 				if Position~=nil then
 					Root.CFrame=Position
@@ -724,7 +729,7 @@ DButton.OnClick(function()
 	local total=0
 	for _,x in next,LocalPlayer.Backpack:GetChildren()do
 		--if x:IsA'Tool'and x.Name=='ClassicSword'then
-		if x:IsA'Tool'and x.Name=='Image Sign'then
+		if x:IsA'Tool'then
 			local handle=x:FindFirstChild'Handle'
 			if handle then
 				handle.Massless=true
@@ -736,7 +741,7 @@ DButton.OnClick(function()
 		end
 	end
 	for _,x in next,Character:GetChildren()do
-		if x:IsA'Tool'and x.Name=='Image Sign'then
+		if x:IsA'Tool'then
 			local handle=x:FindFirstChild'Handle'
 			if handle then
 				handle.Massless=true
@@ -749,7 +754,7 @@ DButton.OnClick(function()
 		end
 	end
 	LocalPlayer.Character.ChildAdded:Connect(function(Child)
-		if Child:IsA'Tool'and Child.Name=='Image Sign'and Child:FindFirstChild'Handle'and not table.find(SWR,Child)then
+		if Child:IsA'Tool'and Child:FindFirstChild'Handle'and not table.find(SWR,Child)then
 			table.insert(SWR,Child)
 			total=total+1
 			Child.Handle.Massless=true
@@ -1083,7 +1088,8 @@ local ACBButton=SnipeMenu.CreateDK('AutoClaimBooth',UDim2.new(.05,0,.085,0),'Ena
 		for _,x in next,workspace:GetChildren()do
 			if x.Name~='Booth'and not x:IsA'Model'then continue end
 			if(table.find(Booths,x)~=table.find(Table,x)and IsWhitelisting)or(table.find(Booths,x)==table.find(Table,x)and not IsWhitelisting)then 
-				continue end
+				continue 
+			end
 			if AlreadyOwnBooth or AlreadyRunning then break end
 			if AlreadyOwnBooth then break end
 			task.spawn(function()
@@ -1096,7 +1102,9 @@ local ACBButton=SnipeMenu.CreateDK('AutoClaimBooth',UDim2.new(.05,0,.085,0),'Ena
 				if Temp==''then 
 					AlreadyRunning=true
 					repeat
-						if not IsSnipingBooth.Value or AlreadyOwnBooth then break end
+						if not IsSnipingBooth.Value or AlreadyOwnBooth then 
+							break 
+						end
 						Dep(Banner)
 						task.wait(.1)
 						fireclickdetector(ClickDetector)
