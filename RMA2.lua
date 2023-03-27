@@ -57,7 +57,7 @@ local KC,UIT=Enum.KeyCode,Enum.UserInputType
 local JewellStand=workspace:FindFirstChild'JewelleryStand'
 local Tag,CurrentVersion=MG.VersionTag						,						'v1.3.1'
 local Heartbeat=RunService.Heartbeat
-local USRemote=ReplicatedStorage.UpdateSign
+local USRemote=ReplicatedStorage:FindFirstChild'UpdateSign'or ReplicatedStorage:WaitForChild'UpdateSign'
 local AllBools={}
 local TableBooth={}
 for _,x in next,workspace:GetChildren()do
@@ -258,6 +258,7 @@ Old=hookmetamethod(game,"__namecall",function(Self,...)
         return Old(Self,Type,('https://www.roblox.com/asset-thumbnail/image?assetId=%s&width=10000&height=10000&format=png'):format(Id:match('%d+')))
     end
     return Old(Self,...)
+end)
 Notify('2 get started, click on the goofy icon thing on the left, oh! dont forget that this script might break if you change even a small detail in game.',6,true)
 getconnections(M.KillButton.MouseButton1Click)[1]:Disable()
 Set(Tag){TextSize=20,TextXAlignment=Enum.TextXAlignment.Left,Size=UDim2.new(0,360,0,40),Position=UDim2.new(0,40,1,-50),Text='v.1.436 | '..CurrentVersion..' LOCAL MODIFIED.',TextScaled=false,TextWrapped=false,RichText=true}
