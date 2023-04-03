@@ -437,7 +437,9 @@ do
 			return
 		end
 		for _,d in next,PlayersTable do
-			condition(PlayerSelectionFrame[d.Name],text,d)			
+			pcall(function()
+				condition(PlayerSelectionFrame[d.Name],text,d)	
+			end)		
 		end
 	end)
 	local function CreateTB(Player)
