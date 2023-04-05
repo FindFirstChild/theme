@@ -55,9 +55,9 @@ local M=LPG.ManagerGui.ServerSettingFrame
 local Knight=Teams.Knight
 local KC,UIT=Enum.KeyCode,Enum.UserInputType
 local JewellStand=workspace:FindFirstChild'JewelleryStand'
-local Tag,CurrentVersion=MG.VersionTag						,						'v1.3.1'
+local Tag,CurrentVersion=MG.VersionTag						,						'v1.3.3'
 local Heartbeat=RunService.Heartbeat
-local USRemote=ReplicatedStorage:FindFirstChild'UpdateSign'or ReplicatedStorage:WaitForChild'UpdateSign'
+local USRemote=ReplicatedStorage.UpdateSign
 local AllBools={}
 local TableBooth={}
 for _,x in next,workspace:GetChildren()do
@@ -89,8 +89,8 @@ local BI=Players.PlayerAdded:Connect(function(Player)
 	PlayerAdded:Fire(Player)
 end)
 local BII=Players.PlayerRemoving:Connect(function(Player)
-	PlayersTable[table.find(PlayersTable,Player.Name)or-1]=nil
 	PlayerRemoving:Fire(Player)
+	PlayersTable[table.find(PlayersTable,Player.Name)or-1]=nil
 end)
 --functions
 local SetClip=toclipboard or setclipboard 
@@ -189,28 +189,39 @@ local function Notify(Message,Duration,Warn)
 	end)
 end
 --bools 
-local IsAutoClaim,IsAntiProx,IsShowingDupeMenu,IsShowingDesc=CreateBool'IACK',CreateBool'IAP',CreateBool'ISDM',CreateBool'ISD'
-local IsAutoRespawn,IsAntiBarrier,IsMusicEnabled,IsBypassLocal=CreateBool'IAR',CreateBool'IAB',CreateBool'IME',CreateBool'IBL'
-local IsSnipingBooth,IsWhitelisting,IsASTOP,IsAIS,IsATS=CreateBool'ISB',CreateBool'IW',CreateBool'IAS(explicitlol)',CreateBool'IAIS',CreateBool'IATS'
+CreateBool'IsAutoClaim'
+CreateBool'IsAntiProx'CreateBool'IsShowingDupeMenu'CreateBool',IsShowingDesc'
+CreateBool'IsAutoRespawn'CreateBool'IsAntiBarrier'CreateBool'IsMusicEnabled'CreateBool'IsBypassLocal'
+CreateBool'IsSnipingBooth'CreateBool'IsWhitelisting'CreateBool'IsASTOP'CreateBool'IsAIS'
+CreateBool'IsATS'
+local AllBools=select(2,Main:GetTables())
+if isfile'RMA2CONFIG.lua'then
+	local s=pcall(function()
+		AllBools=dofile'RMA2CONFIG.lua'
+	end)
+	if not s then
+		writefile('RMA2CONFIG.lua','')
+	end
+end
 --guis
-local Frame=Main.CreateFrame('Custom','hi')
-Frame.CreateSub('credits:\nideas:\nab5ence,cam1492,alonelypersoninpain\nscript:\nkevinYMHGmlg#1822',UDim2.new(.6,0,.9,0),Vector2.new(0,.5),UDim2.new(1.05,0,.5,0),.9)
-local MainIcon=Main.CreateIcon('ExploitButton','rbxassetid://10462982957',UDim2.new(0,20,.5,-80))
-local KnightButton=Frame.CreateButton('Knight','Knight Panel',UDim2.new(.05,0,.75,0))
-local MiscButton=Frame.CreateButton('Other','others',UDim2.new(.05,0,.65,0))
-local LocalButton=Frame.CreateButton('Local','Localplayer',UDim2.new(.05,0,.55,0))
-local BoothButton=Frame.CreateButton('Booth','Booth',UDim2.new(.05,0,.45,0))
-local GuiDestroy=Frame.CreateButton('SelfDestruct','Destroy Gui',UDim2.new(.05,0,.85,0))
+local Frame=Main:CreateFrame('Custom','hi')
+Frame:CreateSub('credits:\nideas:\nab5ence,cam1492,alonelypersoninpain\nscript:\nkevinYMHGmlg#1822',UDim2.new(.6,0,.9,0),Vector2.new(0,.5),UDim2.new(1.05,0,.5,0),.9)
+local MainIcon=Main:CreateIcon('ExploitButton','rbxassetid://10462982957',UDim2.new(0,20,.5,-80))
+local KnightButton=Frame:CreateButton('Knight','Knight Panel',UDim2.new(.05,0,.75,0))
+local MiscButton=Frame:CreateButton('Other','others',UDim2.new(.05,0,.65,0))
+local LocalButton=Frame:CreateButton('Local','Localplayer',UDim2.new(.05,0,.55,0))
+local BoothButton=Frame:CreateButton('Booth','Booth',UDim2.new(.05,0,.45,0))
+local GuiDestroy=Frame:CreateButton('SelfDestruct','Destroy Gui',UDim2.new(.05,0,.85,0))
 GuiDestroy.Gui.BackgroundColor3=Color3.fromRGB(150,64,27)
-local MiscMenu=Main.CreateFrame('others','s')
-local MiscReturn=MiscMenu.CreateButton('R','Return',UDim2.new(.05,0,.25,0))
-local KnightMenu=Main.CreateFrame('Knight','knight panel')
-local KnightReturn=KnightMenu.CreateButton('R','Return',UDim2.new(.05,0,.55,0))
-local BoothMenu=Main.CreateFrame('Booth','game.service(\'WorkSpace\',game)[\'FilteringEnabled\']=not not Instance.new\'BoolValue\'.Value')
-local SnipeMenu=Main.CreateFrame('AutoSnipe','hiyah')
-local BoothReturn=BoothMenu.CreateButton('R','Return',UDim2.new(.05,0,.35,0))
-local LocalMenu=Main.CreateFrame('Local','workspace.FilteringEnabled=false')
-local LocalReturn=LocalMenu.CreateButton('R','Return',UDim2.new(.05,0,.35,0))
+local MiscMenu=Main:CreateFrame('others','s')
+local MiscReturn=MiscMenu:CreateButton('R','Return',UDim2.new(.05,0,.25,0))
+local KnightMenu=Main:CreateFrame('Knight','knight panel')
+local KnightReturn=KnightMenu:CreateButton('R','Return',UDim2.new(.05,0,.55,0))
+local BoothMenu=Main:CreateFrame('Booth','game.service(\'WorkSpace\',game)[\'FilteringEnabled\']=not not Instance.new\'BoolValue\'.Value')
+local SnipeMenu=Main:CreateFrame('AutoSnipe','hiyah')
+local BoothReturn=BoothMenu:CreateButton('R','Return',UDim2.new(.05,0,.35,0))
+local LocalMenu=Main:CreateFrame('Local','workspace.FilteringEnabled=false')
+local LocalReturn=LocalMenu:CreateButton('R','Return',UDim2.new(.05,0,.35,0))
 local TeleportMenu=MG.ContentMenuFrame:Clone()
 Set(TeleportMenu){Name='TeleportationFrame',Parent=MG}
 TeleportMenu.Heading.Text='teleportations'
@@ -227,12 +238,12 @@ PBoothMenu.BrowseImageButton.Visible=false
 PBoothMenu.BrowseDescriptionButton.Visible=false
 PBoothMenu.BlacklistButton:Destroy()
 PBoothMenu.AbandonButton.Visible=false
-local CKButton=KnightMenu.CreateButton('CK','Claim Knight',UDim2.new(.05,0,.35,0))
-local RSButton=KnightMenu.CreateButton('RS','Request Sword',UDim2.new(.05,0,.45,0))
-local TPButton=Frame.CreateButton('TP','Teleportations',UDim2.new(.05,0,.35,0))
-local DButton=LocalMenu.CreateButton('D','DrawGui.lua',UDim2.new(.05,0,.25,0))
-local SnipeButton=BoothMenu.CreateButton('Snipe','Auto Claim Booth..',UDim2.new(.05,0,.45,0))
-local PortableButton=BoothMenu.CreateButton('B','portable booth',UDim2.new(.05,0,.55,0))
+local CKButton=KnightMenu:CreateButton('CK','Claim Knight',UDim2.new(.05,0,.35,0))
+local RSButton=KnightMenu:CreateButton('RS','Request Sword',UDim2.new(.05,0,.45,0))
+local TPButton=Frame:CreateButton('TP','Teleportations',UDim2.new(.05,0,.35,0))
+local DButton=LocalMenu:CreateButton('D','DrawGui.lua',UDim2.new(.05,0,.25,0))
+local SnipeButton=BoothMenu:CreateButton('Snipe','Auto Claim Booth..',UDim2.new(.05,0,.45,0))
+local PortableButton=BoothMenu:CreateButton('B','portable booth',UDim2.new(.05,0,.55,0))
 --linkers
 Link(TeleportMenu.ReturnButton,Frame.Gui)
 MainIcon:BindTo(Frame)
@@ -255,7 +266,7 @@ local Old
 Old=hookmetamethod(game,"__namecall",function(Self,...)
     if Self==USRemote and getnamecallmethod()=='FireServer'then
         local Type,Id=...
-        return Old(Self,Type,('https://www.roblox.com/asset-thumbnail/image?assetId=%s&width=10000&height=10000&format=png'):format(Id:match('%d+')))
+        return Old(Self,Type,('https://www.roblox.com/asset-thumbnail/image?assetId=%s&width=10000&height=10000&format=png'):format(Id:match'%d+'))
     end
     return Old(Self,...)
 end)
@@ -380,7 +391,7 @@ do
 		end)
 	end)
 end
-local APButton=LocalMenu.CreateDK('AP',UDim2.new(.05,0,.65,0),'Anti Proximity: ',IsAntiProx,
+local APButton=LocalMenu:CreateDK('AP',UDim2.new(.05,0,.65,0),'Anti Proximity: ',AllBools.IsAntiProx,
 	function()
 		local Character=LocalPlayer.Character
 		if Character then
@@ -437,9 +448,7 @@ do
 			return
 		end
 		for _,d in next,PlayersTable do
-			pcall(function()
-				condition(PlayerSelectionFrame[d.Name],text,d)	
-			end)		
+			condition(PlayerSelectionFrame[d.Name],text,d)			
 		end
 	end)
 	local function CreateTB(Player)
@@ -468,8 +477,7 @@ do
 	end
 	PlayerAdded.Event:Connect(CreateTB)
 	PlayerRemoving.Event:Connect(function(Player)
-		local Name=Player.Name
-		Destroy(PlayerSelectionFrame,Name)
+		Destroy(PlayerSelectionFrame,Player.Name)
 	end)
 	local function CreateIB(Xame,Id,Position,y)
 		local ImageButton=Create'ImageButton'{Parent=PlaceSelectionFrame,Name=Xame,BorderSizePixel=0,Image='rbxassetid://1183324'..Id}
@@ -499,7 +507,7 @@ do
 	CreateIB('Spawn','1670',Vector3.new(-8,10,6),90)
 	CreateIB('Stage','1495',Vector3.new(-85,43,6),-90)
 end
-local BButton=LocalMenu.CreateDK('B',UDim2.new(.05,0,.45,0),'bypass vip stuff: ',IsBypassLocal,
+local BButton=LocalMenu:CreateDK('B',UDim2.new(.05,0,.45,0),'bypass vip stuff: ',AllBools.IsBypassLocal,
 	function()
 		Notify('this is local only i meant most stuff are localized')
 		local CI,CII
@@ -523,7 +531,7 @@ local BButton=LocalMenu.CreateDK('B',UDim2.new(.05,0,.45,0),'bypass vip stuff: '
 	end
 )
 do
-	for i,x in next,{IsASTOP,IsAIS,IsATS}do
+	for i,x in next,{AllBools.IsASTOP,AllBools.IsAIS,AllBools.IsATS}do
 		local Id,Value=Gamepasses[i][1],Gamepasses[i][2]
 		local TBN,N='',''
 		if i==1 then
@@ -533,7 +541,7 @@ do
 		elseif i==3 then
 			TBN,N='Auto Text Sign: ','ATS'
 		end
-		local funnyButton=MiscMenu.CreateDK(N,UDim2.new(.05,0,.85-(.2*(i-1)),0),TBN,x,
+		local funnyButton=MiscMenu:CreateDK(N,UDim2.new(.05,0,.85-(.2*(i-1)),0),TBN,x,
 			function()
 				if not Value then
 					MiscMenu.Gui[N].Value.ImageColor3=Color3.fromRGB(90,90,90)
@@ -558,7 +566,7 @@ do
 end
 do
 	local Delay=nil
-	local ARButton=LocalMenu.CreateDK('AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',IsAutoRespawn,
+	local ARButton=LocalMenu:CreateDK('AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',AllBools.IsAutoRespawn,
 		function()
 			Notify('I don\'t recommend using this if you\'re trying to toolkill people, or reanimations/god')
 			Notify('now with delay',2)
@@ -578,7 +586,7 @@ do
 				end
 				local Destroying,Die
 				local function yeahwhatever(Connection)
-					if not IsAutoRespawn.Value then
+					if not AllBools.IsAutoRespawn.Value then
 						Destroy(Connection)
 						return
 					end
@@ -937,21 +945,22 @@ local InputTable={
 		task.wait()
 	end,
 	[3]=function(Tool)
-		if not Tool:IsA'Tool'and Tool.Name~='ClassicSword'then return end
+		--if not Tool:IsA'Tool'and Tool.Name~='ClassicSword'then return end
+		if not Tool:IsA'Tool'then return end
 		Tool.Parent=LocalPlayer.Character
 	end,
 }
 RSButton.OnClick(function()RequestSword()if LocalPlayer.Team~=Knight then Notify('You dont have knight role')end end)
-local SGButton=KnightMenu.CreateDK('Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui',IsShowingDupeMenu,
+local SGButton=KnightMenu:CreateDK('Dupe',UDim2.new(.05,0,.65,0),'Show Dupe Gui',AllBools.IsShowingDupeMenu,
 	function()
 		--should rework this function later
 		--Notify('Do i need to explain these icons? yes? no lol')
 		if LocalPlayer.Team~=Knight then Notify('you\'re not knight')end
-		local SideI=Main.CreateButtonOld('DupeButton','Dupe:\noff',UDim2.new(1,-20,.5,-80),Vector2.new(1,0))
+		local SideI=Main:CreateButtonOld('DupeButton','Dupe:\noff',UDim2.new(1,-20,.5,-80),Vector2.new(1,0))
 		local Val=Create'BoolValue'{Parent=CoreGui,Name='dupe'}
-		local SideII=Main.CreateIcon('ClearS','rbxassetid://12068313338',UDim2.new(1,-20,.5,-30),Vector2.new(1,0))
-		local SideIII=Main.CreateIcon('BlockM','rbxassetid://12068313585',UDim2.new(1,-20,.5,20),Vector2.new(1,0))
-		local SideIV=Main.CreateButtonOld('Counter','COUNT SWORD',UDim2.new(1,-20,.5,70),Vector2.new(1,0))
+		local SideII=Main:CreateIcon('ClearS','rbxassetid://12068313338',UDim2.new(1,-20,.5,-30),Vector2.new(1,0))
+		local SideIII=Main:CreateIcon('BlockM','rbxassetid://12068313585',UDim2.new(1,-20,.5,20),Vector2.new(1,0))
+		local SideIV=Main:CreateButtonOld('Counter','COUNT SWORD',UDim2.new(1,-20,.5,70),Vector2.new(1,0))
 		local function CheckTool(Directory,Input)
 			Loop(Directory,nil,function(Item,Handle)Set(Handle){Massless=true,CanCollide=false,CanQuery=true,CanTouch=false}InputTable[Input](Item)end)
 		end
@@ -1006,10 +1015,10 @@ end
 local Table={}
 local SelectButtons={}
 do
-	local SOsub=SnipeMenu.CreateSub('sorry it ran out of budget',UDim2.new(.9,0,.075,0),Vector2.new(0,0),UDim2.new(-.303,0,-.11,0))
-	local SOi=SnipeMenu.CreateSub('Ask Me Anything Booths',UDim2.new(.5,0,.075,0),Vector2.new(.5,0),UDim2.new(.5,0,.15,0),.5)
-	local SOii=SnipeMenu.CreateSub('Rate My Avatar Booths',UDim2.new(.5,0,.075,0),Vector2.new(.5,0),UDim2.new(.5,0,.3,0),.5)
-	local SOiii=SnipeMenu.CreateSub('Guessing Booths',UDim2.new(.5,0,.075,0),Vector2.new(.5,0),UDim2.new(.5,0,.45,0),.5)
+	local SOsub=SnipeMenu:CreateSub('sorry it ran out of budget',UDim2.new(.9,0,.075,0),Vector2.new(0,0),UDim2.new(-.303,0,-.11,0))
+	local SOi=SnipeMenu:CreateSub('Ask Me Anything Booths',UDim2.new(.5,0,.075,0),Vector2.new(.5,0),UDim2.new(.5,0,.15,0),.5)
+	local SOii=SnipeMenu:CreateSub('Rate My Avatar Booths',UDim2.new(.5,0,.075,0),Vector2.new(.5,0),UDim2.new(.5,0,.3,0),.5)
+	local SOiii=SnipeMenu:CreateSub('Guessing Booths',UDim2.new(.5,0,.075,0),Vector2.new(.5,0),UDim2.new(.5,0,.45,0),.5)
 	for x,y in next,Booths do
 		Table[x]=y
 	end
@@ -1024,7 +1033,7 @@ do
 				VFTO=not VFTO
 				if VFTO then
 					Table[ID]=nil
-					if IsWhitelisting.Value then
+					if AllBools.IsWhitelisting.Value then
 						Button.BackgroundColor3=Color3.fromRGB(90,90,90)
 						return
 					end
@@ -1032,7 +1041,7 @@ do
 					return
 				end
 				Table[ID]=Temp
-				if IsWhitelisting.Value then
+				if AllBools.IsWhitelisting.Value then
 					Button.BackgroundColor3=Color3.fromRGB(178,235,53)
 					return
 				end
@@ -1047,7 +1056,7 @@ clem dis buth, no crap sherlock that's a bad practice considering the booth some
 unclaimed but still has image and/or text" in it
 if you use infinite loops i will kill you
 ]]
-local ACBSButton=SnipeMenu.CreateDK('BLWL',UDim2.new(.05,0,.7,0),'Whitelist mode: ',IsWhitelisting,
+local ACBSButton=SnipeMenu:CreateDK('BLWL',UDim2.new(.05,0,.7,0),'Whitelist mode: ',AllBools.IsWhitelisting,
 	function()
 		for _,x in next,SelectButtons do
 			if x.BackgroundColor3==Color3.fromRGB(90,90,90)then
@@ -1067,9 +1076,10 @@ local ACBSButton=SnipeMenu.CreateDK('BLWL',UDim2.new(.05,0,.7,0),'Whitelist mode
 		end
 	end
 )
-local ACBButton=SnipeMenu.CreateDK('AutoClaimBooth',UDim2.new(.05,0,.085,0),'Enable: ',IsSnipingBooth,
+local ACBButton=SnipeMenu:CreateDK('AutoClaimBooth',UDim2.new(.05,0,.085,0),'Enable: ',AllBools.IsSnipingBooth,
 	function()
-		local HumanoidRootPart=LocalPlayer.Character.HumanoidRootPart
+		local HumanoidRootPart=LocalPlayer.Character:FindFirstChild'HumanoidRootPart'
+		if not HumanoidRootPart then return end
 		local Old,Old2=HumanoidRootPart.CFrame,HumanoidRootPart.CanCollide
 		local function Dep(a)
 			HumanoidRootPart.CFrame=a.CFrame-Vector3.new(0,15,0)
@@ -1081,7 +1091,7 @@ local ACBButton=SnipeMenu.CreateDK('AutoClaimBooth',UDim2.new(.05,0,.085,0),'Ena
 		local AlreadyOwnBooth=false
 		for _,x in next,workspace:GetChildren()do
 			if x.Name~='Booth'and not x:IsA'Model'then continue end
-			if(table.find(Booths,x)~=table.find(Table,x)and IsWhitelisting)or(table.find(Booths,x)==table.find(Table,x)and not IsWhitelisting)then 
+			if(table.find(Booths,x)~=table.find(Table,x)and AllBools.IsWhitelisting)or(table.find(Booths,x)==table.find(Table,x)and not AllBools.IsWhitelisting)then 
 				continue 
 			end
 			if AlreadyOwnBooth or AlreadyRunning then break end
@@ -1096,14 +1106,16 @@ local ACBButton=SnipeMenu.CreateDK('AutoClaimBooth',UDim2.new(.05,0,.085,0),'Ena
 				if Temp==''then 
 					AlreadyRunning=true
 					repeat
-						if not IsSnipingBooth.Value or AlreadyOwnBooth then 
+						if not AllBools.IsSnipingBooth.Value or AlreadyOwnBooth then 
 							break 
 						end
 						Dep(Banner)
 						task.wait(.1)
 						fireclickdetector(ClickDetector)
-					until x:GetAttribute'TenantUsername'~=''or not IsSnipingBooth.Value
+					until x:GetAttribute'TenantUsername'~=''or not AllBools.IsSnipingBooth.Value
 					if x:GetAttribute'TenantUsername'==LocalPlayer.Name then
+						SnipeMenu.Gui.AutoClaimBooth.Value.ImageColor3=Color3.fromRGB(90,90,90)
+						AllBools.IsSnipingBooth.Value=false
 						Repos(HumanoidRootPart,Old,Old2)
 						return
 					end
@@ -1113,7 +1125,7 @@ local ACBButton=SnipeMenu.CreateDK('AutoClaimBooth',UDim2.new(.05,0,.085,0),'Ena
 						repeat
 							task.wait(.1)
 							fireclickdetector(ClickDetector)
-						until x:GetAttribute'TenantUsername'~=''or not IsSnipingBooth.Value
+						until x:GetAttribute'TenantUsername'~=''or not AllBools.IsSnipingBooth.Value
 						if x:GetAttribute'TenantUsername'==LocalPlayer.Name then
 							CI:Disconnect()
 						end
@@ -1139,7 +1151,7 @@ local ACBButton=SnipeMenu.CreateDK('AutoClaimBooth',UDim2.new(.05,0,.085,0),'Ena
 		end
 	end
 )
-local EBButton=BoothMenu.CreateDK('Extra Banner',UDim2.new(.05,0,.85,0),'extra description: ',IsShowingDesc,
+local EBButton=BoothMenu:CreateDK('Extra Banner',UDim2.new(.05,0,.85,0),'extra description: ',AllBools.IsShowingDesc,
 	function()
 		local ExtraBanners,ListOfConnections={},{}
 		for _,x in next,TableBooth do
@@ -1237,7 +1249,7 @@ local EBButton=BoothMenu.CreateDK('Extra Banner',UDim2.new(.05,0,.85,0),'extra d
 --EBButton.Text.Size=UDim2.new(.75,0,1,0)
 local MCI=true
 --[[
-local DMButton=Frame.CreateDK('Music',UDim2.new(.05,0,.15,0),'music',IsMusicEnabled,
+local DMButton=Frame:CreateDK('Music',UDim2.new(.05,0,.15,0),'music',IsMusicEnabled,
 	function()
 		do do end do do end end do end do end end
 		Notify('function discontinued until re-newed',3)
@@ -1250,7 +1262,7 @@ local DMButton=Frame.CreateDK('Music',UDim2.new(.05,0,.15,0),'music',IsMusicEnab
 	end
 )
 ]]
-local ABButton=BoothMenu.CreateDK('Anti Barrier',UDim2.new(.05,0,.65,0),'Anti Barrier: ',IsAntiBarrier,
+local ABButton=BoothMenu:CreateDK('Anti Barrier',UDim2.new(.05,0,.65,0),'Anti Barrier: ',AllBools.IsAntiBarrier,
 	function()
 		for _,x in next,workspace:GetChildren()do
 			SetBarrier(x)
@@ -1266,11 +1278,11 @@ local ABButton=BoothMenu.CreateDK('Anti Barrier',UDim2.new(.05,0,.65,0),'Anti Ba
 		end
 	end
 )
-local ACKButton=KnightMenu.CreateDK('ACK',UDim2.new(.05,0,.85,0),'Auto Claim Knight: ',IsAutoClaim,
+local ACKButton=KnightMenu:CreateDK('ACK',UDim2.new(.05,0,.85,0),'Auto Claim Knight: ',AllBools.IsAutoClaim,
 	function()
 		if LocalPlayer.Team==Knight then
 			KnightMenu.Gui.ACK.Value.ImageColor3=Color3.fromRGB(90,90,90)
-			IsAutoClaim.Value=false
+			AllBools.IsAutoClaim.Value=false
 			Notify('you already have knight role, what do you expect.')
 			return
 		end
@@ -1289,12 +1301,12 @@ local ACKButton=KnightMenu.CreateDK('ACK',UDim2.new(.05,0,.85,0),'Auto Claim Kni
 					HumanoidRootPart.CFrame=JewellStand.CFrame
 					fireproximityprompt(Prox)
 					task.wait()
-				until not Prox or not Prox.Enabled or not IsAutoClaim.Value
+				until not Prox or not Prox.Enabled or not AllBools.IsAutoClaim.Value
 				task.wait()
 				JewellStand.CanCollide=true
 				HumanoidRootPart.CFrame=OldCFrame
 				KnightMenu.Gui.ACK.Value.ImageColor3=Color3.fromRGB(90,90,90)
-				IsAutoClaim.Value=false
+				AllBools.IsAutoClaim.Value=false
 				return
 			end
 			Notify('Missing HumanoidRootPart.',3)
@@ -1306,7 +1318,7 @@ local ACKButton=KnightMenu.CreateDK('ACK',UDim2.new(.05,0,.85,0),'Auto Claim Kni
 			if Check then
 				CI:Disconnect()
 				KnightMenu.Gui.ACK.Value.ImageColor3=Color3.fromRGB(90,90,90)
-				IsAutoClaim.Value=false
+				AllBools.IsAutoClaim.Value=false
 			end
 		end)
 		return CI
