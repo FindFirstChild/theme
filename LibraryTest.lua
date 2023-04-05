@@ -18,7 +18,6 @@ function RMA.CreateBool(Xame,Value)
 	if Value then
 		Bool.Value=Value
 	end
-	print(Xame)
 	AllBools[Xame]=Bool
 	Bool:GetPropertyChangedSignal'Value':Connect(function()
 		local str='local Conf={'
