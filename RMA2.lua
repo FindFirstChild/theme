@@ -190,7 +190,7 @@ local function Notify(Message,Duration,Warn)
 end
 --bools 
 CreateBool'IsAutoClaim'
-CreateBool'IsAntiProx'CreateBool'IsShowingDupeMenu'CreateBool',IsShowingDesc'
+CreateBool'IsAntiProx'CreateBool'IsShowingDupeMenu'CreateBool'IsShowingDesc'
 CreateBool'IsAutoRespawn'CreateBool'IsAntiBarrier'CreateBool'IsMusicEnabled'CreateBool'IsBypassLocal'
 CreateBool'IsSnipingBooth'CreateBool'IsWhitelisting'CreateBool'IsASTOP'CreateBool'IsAIS'
 CreateBool'IsATS'
