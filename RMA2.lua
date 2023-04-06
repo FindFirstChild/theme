@@ -196,12 +196,12 @@ CreateBool'IsSnipingBooth'CreateBool'IsWhitelisting'CreateBool'IsASTOP'CreateBoo
 CreateBool'IsATS'
 AllBools=select(2,Main:GetTables())
 if isfile'RMA2CONFIG.lua'then
-	local s=pcall(function()
-		AllBools=dofile'RMA2CONFIG.lua'
+	pcall(function()
+		local re=dofile'RMA2CONFIG.lua'
+		if typeof(re)~=nil then
+			AllBools=dofile'RMA2CONFIG.lua'
+		end
 	end)
-	if not s then
-		writefile('RMA2CONFIG.lua','')
-	end
 end
 --guis
 local Frame=Main:CreateFrame('Custom','hi')
