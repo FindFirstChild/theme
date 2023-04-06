@@ -58,7 +58,6 @@ local JewellStand=workspace:FindFirstChild'JewelleryStand'
 local Tag,CurrentVersion=MG.VersionTag						,						'v1.3.3'
 local Heartbeat=RunService.Heartbeat
 local USRemote=ReplicatedStorage.UpdateSign
-local AllBools={}
 local TableBooth={}
 for _,x in next,workspace:GetChildren()do
 	if x.Name=='Booth'and x:IsA'Model'then
