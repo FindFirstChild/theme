@@ -203,7 +203,7 @@ if isfile'RMA2CONFIG.lua'then
 		end
 		AllBools=re
 		for n,v in next,AllBools do
-			CreateBool(n,v)
+			AllBools[n]=CreateBool(n,v)
 		end
 	end)
 else
