@@ -19,10 +19,10 @@ function RMA.CreateBool(Xame,Value)
 		Bool.Value=Value
 	end
 	AllBools[Xame]=Bool
+	print(AllBools[Xame])
 	Bool:GetPropertyChangedSignal'Value':Connect(function()
 		local str='local Conf={'
 		for n,b in next,select(2,RMA:GetTables())do
-			print('haha lol')
 			str..=('	%s=%s,\n'):format(n,tostring(b.Value))
 		end
 		str..='}\return Conf'
