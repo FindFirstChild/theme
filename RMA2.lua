@@ -189,19 +189,32 @@ local function Notify(Message,Duration,Warn)
 	end)
 end
 --bools 
-CreateBool'IsAutoClaim'
-CreateBool'IsAntiProx'CreateBool'IsShowingDupeMenu'CreateBool'IsShowingDesc'
-CreateBool'IsAutoRespawn'CreateBool'IsAntiBarrier'CreateBool'IsMusicEnabled'CreateBool'IsBypassLocal'
-CreateBool'IsSnipingBooth'CreateBool'IsWhitelisting'CreateBool'IsASTOP'CreateBool'IsAIS'
-CreateBool'IsATS'
-AllBools=select(2,Main:GetTables())
 if isfile'RMA2CONFIG.lua'then
 	pcall(function()
 		local re=dofile'RMA2CONFIG.lua'
-		if typeof(re)=='nil'then return end
+		if typeof(re)=='nil'then 
+			CreateBool'IsAutoClaim'
+			CreateBool'IsAntiProx'CreateBool'IsShowingDupeMenu'CreateBool'IsShowingDesc'
+			CreateBool'IsAutoRespawn'CreateBool'IsAntiBarrier'CreateBool'IsMusicEnabled'CreateBool'IsBypassLocal'
+			CreateBool'IsSnipingBooth'CreateBool'IsWhitelisting'CreateBool'IsASTOP'CreateBool'IsAIS'
+			CreateBool'IsATS'
+			AllBools=select(2,Main:GetTables())
+			return 
+		end
 		AllBools=re
+		for n,v in next,AllBools do
+			CreateBool(n,v)
+		end
 	end)
+else
+	CreateBool'IsAutoClaim'
+	CreateBool'IsAntiProx'CreateBool'IsShowingDupeMenu'CreateBool'IsShowingDesc'
+	CreateBool'IsAutoRespawn'CreateBool'IsAntiBarrier'CreateBool'IsMusicEnabled'CreateBool'IsBypassLocal'
+	CreateBool'IsSnipingBooth'CreateBool'IsWhitelisting'CreateBool'IsASTOP'CreateBool'IsAIS'
+	CreateBool'IsATS'
+	AllBools=select(2,Main:GetTables())
 end
+
 --guis
 local Frame=Main:CreateFrame('Custom','hi')
 Frame:CreateSub('credits:\nideas:\nab5ence,cam1492,alonelypersoninpain\nscript:\nkevinYMHGmlg#1822',UDim2.new(.6,0,.9,0),Vector2.new(0,.5),UDim2.new(1.05,0,.5,0),.9)
