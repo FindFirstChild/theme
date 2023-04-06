@@ -24,7 +24,7 @@ function RMA.CreateBool(Xame,Value)
 		for n,b in next,select(2,RMA:GetTables())do
 			str..=('	%s=%s,\n'):format(n,tostring(b.Value))
 		end
-		str..='}\return Conf'
+		str..='}\nreturn Conf'
 		writefile('RMA2CONFIG.lua',str)
 	end)
 	return Bool
