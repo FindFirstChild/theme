@@ -195,13 +195,19 @@ CreateBool'IsAutoRespawn'CreateBool'IsAntiBarrier'CreateBool'IsMusicEnabled'Crea
 CreateBool'IsSnipingBooth'CreateBool'IsWhitelisting'CreateBool'IsASTOP'CreateBool'IsAIS'
 CreateBool'IsATS'
 AllBools=select(2,Main:GetTables())
+for n,x in next,AllBools do
+	print(n,x)
+end
 if isfile'RMA2CONFIG.lua'then
 	pcall(function()
 		local re=dofile'RMA2CONFIG.lua'
 		if typeof(re)~=nil then
-			AllBools=dofile'RMA2CONFIG.lua'
+			AllBools=re
 		end
 	end)
+end
+for n,x in next,AllBools do
+	print(n,x)
 end
 --guis
 local Frame=Main:CreateFrame('Custom','hi')
