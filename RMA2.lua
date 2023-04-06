@@ -201,13 +201,9 @@ end
 if isfile'RMA2CONFIG.lua'then
 	pcall(function()
 		local re=dofile'RMA2CONFIG.lua'
-		if typeof(re)~=nil then
-			AllBools=re
-		end
+		if typeof(re)=='nil'then return end
+		AllBools=re
 	end)
-end
-for n,x in next,AllBools do
-	print(n,x)
 end
 --guis
 local Frame=Main:CreateFrame('Custom','hi')
