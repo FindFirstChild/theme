@@ -58,6 +58,7 @@ local JewellStand=workspace:FindFirstChild'JewelleryStand'
 local Tag,CurrentVersion=MG.VersionTag						,						'v1.3.3'
 local Heartbeat=RunService.Heartbeat
 local USRemote=ReplicatedStorage.UpdateSign
+local AllBools={}
 local TableBooth={}
 for _,x in next,workspace:GetChildren()do
 	if x.Name=='Booth'and x:IsA'Model'then
@@ -193,7 +194,7 @@ CreateBool'IsAntiProx'CreateBool'IsShowingDupeMenu'CreateBool'IsShowingDesc'
 CreateBool'IsAutoRespawn'CreateBool'IsAntiBarrier'CreateBool'IsMusicEnabled'CreateBool'IsBypassLocal'
 CreateBool'IsSnipingBooth'CreateBool'IsWhitelisting'CreateBool'IsASTOP'CreateBool'IsAIS'
 CreateBool'IsATS'
-local AllBools=select(2,Main:GetTables())
+AllBools=select(2,Main:GetTables())
 if isfile'RMA2CONFIG.lua'then
 	local s=pcall(function()
 		AllBools=dofile'RMA2CONFIG.lua'
