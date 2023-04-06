@@ -5,21 +5,21 @@ local LocalPlayer=Players.LocalPlayer
 local CoreGui=game.CoreGui
 local LPG=LocalPlayer.PlayerGui
 local MG=LPG:FindFirstChild'MainGui'or LPG:WaitForChild'MainGui'
-local AllBools={}
+RMA.AllBools={}
 local function Create(Type)
 	if type(Type)~='string'then error("Argument of Create must be a string",2)end return function(dat)dat=dat or{}local obj=Instance.new(Type)local parent,ctor for k,v in next,dat do if type(k)=='string'then if k=='Parent'then parent=v continue end obj[k]=v elseif type(k)=='number'then if type(v)~='userdata'then error("Bad entry in Create body: Numeric keys must be paired with children, got a: "..type(v),2)end v.Parent=obj elseif type(k)=='table'and k.__eventname then if type(v)~='function'then error("Bad entry in Create body: Key `[Create.E\'"..k.__eventname.."\']` must have a function value, got: "..tostring(v),2)end obj[k.__eventname]:Connect(v)elseif k==Create then if type(v)~='function'then error("Bad entry in Create body: Key `[Create]` should be paired with a constructor function, got: "..tostring(v),2)elseif ctor then error("Bad entry in Create body: Only one constructor function is allowed",2)end ctor=v else error("Bad entry ("..tostring(k).." => "..tostring(v)..") in Create body",2)end end if ctor then ctor(obj)end if parent then obj.Parent=parent end return obj end
 end
 RMA.Create=Create
 function RMA:GetTables()
-	return Frames,AllBools
+	return Frames,RMA.AllBools
 end
 function RMA.CreateBool(Xame,Value)
 	local Bool=Create'BoolValue'{Parent=CoreGui,Name=Xame}
 	if Value then
 		Bool.Value=Value
 	end
-	AllBools[Xame]=Bool
-	print(AllBools[Xame])
+	RMA.AllBools[Xame]=Bool
+	print(RMA.AllBools[Xame])
 	Bool:GetPropertyChangedSignal'Value':Connect(function()
 		local str='local Conf={'
 		for n,b in next,select(2,RMA:GetTables())do
