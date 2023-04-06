@@ -109,6 +109,10 @@ function RMA:CreateFrame(Xame,Heading)
 		local Value=Create'ImageButton'{Parent=Frame,AnchorPoint=Vector2.new(1,.5),BackgroundTransparency=1,Name='Value',Position=UDim2.new(1,0,.5,0),Size=UDim2.new(.1,40,1,40),Image='rbxassetid://1759563960',ImageColor3=Color3.fromRGB(90,90,90)}		
 		local DKs={}
 		local TextL=Create'TextLabel'{Parent=Frame,AutomaticSize=Enum.AutomaticSize.None,BackgroundTransparency=1,Name='Text',Size=UDim2.new(.9,0,1,0),Font=Enum.Font.SourceSansSemibold,Text=Xext,TextColor3=Color3.new(1,1,1),TextScaled=true,TextSize=14,TextXAlignment=Enum.TextXAlignment.Left}
+		if Bool.Value then
+			Value.ImageColor3=Color3.new(1,1,1)
+			Instances=CodeOff()
+		end
 		Value.MouseButton1Click:Connect(function()
 			if Bool.Value then				
 				Bool.Value=false
