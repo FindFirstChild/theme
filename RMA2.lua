@@ -1199,9 +1199,9 @@ local EBButton=BoothMenu:CreateDK('Extra Banner',UDim2.new(.05,0,.85,0),'extra d
 			Set(TBanner){Parent=Banner.Parent,Size=Vector3.new(3.8,1.05,.4),Name='TBanner',CFrame=Banner.CFrame:ToWorldSpace(CFrame.new(6.2,-1.925,0,1,0,0,0,1,0,0,0,1))}
 			TBanner.SurfaceGui.Frame.Description:Destroy()
 			local Text=Create'TextBox'{Parent=TBanner.SurfaceGui.Frame,BackgroundTransparency=1,Size=UDim2.new(1,0,1,0),Font=Enum.Font.SourceSansBold,TextColor3=Color3.new(1,1,1),PlaceholderText='text should appear here (Ctrl+A copy)',TextScaled=true,TextWrapped=true,Name='Extra',Text=Description.Text,TextEditable=false,ClearTextOnFocus=false}
-			Set(Img){RichText=true,Text=('roblox.com/library/%s'):format(Icon.Image:match'%d+$'),AnchorPoint=Vector2.new(0,.5),Position=UDim2.new(0,0,.5,0),Size=UDim2.new(1,0,.5,0)}
+			Set(Img){RichText=true,Text=('roblox.com/library/%s'):format(Icon.Image:match'%d+$'or''),AnchorPoint=Vector2.new(0,.5),Position=UDim2.new(0,0,.5,0),Size=UDim2.new(1,0,.5,0)}
 			Icon:GetPropertyChangedSignal'Image':Connect(function()
-				Img.Text=('roblox.com/library/%s'):format(Icon.Image:match'%d+$')
+				Img.Text=('roblox.com/library/%s'):format(Icon.Image:match'%d+$'or'')
 			end)
 			local Temp=x:GetAttribute'TenantUsername'
 			ODesc.Text=Temp
