@@ -361,7 +361,8 @@ do
 	PBoothMenu.UpdateButton.MouseButton1Click:Connect(function()
 		local Character=LocalPlayer.Character
 		if not Character then return end
-		local ISign=Character:FindFirstChild'Image Sign'or LocalPlayer.Backpack:FindFirstChild'Image Sign'or(function()
+		local ISign=Character:FindFirstChild'Image Sign'or LocalPlayer.Backpack:FindFirstChild'Image Sign'
+		if not ISign then
 			if Gamepasses[2][2]then
 				Notify('you need an image sign')
 				return
@@ -372,23 +373,24 @@ do
 				while not Item or Item.Name~='Image Sign'do
 					Item=LocalPlayer.Backpack.ChildAdded:Wait()
 				end
-				return Item
+				ISign=Item
 			end))
-		end)()
-		local TSign=Character:FindFirstChild'Text Sign'or LocalPlayer.Backpack:FindFirstChild'Text Sign'or(function()
+		end
+		local TSign=Character:FindFirstChild'Text Sign'or LocalPlayer.Backpack:FindFirstChild'Text Sign'
+		if not TSign then
 			if Gamepasses[3][2]then
 				Notify('you need a text sign')
 				return
 			end
 			RequestItem(17291420)
-			coroutine.resume(coroutine.create(function()
+			coroutine.resume(coroutine.create(function() --lazy task.spawn
 				local Item=nil
 				while not Item or Item.Name~='Text Sign'do
 					Item=LocalPlayer.Backpack.ChildAdded:Wait()
 				end
-				return Item
+				TSign=Item
 			end))
-		end)()
+		end
 		USRemote:FireServer("Decal",("rbxassetid://%s"):format(Img.Text or'0')or'')
 		USRemote:FireServer("Text",Desc.Text or'')
 		for _,x in next,{ISign,TSign}do
