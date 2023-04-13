@@ -55,7 +55,7 @@ local M=LPG.ManagerGui.ServerSettingFrame
 local Knight=Teams.Knight
 local KC,UIT=Enum.KeyCode,Enum.UserInputType
 local JewellStand=workspace:FindFirstChild'JewelleryStand'
-local Tag,CurrentVersion=MG.VersionTag						,						'v1.3.3(b)'
+local Tag,CurrentVersion=MG.VersionTag						,						'v1.3.3(c)'
 local Heartbeat=RunService.Heartbeat
 local USRemote=ReplicatedStorage.UpdateSign
 local AllBools={}
@@ -189,15 +189,31 @@ local function Notify(Message,Duration,Warn)
 	end)
 end
 --bools 
+local HAHAHA={
+	'IsAutoClaim',
+	'IsAntiProx',
+	'IsShowingDupeMenu',
+	'IsShowingDesc',
+	'IsAutoRespawn',
+	'IsAntiBarrier',
+	'IsMusicEnabled',
+	'IsBypassLocal',
+	'IsSnipingBooth',
+	'IsWhitelisting',
+	'IsASTOP',
+	'IsAIS',
+	'IsATS',
+}
+local function CALL()
+	for _,x in next,HAHAHA do
+		CreateBool(x)
+	end
+end
 if isfile'RMA2CONFIG.lua'then
 	pcall(function()
 		local re=dofile'RMA2CONFIG.lua'
 		if typeof(re)=='nil'then 
-			CreateBool'IsAutoClaim'
-			CreateBool'IsAntiProx'CreateBool'IsShowingDupeMenu'CreateBool'IsShowingDesc'
-			CreateBool'IsAutoRespawn'CreateBool'IsAntiBarrier'CreateBool'IsMusicEnabled'CreateBool'IsBypassLocal'
-			CreateBool'IsSnipingBooth'CreateBool'IsWhitelisting'CreateBool'IsASTOP'CreateBool'IsAIS'
-			CreateBool'IsATS'
+			CALL()
 			AllBools=select(2,Main:GetTables())
 			return 
 		end
@@ -207,11 +223,7 @@ if isfile'RMA2CONFIG.lua'then
 		end
 	end)
 else
-	CreateBool'IsAutoClaim'
-	CreateBool'IsAntiProx'CreateBool'IsShowingDupeMenu'CreateBool'IsShowingDesc'
-	CreateBool'IsAutoRespawn'CreateBool'IsAntiBarrier'CreateBool'IsMusicEnabled'CreateBool'IsBypassLocal'
-	CreateBool'IsSnipingBooth'CreateBool'IsWhitelisting'CreateBool'IsASTOP'CreateBool'IsAIS'
-	CreateBool'IsATS'
+	CALL()
 	AllBools=select(2,Main:GetTables())
 end
 
@@ -368,13 +380,13 @@ do
 				return
 			end
 			RequestItem(17291427)
-			coroutine.resume(coroutine.create(function()
+			task.spawn(function()
 				local Item=nil
 				while not Item or Item.Name~='Image Sign'do
 					Item=LocalPlayer.Backpack.ChildAdded:Wait()
 				end
 				ISign=Item
-			end))
+			end)
 		end
 		local TSign=Character:FindFirstChild'Text Sign'or LocalPlayer.Backpack:FindFirstChild'Text Sign'
 		if not TSign then
@@ -383,15 +395,15 @@ do
 				return
 			end
 			RequestItem(17291420)
-			coroutine.resume(coroutine.create(function() --lazy task.spawn
+			task.spawn(function()
 				local Item=nil
 				while not Item or Item.Name~='Text Sign'do
 					Item=LocalPlayer.Backpack.ChildAdded:Wait()
 				end
-				TSign=Item
-			end))
+				return Item
+			end)
 		end
-		USRemote:FireServer("Decal",("rbxassetid://%s"):format(Img.Text or'0')or'')
+		USRemote:FireServer("Decal",("rbxassetid://%s"):format(Img.Text or'0')or'rbxassetid://0')
 		USRemote:FireServer("Text",Desc.Text or'')
 		for _,x in next,{ISign,TSign}do
 			if x.Parent==Character then
@@ -443,16 +455,6 @@ do
 	local UIGridLayout=Create'UIGridLayout'{Parent=PlaceSelectionFrame,CellSize=UDim2.new(0,82,0,82),SortOrder=Enum.SortOrder.Name}
 	local Searcher=Create'TextBox'{Parent=TeleportMenu,BackgroundColor3=Color3.fromRGB(61,61,61),AnchorPoint=Vector2.new(1,0),Position=UDim2.new(.95,0,.3,0),Size=UDim2.new(.67,0,.075,0),Font=Enum.Font.SourceSansBold,TextColor3=Color3.new(1,1,1),PlaceholderText='Find player by Name/DisplayName',TextScaled=true,TextWrapped=true,Name='FindSeacher',Text=''}
 	local Count=0
-	local function condition(frame,text,plr)
-		for i=1,text:len() do
-			local name,displayname=plr.Name,plr.DisplayName
-			if name:lower():find(text,i,true)or displayname:lower():find(text,i,true)then
-				frame.Visible=true
-				break
-			end
-			frame.Visible=false
-		end
-	end
 	Searcher:GetPropertyChangedSignal'Text':Connect(function()
 		local text=Searcher.Text:lower()
 		if text==''then
@@ -462,7 +464,14 @@ do
 			return
 		end
 		for _,d in next,PlayersTable do
-			condition(PlayerSelectionFrame[d.Name],text,d)			
+			for _,d in next,PlayersTable do
+				local name,displayname=d.Name,d.DisplayName
+				if name:lower():find(text,1,true)or displayname:lower():find(text,1,true)then
+					PlayerSelectionFrame[d.Name].Visible=true
+					continue
+				end
+				PlayerSelectionFrame[d.Name].Visible=false		
+			end		
 		end
 	end)
 	local function CreateTB(Player)
@@ -482,7 +491,7 @@ do
 				Notify('Missing HMR either on local or target.',3)
 				return
 			end
-			HumanoidRootPart.AssemblyLinearVelocity,HumanoidRootPart.AssemblyAngularVelocity=Vector3.zero,Vector3.zer
+			HumanoidRootPart.AssemblyLinearVelocity,HumanoidRootPart.AssemblyAngularVelocity=Vector3.zero,Vector3.zero
 			HumanoidRootPart.CFrame=THumanoidRootPart.CFrame
 		end)
 	end
@@ -495,7 +504,7 @@ do
 	end)
 	local function CreateIB(Xame,Id,Position,y)
 		local ImageButton=Create'ImageButton'{Parent=PlaceSelectionFrame,Name=Xame,BorderSizePixel=0,Image='rbxassetid://1183324'..Id}
-		ContentProvider:PreloadAsync({ImageButton})
+		--ContentProvider:PreloadAsync({ImageButton})
 		ImageButton.MouseButton1Click:Connect(function()
 			local Character=LocalPlayer.Character
 			if not Character then 
@@ -582,8 +591,8 @@ do
 	local Delay=nil
 	local ARButton=LocalMenu:CreateDK('AR',UDim2.new(.05,0,.85,0),'Auto Respawn: ',AllBools.IsAutoRespawn,
 		function()
-			Notify('I don\'t recommend using this if you\'re trying to toolkill people, or reanimations/god')
-			Notify('now with delay',2)
+			--Notify('I don\'t recommend using this if you\'re trying to toolkill people, or reanimations/god')
+			--Notify('now with delay',2)
 			local Position,CI,CII
 			local function CharCheck(Character)
 				local Character=Character or LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
@@ -745,7 +754,7 @@ DButton.OnClick(function()
 	local total=0
 	for _,x in next,LocalPlayer.Backpack:GetChildren()do
 		--if x:IsA'Tool'and x.Name=='ClassicSword'then
-		if x:IsA'Tool'then
+		if x:IsA'Tool'and x~=Placeholder then
 			local handle=x:FindFirstChild'Handle'
 			if handle then
 				handle.Massless=true
@@ -757,7 +766,7 @@ DButton.OnClick(function()
 		end
 	end
 	for _,x in next,Character:GetChildren()do
-		if x:IsA'Tool'then
+		if x:IsA'Tool'and x~=Placeholder then
 			local handle=x:FindFirstChild'Handle'
 			if handle then
 				handle.Massless=true
@@ -770,7 +779,7 @@ DButton.OnClick(function()
 		end
 	end
 	LocalPlayer.Character.ChildAdded:Connect(function(Child)
-		if Child:IsA'Tool'and Child:FindFirstChild'Handle'and not table.find(SWR,Child)then
+		if Child:IsA'Tool'and Child:FindFirstChild'Handle'and not table.find(SWR,Child)and Child~=Placeholder then
 			table.insert(SWR,Child)
 			total=total+1
 			Child.Handle.Massless=true
@@ -1300,10 +1309,6 @@ local ACKButton=KnightMenu:CreateDK('ACK',UDim2.new(.05,0,.85,0),'Auto Claim Kni
 			Notify('you already have knight role, what do you expect.')
 			return
 		end
-		if not JewellStand then
-			Notify('There\'s no JewelleryStand, Knight Panel may not be working',5)
-			return
-		end
 		local Prox=JewellStand:FindFirstChild'ProximityPrompt'
 		if Prox.Enabled then
 			local HumanoidRootPart=LocalPlayer.Character:FindFirstChild'HumanoidRootPart'
@@ -1345,10 +1350,6 @@ CKButton.OnClick(function()
 	ClickSound()
 	if LocalPlayer.Team==Knight then
 		Notify('you already have knight role, what do you expect.')
-		return
-	end
-	if not JewellStand then
-		Notify('There\'s no JewelleryStand, Knight Panel may not be working',5)
 		return
 	end
 	local Prox=JewellStand:FindFirstChild'ProximityPrompt'
