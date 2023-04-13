@@ -464,14 +464,12 @@ do
 			return
 		end
 		for _,d in next,PlayersTable do
-			for _,d in next,PlayersTable do
-				local name,displayname=d.Name,d.DisplayName
-				if name:lower():find(text,1,true)or displayname:lower():find(text,1,true)then
-					PlayerSelectionFrame[d.Name].Visible=true
-					continue
-				end
-				PlayerSelectionFrame[d.Name].Visible=false		
-			end		
+			local name,displayname=d.Name,d.DisplayName
+			if name:lower():find(text,1,true)or displayname:lower():find(text,1,true)then
+				PlayerSelectionFrame[d.Name].Visible=true
+				continue
+			end
+			PlayerSelectionFrame[d.Name].Visible=false			
 		end
 	end)
 	local function CreateTB(Player)
