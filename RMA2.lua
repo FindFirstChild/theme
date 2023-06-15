@@ -531,23 +531,27 @@ end
 local BButton=LocalMenu:CreateDK('B',UDim2.new(.05,0,.45,0),'bypass vip stuff: ',AllBools.IsBypassLocal,
 	function()
 		Notify('this is local only i meant most stuff are localized')
-		local CI,CII
 		local Part=workspace:FindFirstChild'GroupAccessPart'
 		if not Part then Notify('Missing \'workspace\'.GroupAccessPart',3,true)end
-		Part.CanCollide,Part.CanTouch,Part.CanQuery=false,false,false
+		Set(Part){CanCollide=false,CanTouch=false,CanQuery=false}
 		local Window=workspace['VIP Entrance']:FindFirstChild'Window'
 		if not Window then Notify('Missing \'VIP Entrance\'.Window',3,true)return end
-		CI=Window.VIPProximityPrompt.Triggered:Connect(function()
+		local CI=Window.VIPProximityPrompt.Triggered:Connect(function()
 			local p=game.Players.LocalPlayer.Character:FindFirstChild'HumanoidRootPart'
 			if not p then return end
 			p.CFrame=CFrame.new(-5900,-51.49,23,-1,0,0,0,1,0,0,0,-1)
 		end)
-		return{CI,Part}
+		local CII=Part.Changed:Connect(function()
+			Set(Part){CanCollide=false,CanTouch=false,CanQuery=false}	
+		end)
+		return {CI,CII},Part
 	end,
-	function(Table)
-		Destroy(Table[1])
-		if Table[2]then
-			Set(Table[2]){CanCollide=true,CanTouch=true,CanQuery=true}
+	function(Connections,P)
+		for _,x in next,Connections do
+			Destroy(x)
+		end
+		if P then
+			Set(P){CanCollide=true,CanTouch=true,CanQuery=true}
 		end
 	end
 )
