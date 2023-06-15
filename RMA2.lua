@@ -211,7 +211,7 @@ local function CALL()
 end
 if isfile'RMA2CONFIG.lua'then
 	pcall(function()
-		local re=dofile'RMA2CONFIG.lua'
+		local re=loadfile'RMA2CONFIG.lua'()
 		if typeof(re)=='nil'then 
 			CALL()
 			AllBools=select(2,Main:GetTables())
