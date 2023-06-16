@@ -20,7 +20,10 @@ if _G.RMA2ENABLED then
 	return
 end
 _G.RMA2ENABLED=true
-local Main=loadstring(game:HttpGet('https://raw.githubusercontent.com/kevinYMHGmlg/theme/main/LibraryTest.lua'))()
+local Main
+if pcall(function()Main=loadfile'rma_library.lua'())then
+	Main=loadstring(game:HttpGet'https://raw.githubusercontent.com/kevinYMHGmlg/theme/main/LibraryTest.lua')()
+end
 -- services
 local Players=game:GetService'Players'
 local UserInputService=game:GetService'UserInputService'
@@ -55,7 +58,7 @@ local M=LPG.ManagerGui.ServerSettingFrame
 local Knight=Teams.Knight
 local KC,UIT=Enum.KeyCode,Enum.UserInputType
 local JewellStand=workspace:FindFirstChild'JewelleryStand'
-local Tag,CurrentVersion=MG.VersionTag						,						'v1.3.3(c)'
+local Tag,CurrentVersion=MG.VersionTag						,						'v1.3.4'
 local Heartbeat=RunService.Heartbeat
 local USRemote=ReplicatedStorage.UpdateSign
 local AllBools={}
@@ -596,17 +599,24 @@ do
 			--Notify('I don\'t recommend using this if you\'re trying to toolkill people, or reanimations/god')
 			--Notify('now with delay',2)
 			local Position,CI,CII
+			local CameraCFrame
 			local function CharCheck(Character)
 				local Character=Character or LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 				if not Character then 
 					ReplicatedStorage.RequestRespawn:FireServer()
 					return 
 				end
-				local Humanoid=Character:WaitForChild('Humanoid',1)or Character:FindFirstChildWhichIsA'Humanoid'
-				local Root=Character:WaitForChild('HumanoidRootPart',1)or Character:FindFirstChild'HumanoidRootPart'
-				if not Humanoid or not Root then return end			
+				local Humanoid=Character:WaitForChild'Humanoid'
+				local Root=Character:WaitForChild'HumanoidRootPart'
 				if Position~=nil then
-					Root.CFrame=Position
+					repeat
+						Root.CFrame=Position
+						task.wait()
+					until(Root.Position-Position.Position).Magnitude<5
+					if CameraCFrame then
+						Set(workspace.CurrentCamera){CFrame=CameraCFrame[1],Focus=CameraCFrame[2]}
+						CameraCFrame=nil
+					end
 					Position=nil
 				end
 				local Destroying,Die
@@ -618,6 +628,7 @@ do
 					local Height=workspace.FallenPartsDestroyHeight
 					if Height~=Height then Height=-400 end
 					if Root and Root.Position.Y>Height then
+						CameraCFrame={workspace.CurrentCamera.CFrame,workspace.CurrentCamera.Focus}
 						Position=Root.CFrame
 					end
 					if not Delay then
