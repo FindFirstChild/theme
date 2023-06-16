@@ -21,8 +21,10 @@ if _G.RMA2ENABLED then
 end
 _G.RMA2ENABLED=true
 local Main
-if pcall(function()Main=loadfile'rma_library.lua'())then
-	Main=loadstring(game:HttpGet'https://raw.githubusercontent.com/kevinYMHGmlg/theme/main/LibraryTest.lua')()
+if not pcall(function()Main=loadfile'rma_library.lua'()end)then
+	local mama=game:HttpGet'https://raw.githubusercontent.com/kevinYMHGmlg/theme/main/LibraryTest.lua'
+	writefile('rma_library.lua',mama)
+	Main=loadstring(mama)()
 end
 -- services
 local Players=game:GetService'Players'
