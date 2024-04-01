@@ -8,7 +8,7 @@ credits:
 		alonelypersoninpain
 		
 	scripting:
-		kevinYMHGmlg#1822 (me)
+		Me
 		
 まもるクンは呪われてしまった！　「Great Tribulation」
 
@@ -22,7 +22,7 @@ end
 _G.RMA2ENABLED=true
 local Main
 if not pcall(function()Main=loadfile'rma_library.lua'()end)then
-	local mama=game:HttpGet'https://raw.githubusercontent.com/kevinYMHGmlg/theme/main/LibraryTest.lua'
+	local mama=game:HttpGet'https://raw.githubusercontent.com/FindFirstChild/theme/main/LibraryTest.lua'
 	writefile('rma_library.lua',mama)
 	Main=loadstring(mama)()
 end
